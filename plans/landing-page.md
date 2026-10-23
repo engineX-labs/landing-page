@@ -8,7 +8,7 @@ Implementar la landing page de **engineX** (agencia de software) siguiendo el si
 
 ## Feature a implementar
 
-`feature/landing-page`: sitio de una página prerenderizado con **Astro 5**, más un único endpoint server `POST /api/contact` que valida, guarda el mensaje y devuelve la URL de WhatsApp. Estilos con **Tailwind CSS 4** sobre los tokens del sistema y animaciones con **Motion** (motion.dev, vanilla).
+`feature/landing-page`: sitio de una página prerenderizado con **Astro 7**, más un único endpoint server `POST /api/contact` que valida, guarda el mensaje y devuelve la URL de WhatsApp. Estilos con **Tailwind CSS 4** sobre los tokens del sistema y animaciones con **Motion** (motion.dev, vanilla).
 
 ## Features que va a utilizar
 
@@ -39,7 +39,7 @@ Ninguna (repo vacío).
 
 ### Stack
 
-- **Astro 5** con `output: 'static'` (default) y adapter **`@astrojs/node`** (`mode: 'standalone'`). Todo se prerenderiza salvo `src/pages/api/contact.ts`, que declara `export const prerender = false`. En Astro 5 ya no existe `output: 'hybrid'` y `output: 'server'` haría SSR de todo el sitio, que no es lo que queremos.
+- **Astro 7** (decidido durante la construcción: el plan decía Astro 5, que quedó dos versiones mayores atrás, y el adapter Node actual pide `astro ^7.2.1`) con `output: 'static'` y adapter **`@astrojs/node`** (`mode: 'standalone'`). Todo se prerenderiza salvo `src/pages/api/contact.ts`, que declara `export const prerender = false`. Cambios de Astro 6/7 que aplican: `import.meta.env` se inlinea en el build (el número de WhatsApp se lee de `process.env` en runtime), Zod 4 desde `astro/zod`, y `compressHTML` vuelve a `true` (el default `'jsx'` se come los espacios entre elementos inline). La rama es `feature/landing-page-impl` porque `feature/landing-page` ya existía en otro worktree con el borrador original.
 - **Tailwind CSS 4** vía `@tailwindcss/vite` (la integración `@astrojs/tailwind` es para v3). Los tokens se definen **una sola vez** en `src/styles/tokens.css` como custom properties (`--surface`, `--ink`, `--space-6`, `--radius-xl`, `--ease-out`, `--duration-fast`…) con los mismos nombres del sistema, y `global.css` los expone a Tailwind con `@theme inline`. Se pisan los defaults de Tailwind que chocan: `--radius-*` (el `rounded-md` de Tailwind es 6px, el del sistema 10px), `--ease-out`/`--ease-in-out`, y se deshabilitan las paletas de color por defecto para no usar hex fuera del sistema. La escala de spacing de Tailwind 4 (múltiplos de 4px) coincide con `space-1..24`.
 - **Fuentes**: los `.woff2` del sistema, auto-hospedados con `@font-face` y `font-display: swap`, más `<link rel="preload">` para Plus Jakarta Sans 400 y 800. Alternativa: `@fontsource` (ver Preguntas).
 - **Íconos**: `@lucide/astro`, 24px, trazo 2px, color `ink-muted`.
@@ -108,7 +108,7 @@ Todos nuevos:
 - `src/lib/contact.ts`
 - `src/components/`: `Logo.astro`, `Button.astro`, `Tag.astro`, `ProjectCard.astro`, `TextField.astro`, `Header.astro`, `Hero.astro`, `Services.astro`, `Projects.astro`, `Process.astro`, `ContactForm.astro`, `Footer.astro`
 - `src/styles/tokens.css`, `src/styles/global.css`
-- `src/content.config.ts` (Astro 5, loader `glob`, schema con `client`, `title`, `summary`, `tags`, `image`, `imageAlt`, `href`, `cta`, `draft`) y `src/content/projects/*.md` (`reservo.md` + 2 ejemplos `draft`)
+- `src/content.config.ts` (loader `glob`, schema con `client`, `title`, `summary`, `tags`, `image`, `imageAlt`, `href`, `cta`, `draft`) y `src/content/projects/*.md` (`reservo.md` + 2 ejemplos `draft`)
 - `src/assets/projects/reservo.png` (captura de mireservo.online)
 - `public/brand/` (los 11 logos oficiales), `public/fonts/` (7 `.woff2`)
 - `data/contacts/` (se genera en runtime, ignorado por git)
