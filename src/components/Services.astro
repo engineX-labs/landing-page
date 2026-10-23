@@ -1,0 +1,64 @@
+---
+import CalendarCheck from "@lucide/astro/icons/calendar-check";
+import CreditCard from "@lucide/astro/icons/credit-card";
+import Globe from "@lucide/astro/icons/globe";
+import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
+import ReceiptText from "@lucide/astro/icons/receipt-text";
+import Workflow from "@lucide/astro/icons/workflow";
+
+const services = [
+  {
+    icon: LayoutDashboard,
+    title: "Sistemas de gestión",
+    text: "Stock, ventas, clientes y reportes en un solo lugar, armado según cómo trabajás.",
+  },
+  {
+    icon: ReceiptText,
+    title: "Facturación electrónica ARCA",
+    text: "Facturás desde tu sistema, sin entrar a la web de ARCA ni cargar los datos dos veces.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Reservas online",
+    text: "Tus clientes reservan solos y vos ves la ocupación al día desde el celular.",
+  },
+  {
+    icon: CreditCard,
+    title: "Pagos online",
+    text: "Cobrás con Mercado Pago y cada pago queda registrado en tu sistema.",
+  },
+  {
+    icon: Globe,
+    title: "Webs",
+    text: "Sitios rápidos que cuentan lo que hacés y llevan a la consulta.",
+  },
+  {
+    icon: Workflow,
+    title: "Integraciones",
+    text: "Conectamos lo que ya usás: WhatsApp, planillas y otros sistemas.",
+  },
+];
+---
+
+<section id="servicios" class="section border-t border-line" aria-labelledby="servicios-title">
+  <div class="container-x flex flex-col gap-12">
+    <div class="flex max-w-[720px] flex-col gap-4">
+      <h2 id="servicios-title" class="display m-0">Lo que construimos</h2>
+      <p class="body-lg m-0 max-w-[60ch] text-ink-muted">
+        Sistemas a medida para negocios que quieren crecer. Vos nos contás qué querés resolver;
+        la tecnología la elegimos nosotros.
+      </p>
+    </div>
+    <ul class="m-0 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        services.map(({ icon: Icon, title, text }) => (
+          <li class="flex flex-col gap-4 rounded-xl border border-line bg-surface-raised p-6">
+            <Icon size={24} aria-hidden="true" class="text-ink-muted" />
+            <h3 class="heading-3 m-0">{title}</h3>
+            <p class="m-0 text-ink-muted">{text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

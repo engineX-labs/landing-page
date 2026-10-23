@@ -1,0 +1,46 @@
+---
+import { getCollection } from "astro:content";
+import ProjectCard from "./ProjectCard.astro";
+
+const projects = (
+  await getCollection("projects", ({ data }) => import.meta.env.DEV || !data.draft)
+).sort((a, b) => a.data.order - b.data.order);
+
+// La grilla se adapta a la cantidad: con uno o dos proyectos no quedan huecos.
+const cols =
+  projects.length >= 3
+    ? "sm:grid-cols-2 lg:grid-cols-3"
+    : projects.length === 2
+      ? "sm:grid-cols-2"
+      : "max-w-[560px]";
+---
+
+<section id="proyectos" class="section border-t border-line" aria-labelledby="proyectos-title">
+  <div class="container-x flex flex-col gap-12">
+    <div class="flex max-w-[720px] flex-col gap-4">
+      <h2 id="proyectos-title" class="heading-2 m-0">Mirá lo que hicimos</h2>
+      <p class="body-lg m-0 max-w-[60ch] text-ink-muted">
+        Proyectos que ya están funcionando. Contamos lo que cambió para cada cliente.
+      </p>
+    </div>
+    <ul class:list={["m-0 grid list-none gap-6 p-0", cols]}>
+      {
+        projects.map(({ data }) => (
+          <li class="flex min-w-0">
+            <ProjectCard
+              class="w-full"
+              title={data.title}
+              client={data.client}
+              summary={data.summary}
+              tags={data.tags}
+              image={data.image}
+              imageAlt={data.imageAlt}
+              href={data.href}
+              cta={data.cta}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

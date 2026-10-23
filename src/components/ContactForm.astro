@@ -1,0 +1,307 @@
+---
+import CircleAlert from "@lucide/astro/icons/circle-alert";
+import CircleCheck from "@lucide/astro/icons/circle-check";
+import MessageCircle from "@lucide/astro/icons/message-circle";
+import { whatsapp } from "../lib/site";
+import Button from "./Button.astro";
+import TextField from "./TextField.astro";
+---
+
+<section id="contacto" class="section border-t border-line" aria-labelledby="contacto-title">
+  <div class="container-x grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
+    <div class="flex max-w-[520px] flex-col gap-6">
+      <h2 id="contacto-title" class="heading-2 m-0">Contanos tu proyecto</h2>
+      <p class="body-lg m-0 text-ink-muted">
+        Contanos qué querés resolver y te respondemos en 24 h. La propuesta y el presupuesto son
+        sin cargo.
+      </p>
+      <a href={whatsapp.url} class="contact-direct" target="_blank" rel="noopener">
+        <MessageCircle size={24} aria-hidden="true" class="shrink-0 text-ink-muted" />
+        <span class="flex flex-col">
+          <span class="body-strong">WhatsApp</span>
+          <span class="small text-ink-muted">{whatsapp.display}</span>
+        </span>
+        <span class="sr-only">(se abre en otra pestaña)</span>
+      </a>
+    </div>
+
+    <div class="rounded-xl border border-line bg-surface-raised p-6 md:p-8">
+      <form
+        class="flex flex-col gap-6"
+        action="/api/contact"
+        method="post"
+        novalidate
+        data-contact-form
+      >
+        <TextField id="contact-name" name="name" label="Nombre" autocomplete="name" maxlength={100} />
+        <TextField
+          id="contact-email"
+          name="email"
+          type="email"
+          label="Email"
+          autocomplete="email"
+          inputmode="email"
+          spellcheck="false"
+          maxlength={254}
+        />
+        <TextField
+          id="contact-message"
+          name="message"
+          label="¿Qué querés resolver?"
+          hint="Contanos de tu negocio y qué te gustaría que haga el sistema."
+          multiline
+          rows={5}
+          maxlength={2000}
+        />
+
+        <!-- Honeypot: invisible para personas, los bots lo completan. -->
+        <div class="hp" aria-hidden="true">
+          <label for="contact-company">No completes este campo</label>
+          <input id="contact-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <Button type="submit" size="lg" class="self-start" data-submit>
+            Enviar mensaje
+          </Button>
+          <p class="small m-0 text-ink-muted">Te respondemos en menos de 24 h hábiles.</p>
+        </div>
+
+        <div aria-live="polite" data-form-status>
+          <p class="form-error ex-pop" hidden data-form-error>
+            <CircleAlert size={20} aria-hidden="true" class="mt-0.5 shrink-0" />
+            <span>
+              <span data-form-error-text>No pudimos enviar tu mensaje.</span>
+              Escribinos directo por
+              <a href={whatsapp.url} target="_blank" rel="noopener">WhatsApp</a>.
+            </span>
+          </p>
+        </div>
+      </form>
+
+      <div class="flex-col gap-6" hidden data-form-success tabindex="-1">
+        <p class="form-success heading-3 m-0">
+          <CircleCheck size={24} aria-hidden="true" class="mt-1 shrink-0" />
+          <span>Recibimos tu mensaje</span>
+        </p>
+        <p class="m-0 text-ink-muted">
+          Te respondemos en 24 h. Si querés, seguí la conversación por WhatsApp: el mensaje ya va
+          escrito.
+        </p>
+        <div class="flex flex-wrap items-center gap-4">
+          <Button
+            size="lg"
+            arrow
+            href={whatsapp.url}
+            target="_blank"
+            rel="noopener"
+            data-whatsapp-link
+          >
+            Seguir por WhatsApp
+          </Button>
+          <Button variant="ghost" data-form-reset>Enviar otro mensaje</Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-direct {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    align-self: flex-start;
+    padding: var(--space-4) var(--space-6) var(--space-4) var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-raised);
+    color: var(--ink);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .contact-direct:hover {
+      border-color: var(--line-strong);
+    }
+  }
+
+  .hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .form-error {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--danger);
+  }
+  .form-error[hidden] {
+    display: none;
+  }
+  .form-error a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+  }
+
+  [data-form-success]:not([hidden]) {
+    display: flex;
+    animation: ex-pop var(--duration-base) var(--ease-out);
+    transform-origin: top left;
+  }
+  [data-form-success]:focus {
+    outline: none;
+  }
+  .form-success {
+    display: flex;
+    gap: var(--space-2);
+    color: var(--success);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-form-success]:not([hidden]) {
+      animation-name: ex-fade;
+    }
+  }
+</style>
+
+<script>
+  import { type ContactField, validateField } from "../lib/contact";
+
+  type ApiResponse =
+    | { ok: true; whatsappUrl: string }
+    | { ok: false; errors?: Partial<Record<ContactField, string>>; error?: string };
+
+  const FIELDS: ContactField[] = ["name", "email", "message"];
+
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+  const success = document.querySelector<HTMLElement>("[data-form-success]");
+
+  if (form && success) {
+    const submit = form.querySelector<HTMLButtonElement>("[data-submit]");
+    const submitLabel = submit?.querySelector("span");
+    const formError = form.querySelector<HTMLElement>("[data-form-error]");
+    const formErrorText = form.querySelector<HTMLElement>("[data-form-error-text]");
+    const whatsappLink = success.querySelector<HTMLAnchorElement>("[data-whatsapp-link]");
+    const reset = success.querySelector<HTMLButtonElement>("[data-form-reset]");
+
+    const control = (field: ContactField) =>
+      form.elements.namedItem(field) as HTMLInputElement | HTMLTextAreaElement;
+
+    const setFieldError = (field: ContactField, message: string | undefined) => {
+      const el = control(field);
+      const errorId = el.dataset.errorId as string;
+      const errorBox = document.getElementById(errorId);
+      const errorText = errorBox?.querySelector("[data-error-text]");
+      const describedBy = [el.dataset.hintId, message ? errorId : null].filter(Boolean).join(" ");
+
+      if (describedBy) el.setAttribute("aria-describedby", describedBy);
+      else el.removeAttribute("aria-describedby");
+
+      if (message) el.setAttribute("aria-invalid", "true");
+      else el.removeAttribute("aria-invalid");
+
+      if (errorBox && errorText) {
+        errorText.textContent = message ?? "";
+        errorBox.hidden = !message;
+      }
+    };
+
+    const validate = (field: ContactField) => {
+      const message = validateField(field, control(field).value);
+      setFieldError(field, message);
+      return message;
+    };
+
+    // Se valida al salir del campo; mientras se escribe solo se limpia un error ya mostrado.
+    for (const field of FIELDS) {
+      const el = control(field);
+      el.addEventListener("blur", () => {
+        if (el.value.trim() || el.getAttribute("aria-invalid") === "true") validate(field);
+      });
+      el.addEventListener("input", () => {
+        if (el.getAttribute("aria-invalid") === "true" && !validateField(field, el.value)) {
+          setFieldError(field, undefined);
+        }
+      });
+    }
+
+    const setLoading = (loading: boolean) => {
+      if (!submit || !submitLabel) return;
+      submit.disabled = loading;
+      if (loading) {
+        submit.setAttribute("aria-busy", "true");
+        const spinner = document.createElement("span");
+        spinner.className = "ex-btn-spinner";
+        spinner.setAttribute("aria-hidden", "true");
+        submit.prepend(spinner);
+        submitLabel.textContent = "Enviando…";
+      } else {
+        submit.removeAttribute("aria-busy");
+        submit.querySelector(".ex-btn-spinner")?.remove();
+        submitLabel.textContent = "Enviar mensaje";
+      }
+    };
+
+    const showFormError = (message?: string) => {
+      if (!formError || !formErrorText) return;
+      formErrorText.textContent = message ?? "No pudimos enviar tu mensaje.";
+      formError.hidden = false;
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (formError) formError.hidden = true;
+
+      const invalid = FIELDS.filter((field) => validate(field));
+      if (invalid.length > 0) {
+        control(invalid[0]).focus();
+        return;
+      }
+
+      const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+      setLoading(true);
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(data),
+        });
+        const body = (await response.json().catch(() => null)) as ApiResponse | null;
+
+        if (body?.ok) {
+          if (whatsappLink) whatsappLink.href = body.whatsappUrl;
+          form.hidden = true;
+          success.hidden = false;
+          success.focus();
+          return;
+        }
+        if (body?.errors) {
+          const fields = FIELDS.filter((field) => body.errors?.[field]);
+          for (const field of fields) setFieldError(field, body.errors[field]);
+          if (fields.length > 0) {
+            control(fields[0]).focus();
+            return;
+          }
+        }
+        showFormError(body && !body.ok ? body.error : undefined);
+      } catch {
+        showFormError("No pudimos conectarnos.");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    reset?.addEventListener("click", () => {
+      form.reset();
+      for (const field of FIELDS) setFieldError(field, undefined);
+      success.hidden = true;
+      form.hidden = false;
+      control("name").focus();
+    });
+  }
+</script>
