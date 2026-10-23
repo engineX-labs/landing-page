@@ -1,0 +1,11 @@
+---
+interface Props {
+  tone?: "neutral" | "accent";
+  text: string;
+  class?: string;
+}
+
+const { tone = "neutral", text, class: className } = Astro.props;
+---
+
+<span class:list={["ex-tag", `ex-tag-${tone}`, className]} title={text}>{text}</span>

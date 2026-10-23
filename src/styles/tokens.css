@@ -1,0 +1,143 @@
+/*
+ * Tokens del sistema de diseño de engineX (tokens.json, versión 2), tema Carbón.
+ * Única fuente de los valores: los componentes usan estas variables, nunca el hex.
+ */
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/PlusJakartaSans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/PlusJakartaSans-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/PlusJakartaSans-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/PlusJakartaSans-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/PlusJakartaSans-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Marca: fijos en ambos temas. */
+  --carbon: #0e1116;
+  --paper: #f4f4f2;
+  --stone: #d9dbd6;
+  --ignite: #ff5b2e;
+
+  /* Semánticos, tema Carbón. */
+  --surface: var(--carbon);
+  --surface-raised: #161a21;
+  --surface-inset: #0a0c10;
+  --line: #262c36;
+  --line-strong: #636c7b;
+  --ink: var(--paper);
+  --ink-muted: #9aa1ac;
+  --accent: var(--ignite);
+  --accent-hover: #ff7a52;
+  --accent-ink: var(--ignite);
+  --accent-soft: #2a1610;
+  --on-accent: var(--carbon);
+  --focus-ring: var(--ignite);
+  --success: #5fd68a;
+  --danger: #ff9eb0;
+
+  /* Espaciado: grilla de 4px. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* Duraciones: toda la UI por debajo de 300ms. */
+  --duration-press: 140ms;
+  --duration-fast: 160ms;
+  --duration-base: 220ms;
+}
+
+/* Tokens que Tailwind también expone como utilidades (rounded-*, ease-*, font-*). */
+@theme static {
+  --font-*: initial;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-*: initial;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  --ease-*: initial;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+}
+
+/* Solo los colores semánticos del sistema: sin la paleta por defecto de Tailwind. */
+@theme inline {
+  --color-*: initial;
+  --color-carbon: var(--carbon);
+  --color-paper: var(--paper);
+  --color-stone: var(--stone);
+  --color-ignite: var(--ignite);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-inset: var(--surface-inset);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-focus-ring: var(--focus-ring);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+}
