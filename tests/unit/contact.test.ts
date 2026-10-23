@@ -162,6 +162,27 @@ describe("handleContact", () => {
     expect(await readdir(dir)).toHaveLength(0);
   });
 
+  it("corta un body chunked sin Content-Length apenas pasa el límite", async () => {
+    let pulled = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulled++;
+        if (pulled > 1000) controller.close();
+        else controller.enqueue(new TextEncoder().encode("a".repeat(1024)));
+      },
+    });
+    const request = new Request("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: stream,
+      duplex: "half",
+    } as RequestInit);
+    const response = await handleContact(request, { dir, whatsappNumber: number });
+    expect(response.status).toBe(413);
+    expect(pulled).toBeLessThan(20);
+    expect(await readdir(dir)).toHaveLength(0);
+  });
+
   it("rechaza lo que no es JSON", async () => {
     const notJson = await handleContact(post("{roto"), { dir, whatsappNumber: number });
     expect(notJson.status).toBe(400);

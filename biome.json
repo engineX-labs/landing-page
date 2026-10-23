@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!docs", "!plans", "!public/brand", "!src/components/logo-paths.ts"]
+    "includes": [
+      "**",
+      "!**/*.md",
+      "!docs",
+      "!plans",
+      "!public/brand",
+      "!src/components/logo-paths.ts"
+    ]
   },
   "formatter": {
     "enabled": true,

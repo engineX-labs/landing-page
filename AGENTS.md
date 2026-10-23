@@ -25,7 +25,9 @@ Requiere Node 22.12 o superior.
 Ver `.env.example`. Se leen con `process.env` en runtime (en Astro 7 `import.meta.env` queda fijo
 en el build).
 
-- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545460`.
+- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545460`. Se usa
+  en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
+  devuelve `/api/contact`). Tiene que estar definido igual en los dos.
 - `CONTACTS_DIR`: carpeta donde se guarda un `.json` por mensaje. Por defecto `data/contacts`
   (ignorada por git). Necesita disco persistente: en serverless los mensajes se pierden.
 

@@ -56,6 +56,31 @@ export async function saveContact(
   return file;
 }
 
+/** Lee el body como texto; devuelve null si supera `limit` bytes, sin bufferear el resto. */
+export async function readBodyWithLimit(request: Request, limit: number): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > limit) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 export async function handleContact(request: Request, config: ContactConfig): Promise<Response> {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
@@ -66,15 +91,14 @@ export async function handleContact(request: Request, config: ContactConfig): Pr
   if (declared > LIMITS.body)
     return json({ ok: false, error: "El mensaje es demasiado largo." }, 413);
 
-  let text: string;
+  // Sin Content-Length (chunked) se corta la lectura apenas pasa el límite.
+  let text: string | null;
   try {
-    text = await request.text();
+    text = await readBodyWithLimit(request, LIMITS.body);
   } catch {
     return json({ ok: false, error: "No pudimos leer el mensaje." }, 400);
   }
-  if (new TextEncoder().encode(text).length > LIMITS.body) {
-    return json({ ok: false, error: "El mensaje es demasiado largo." }, 413);
-  }
+  if (text === null) return json({ ok: false, error: "El mensaje es demasiado largo." }, 413);
 
   let body: unknown;
   try {
