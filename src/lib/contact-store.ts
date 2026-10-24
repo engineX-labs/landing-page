@@ -96,13 +96,20 @@ export function upstashRateLimiter(redis: Redis): ContactRateLimiter {
   };
 }
 
-/** Vercel completa x-forwarded-for con la IP real del cliente como primer valor. */
-export function clientIp(request: Request): string {
+/**
+ * IP del cliente según Vercel, que completa x-forwarded-for con la IP real (y pisa la que mande el
+ * cliente). Fuera de Vercel ese header se puede falsificar: por eso el límite solo se usa ahí.
+ * Sin IP devuelve undefined, para no meter a todas las visitas en el mismo cupo.
+ */
+export function clientIp(request: Request): string | undefined {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip")?.trim() || "desconocida";
+  return forwarded || request.headers.get("x-real-ip")?.trim() || undefined;
 }
 
-/** Store y límite según el entorno: con Redis, los dos sobre Redis; sin Redis, archivos y sin límite. */
+/**
+ * Store y límite según el entorno: con Redis los mensajes van a Redis; sin Redis, a archivos.
+ * El límite por IP solo se activa en Vercel con Redis, donde la IP es confiable.
+ */
 export function contactBackendFromEnv(env: Env): {
   store: ContactStore;
   rateLimiter?: ContactRateLimiter;
@@ -110,5 +117,6 @@ export function contactBackendFromEnv(env: Env): {
   const credentials = redisCredentials(env);
   if (!credentials) return { store: contactStoreFromEnv(env) };
   const redis = new Redis(credentials);
-  return { store: contactStoreFromEnv(env, redis), rateLimiter: upstashRateLimiter(redis) };
+  const store = contactStoreFromEnv(env, redis);
+  return env.VERCEL ? { store, rateLimiter: upstashRateLimiter(redis) } : { store };
 }

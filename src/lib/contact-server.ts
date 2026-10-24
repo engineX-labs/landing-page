@@ -102,10 +102,11 @@ export async function handleContact(request: Request, config: ContactConfig): Pr
   // Al bot se le responde igual que a una persona, pero no se guarda nada.
   if (result.honeypot) return json({ ok: true, whatsappUrl }, 200);
 
-  if (config.rateLimiter) {
+  const ip = clientIp(request);
+  if (config.rateLimiter && ip) {
     let allowed = true;
     try {
-      allowed = await config.rateLimiter.allow(clientIp(request));
+      allowed = await config.rateLimiter.allow(ip);
     } catch (error) {
       // Si el límite no responde, se deja pasar: es mejor recibir el mensaje que perderlo.
       console.error("[contact] no se pudo consultar el límite de envíos", error);

@@ -37,7 +37,7 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
   devuelve `/api/contact`). Tiene que estar definido igual en los dos.
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los
-  mensajes van a la lista `contacts` y hay límite de 5 envíos por IP cada 10 minutos.
+  mensajes van a la lista `contacts`; en Vercel, además, hay límite de 5 envíos por IP cada 10 minutos.
 - `CONTACTS_DIR`: sin Redis, carpeta donde se guarda un `.json` por mensaje. Por defecto
   `data/contacts` (ignorada por git); necesita disco persistente. En Vercel no se usa: sin Redis el
   endpoint responde 500 en vez de perder el mensaje.

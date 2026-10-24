@@ -119,13 +119,23 @@ describe("elección del almacenamiento", () => {
     expect(contactStoreFromEnv({ VERCEL: "1" })).toBeInstanceOf(UnavailableContactStore);
   });
 
-  it("con credenciales arma Redis y el límite de envíos", () => {
+  it("en Vercel con credenciales usa Redis y el límite de envíos", () => {
     const backend = contactBackendFromEnv({
+      VERCEL: "1",
       KV_REST_API_URL: "https://example.upstash.io",
       KV_REST_API_TOKEN: "token",
     });
     expect(backend.store).toBeInstanceOf(RedisContactStore);
     expect(backend.rateLimiter).toBeDefined();
+  });
+
+  it("fuera de Vercel usa Redis pero sin límite (la IP no es confiable)", () => {
+    const backend = contactBackendFromEnv({
+      KV_REST_API_URL: "https://example.upstash.io",
+      KV_REST_API_TOKEN: "token",
+    });
+    expect(backend.store).toBeInstanceOf(RedisContactStore);
+    expect(backend.rateLimiter).toBeUndefined();
   });
 
   it("sin credenciales no hay límite", () => {
@@ -148,7 +158,24 @@ describe("límite de envíos", () => {
     expect(clientIp(post("190.2.3.4"))).toBe("190.2.3.4");
     const realIp = new Request("http://x", { headers: { "x-real-ip": "1.2.3.4" } });
     expect(clientIp(realIp)).toBe("1.2.3.4");
-    expect(clientIp(new Request("http://x"))).toBe("desconocida");
+    expect(clientIp(new Request("http://x"))).toBeUndefined();
+  });
+
+  it("sin IP no consulta el límite ni comparte cupo", async () => {
+    const rateLimiter = limiter(0);
+    const store = new MemoryStore();
+    const noIp = new Request("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(valid),
+    });
+    const response = await handleContact(noIp, {
+      whatsappNumber: "5491100000000",
+      store,
+      rateLimiter,
+    });
+    expect(response.status).toBe(200);
+    expect(rateLimiter.seen).toHaveLength(0);
   });
 
   it("el sexto envío de la misma IP responde 429 y no se guarda", async () => {

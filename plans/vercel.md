@@ -78,7 +78,7 @@ Alternativas descartadas:
 Cierra el pendiente de la revisión anterior (sin límite de envíos), con `@upstash/ratelimit` sobre el mismo Redis:
 - 5 mensajes por IP cada 10 minutos (IP tomada de `x-forwarded-for`, que Vercel completa).
 - Al pasarse, responde 429 con "Mandaste varios mensajes seguidos. Esperá unos minutos o escribinos por WhatsApp.".
-- Sin Redis (desarrollo y servidor propio) no hay límite.
+- Solo se activa en Vercel con Redis (ajuste de la revisión: fuera de Vercel `x-forwarded-for` se puede falsificar y, sin proxy, todas las visitas compartirían el mismo cupo). Sin IP en el request no se limita.
 
 ### Variables de entorno en Vercel
 

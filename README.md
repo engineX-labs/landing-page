@@ -60,7 +60,7 @@ Todas están en [`.env.example`](.env.example).
 | `SITE_URL` | Build | Dominio público (ver arriba). | vacío, o `DEFAULT_SITE_URL` |
 | `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545460` |
 | `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje cuando no hay Redis. | `data/contacts` |
-| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
 | `VERCEL` | Build y runtime | La define Vercel. Elige el adapter de Vercel y evita guardar en disco. No se configura a mano. | vacío |
 | `HOST`, `PORT` | Runtime | Dónde escucha el servidor Node. | `localhost`, `4321` |
 
@@ -80,7 +80,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **`npm run lint`**: Biome, lint y formato sin escribir. `npm run format` aplica los arreglos.
 - **`npm test`**: Vitest, en `tests/unit/`.
   - `contact.test.ts`: validación del formulario (mensajes de error en voseo), honeypot, límite de tamaño (también sin `Content-Length`), guardado del `.json`, errores al guardar y codificación de la URL de WhatsApp.
-  - `contact-store.test.ts`: guardado en archivos y en Redis (con un Redis simulado), elección del almacenamiento según el entorno y el límite de envíos por IP.
+  - `contact-store.test.ts`: guardado en archivos y en Redis (con un Redis simulado), elección del almacenamiento según el entorno y el límite de envíos por IP (solo en Vercel).
   - `seo.test.ts`: validación de `SITE_URL`, `robots.txt` con y sin dominio, `sitemap.xml`, JSON-LD sin datos inventados y `llms.txt`.
 - **`npm run build`**: chequeo de tipos (`astro check`) y build.
 - **`npm run test:e2e`**: Playwright en `tests/e2e/`. Compila y levanta el **build de producción** con un dominio y un número de prueba (ver `playwright.config.ts`) y comprueba:
@@ -187,4 +187,4 @@ Los mensajes viven en la lista `contacts` de Redis, uno por elemento, como JSON 
 
 ### Servidor propio (alternativa)
 
-También corre en cualquier servidor con **Node 22.12+**: `npm run build` y `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `SITE_URL` y `WHATSAPP_NUMBER`. Sin Redis guarda los mensajes en `CONTACTS_DIR`, que necesita **disco persistente**. Con las variables de Redis usa Redis y el límite de envíos, igual que en Vercel.
+También corre en cualquier servidor con **Node 22.12+**: `npm run build` y `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `SITE_URL` y `WHATSAPP_NUMBER`. Sin Redis guarda los mensajes en `CONTACTS_DIR`, que necesita **disco persistente**. Con las variables de Redis guarda en Redis, pero sin límite de envíos: fuera de Vercel la IP del cliente se puede falsificar.
