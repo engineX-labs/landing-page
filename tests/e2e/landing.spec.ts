@@ -1,7 +1,7 @@
 import { readdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { E2E_CONTACTS_DIR, E2E_WHATSAPP_NUMBER } from "../../playwright.config";
+import { E2E_CONTACTS_DIR, E2E_SITE_URL, E2E_WHATSAPP_NUMBER } from "../../playwright.config";
 
 async function outlineOf(page: Page) {
   return page.evaluate(() => {
@@ -179,5 +179,49 @@ test.describe("móvil", () => {
     await menu.getByRole("link", { name: "Contacto" }).click();
     await expect(menu).toBeHidden();
     await expect(page).toHaveURL(/#contacto$/);
+  });
+});
+
+test.describe("SEO y GEO", () => {
+  test("robots.txt bloquea la API y apunta al sitemap del dominio", async ({ request }) => {
+    const res = await request.get("/robots.txt");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("text/plain");
+    const body = await res.text();
+    expect(body).toContain("Disallow: /api/");
+    expect(body).toContain(`Sitemap: ${E2E_SITE_URL}/sitemap.xml`);
+  });
+
+  test("sitemap.xml lista la home con el dominio", async ({ request }) => {
+    const res = await request.get("/sitemap.xml");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("xml");
+    expect(await res.text()).toContain(`<loc>${E2E_SITE_URL}/</loc>`);
+  });
+
+  test("llms.txt resume engineX", async ({ request }) => {
+    const res = await request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body.startsWith("# engineX")).toBe(true);
+    expect(body).toContain(`${E2E_SITE_URL}/#contacto`);
+  });
+
+  test("la home tiene URLs absolutas y JSON-LD válido", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `${E2E_SITE_URL}/`);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+      "content",
+      `${E2E_SITE_URL}/`,
+    );
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      `${E2E_SITE_URL}/brand/enginex-app-icon-512.png`,
+    );
+    const raw = await page.locator('script[type="application/ld+json"]').textContent();
+    const data = JSON.parse(raw ?? "");
+    const org = data["@graph"].find((n: { name?: string }) => n.name === "engineX");
+    expect(org.url).toBe(`${E2E_SITE_URL}/`);
+    expect(org.contactPoint.telephone).toBe(`+${E2E_WHATSAPP_NUMBER}`);
   });
 });

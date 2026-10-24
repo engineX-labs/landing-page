@@ -4,6 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 4330;
 export const E2E_CONTACTS_DIR = path.resolve("test-results/e2e-contacts");
 export const E2E_WHATSAPP_NUMBER = "5491100000000";
+export const E2E_SITE_URL = "https://enginex.test";
 
 // Corre contra el build de producción con el adapter Node, como en un deploy real.
 export default defineConfig({
@@ -27,6 +28,7 @@ export default defineConfig({
       PORT: String(PORT),
       CONTACTS_DIR: E2E_CONTACTS_DIR,
       WHATSAPP_NUMBER: E2E_WHATSAPP_NUMBER,
+      SITE_URL: E2E_SITE_URL,
     },
   },
 });
