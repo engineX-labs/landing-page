@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
-    "preview": "node ./dist/server/entry.mjs",
+    "preview": "node --env-file-if-exists=.env ./dist/server/entry.mjs",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
