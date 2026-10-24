@@ -58,9 +58,9 @@ Sitemap: https://<dominio>/sitemap.xml
 
 Se genera desde `Astro.site`, así que el `Sitemap:` usa siempre el dominio configurado. Para GEO, los crawlers de búsqueda con IA (`OAI-SearchBot`, `ChatGPT-User`, `PerplexityBot`, `Claude-SearchBot`, `Claude-User`) quedan permitidos explícitamente. Los crawlers de **entrenamiento** (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`) también quedan permitidos (decidido por el usuario), siempre con `/api/` bloqueado.
 
-### `sitemap.xml` (`src/pages/sitemap.xml.ts`, prerenderizado)
+### `sitemap.xml` (`src/routes/sitemap.xml.ts`, prerenderizado)
 
-Endpoint propio en lugar de `@astrojs/sitemap`, porque esa integración genera `sitemap-index.xml` + `sitemap-0.xml` y pediste `sitemap.xml`. Con una sola página no hace falta índice. Incluye `/` con `<lastmod>` de la fecha del build. Si mañana hay más páginas, se migra a la integración.
+Vive en `src/routes/` (no en `src/pages/`) porque `astro.config.mjs` lo registra con `injectRoute` solo cuando hay dominio. Endpoint propio en lugar de `@astrojs/sitemap`, porque esa integración genera `sitemap-index.xml` + `sitemap-0.xml` y pediste `sitemap.xml`. Con una sola página no hace falta índice. Incluye `/` con `<lastmod>` de la fecha del build. Si mañana hay más páginas, se migra a la integración.
 
 ### Metadata y datos estructurados (SEO + GEO)
 
@@ -90,10 +90,15 @@ Pensado para alguien que llega al repo por primera vez (el compañero que config
 
 - El contenido ya ayuda a GEO: un solo `h1`, secciones con `h2`, servicios descritos en una frase concreta cada uno y el proceso como lista ordenada. No se toca el copy.
 
+### Ajustes surgidos al construir
+
+- **Carga del `.env`**: Astro no lo pone en `process.env` al leer la config, así que el `cp .env.example .env` del README no tenía efecto. `astro.config.mjs` lo carga en `dev` y `build`, y `npm run preview` usa `node --env-file-if-exists=.env`. Lo que ya está en el entorno tiene prioridad.
+- **Copy compartido**: para que `llms.txt` no duplique textos, el copy de servicios, proceso y hero pasó a `src/lib/content.ts`. El texto no cambió; `Services.astro`, `Process.astro` y `Hero.astro` lo importan.
+
 ## Archivos afectados
 
-- Nuevos: `site.config.mjs`, `src/pages/robots.txt.ts`, `src/pages/sitemap.xml.ts`, `src/pages/llms.txt.ts`, `src/lib/structured-data.ts`, `tests/unit/seo.test.ts`
-- Modificados: `astro.config.mjs`, `src/layouts/Base.astro`, `.env.example`, `AGENTS.md`, `README.md`, `playwright.config.ts`, `tests/e2e/landing.spec.ts`
+- Nuevos: `site.config.mjs`, `src/pages/robots.txt.ts`, `src/routes/sitemap.xml.ts`, `src/pages/llms.txt.ts`, `src/lib/seo.ts`, `src/lib/structured-data.ts`, `src/lib/content.ts`, `tests/unit/seo.test.ts`
+- Modificados: `astro.config.mjs`, `package.json` (script `preview`), `src/layouts/Base.astro`, `src/components/Services.astro`, `src/components/Process.astro`, `src/components/Hero.astro`, `.env.example`, `AGENTS.md`, `README.md`, `playwright.config.ts`, `tests/e2e/landing.spec.ts`
 
 ## Riesgos y supuestos
 
