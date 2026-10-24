@@ -1,0 +1,25 @@
+---
+import ContactForm from "../components/ContactForm.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Process from "../components/Process.astro";
+import Projects from "../components/Projects.astro";
+import Services from "../components/Services.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="engineX · Software a medida para tu negocio"
+  description="Diseñamos y desarrollamos sistemas de gestión, facturación electrónica ARCA, reservas online, pagos y webs para negocios que quieren crecer."
+>
+  <Header />
+  <main id="contenido" tabindex="-1">
+    <Hero />
+    <Services />
+    <Projects />
+    <Process />
+    <ContactForm />
+  </main>
+  <Footer />
+</Base>

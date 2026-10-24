@@ -1,0 +1,67 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Arrow from "./Arrow.astro";
+
+type Props = Omit<HTMLAttributes<"button">, "class"> & {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "md" | "lg";
+  arrow?: boolean;
+  href?: string;
+  loading?: boolean;
+  class?: string;
+  target?: string;
+  rel?: string;
+};
+
+const {
+  variant = "primary",
+  size = "md",
+  arrow = false,
+  href,
+  loading = false,
+  disabled = false,
+  class: className,
+  type = "button",
+  target,
+  rel,
+  ...rest
+} = Astro.props;
+
+const classes = ["ex-btn", `ex-btn-${variant}`, `ex-btn-${size}`, className];
+// Un <a> no entiende disabled: se bloquea con aria-disabled y sin href.
+const off = Boolean(disabled) || loading;
+---
+
+{
+  href ? (
+    <a
+      class:list={classes}
+      href={off ? undefined : href}
+      aria-disabled={off ? "true" : undefined}
+      aria-busy={loading ? "true" : undefined}
+      target={target}
+      rel={rel}
+      {...rest}
+    >
+      {loading && <span class="ex-btn-spinner" aria-hidden="true" />}
+      <span>
+        <slot />
+      </span>
+      {arrow && !loading && <Arrow />}
+    </a>
+  ) : (
+    <button
+      class:list={classes}
+      type={type}
+      disabled={off}
+      aria-busy={loading ? "true" : undefined}
+      {...rest}
+    >
+      {loading && <span class="ex-btn-spinner" aria-hidden="true" />}
+      <span>
+        <slot />
+      </span>
+      {arrow && !loading && <Arrow />}
+    </button>
+  )
+}

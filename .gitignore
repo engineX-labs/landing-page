@@ -1,0 +1,23 @@
+# build
+dist/
+.astro/
+
+# dependencias
+node_modules/
+
+# entorno
+.env
+.env.*
+!.env.example
+
+# mensajes de contacto guardados en runtime
+data/
+
+# tests
+test-results/
+playwright-report/
+coverage/
+
+# sistema
+.DS_Store
+*.log

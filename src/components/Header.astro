@@ -1,0 +1,169 @@
+---
+import MenuIcon from "@lucide/astro/icons/menu";
+import XIcon from "@lucide/astro/icons/x";
+import { nav } from "../lib/site";
+import Button from "./Button.astro";
+import Logo from "./Logo.astro";
+---
+
+<header class="sticky top-0 z-50 border-b border-line bg-surface">
+  <div class="container-x flex h-16 items-center justify-between gap-6 md:h-[72px]">
+    <a href="#inicio" class="-m-2 rounded-md p-2" aria-label="engineX, ir al inicio">
+      <Logo height={28} decorative />
+    </a>
+
+    <nav aria-label="Principal" class="hidden md:block">
+      <ul class="m-0 flex list-none items-center gap-1 p-0">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} class="nav-link small">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="hidden md:block">
+      <Button variant="secondary" href="#contacto">Contanos tu proyecto</Button>
+    </div>
+
+    <div class="relative md:hidden" data-menu>
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="menu-movil"
+        data-menu-toggle
+      >
+        <span class="sr-only" data-menu-label>Abrir menú</span>
+        <MenuIcon size={24} aria-hidden="true" class="menu-icon-open" />
+        <XIcon size={24} aria-hidden="true" class="menu-icon-close" />
+      </button>
+      <div id="menu-movil" class="menu-panel" hidden data-menu-panel>
+        <nav aria-label="Principal">
+          <ul class="m-0 flex list-none flex-col p-0">
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} class="menu-link body-strong" data-menu-link>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--ink-muted);
+    text-decoration: none;
+    transition: color var(--duration-fast) ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-link:hover {
+      color: var(--ink);
+    }
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+  .menu-toggle:active {
+    transform: scale(0.97);
+  }
+  .menu-icon-close {
+    display: none;
+  }
+  .menu-toggle[aria-expanded="true"] .menu-icon-open {
+    display: none;
+  }
+  .menu-toggle[aria-expanded="true"] .menu-icon-close {
+    display: block;
+  }
+
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--space-2));
+    min-width: 240px;
+    padding: var(--space-2);
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    transform-origin: top right;
+    animation: ex-pop var(--duration-base) var(--ease-out);
+  }
+  .menu-link {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding-inline: var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .menu-link:active {
+    background: var(--surface-inset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-toggle:active {
+      transform: none;
+    }
+    .menu-panel {
+      animation-name: ex-fade;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-menu]");
+  const toggle = root?.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const panel = root?.querySelector<HTMLElement>("[data-menu-panel]");
+  const label = root?.querySelector<HTMLElement>("[data-menu-label]");
+
+  if (root && toggle && panel && label) {
+    const setOpen = (open: boolean, { focusToggle = false } = {}) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      panel.hidden = !open;
+      label.textContent = open ? "Cerrar menú" : "Abrir menú";
+      if (focusToggle) toggle.focus();
+    };
+
+    toggle.addEventListener("click", () => {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+    for (const link of panel.querySelectorAll("[data-menu-link]")) {
+      link.addEventListener("click", () => setOpen(false));
+    }
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !panel.hidden) setOpen(false, { focusToggle: true });
+    });
+    document.addEventListener("click", (event) => {
+      if (!panel.hidden && !root.contains(event.target as Node)) setOpen(false);
+    });
+  }
+</script>

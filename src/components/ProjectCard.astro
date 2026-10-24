@@ -1,0 +1,82 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import Arrow from "./Arrow.astro";
+import Logo from "./Logo.astro";
+import Tag from "./Tag.astro";
+
+interface Props {
+  title: string;
+  client?: string;
+  summary?: string;
+  tags?: string[];
+  image?: ImageMetadata;
+  imageAlt?: string;
+  href?: string;
+  cta?: string;
+  class?: string;
+}
+
+const {
+  title,
+  client,
+  summary,
+  tags = [],
+  image,
+  imageAlt = "",
+  href,
+  cta = "Ver caso",
+  class: className,
+} = Astro.props;
+
+const external = href ? /^https?:\/\//.test(href) : false;
+const Wrapper = href ? "a" : "article";
+const linkAttrs = href
+  ? { href, target: external ? "_blank" : undefined, rel: external ? "noopener" : undefined }
+  : {};
+---
+
+<Wrapper class:list={["ex-card", href && "ex-card-link", className]} {...linkAttrs}>
+  <div class="ex-card-media">
+    {
+      image ? (
+        <div class="ex-card-shot">
+          <Image
+            src={image}
+            alt={imageAlt}
+            widths={[480, 720, 960]}
+            sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 90vw"
+            format="webp"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <Logo variant="mark" tone="mono" height={48} decorative />
+      )
+    }
+  </div>
+  <div class="ex-card-body">
+    {client && <p class="ex-card-meta small m-0">{client}</p>}
+    <h3 class="ex-card-title heading-3">{title}</h3>
+    {summary && <p class="ex-card-summary small">{summary}</p>}
+    {
+      tags.length > 0 && (
+        <ul class="ex-card-tags" aria-label="Tecnologías">
+          {tags.slice(0, 5).map((t) => (
+            <li class="max-w-full">
+              <Tag text={t} />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      href && (
+        <span class="ex-card-cta">
+          {cta}
+          <Arrow />
+        </span>
+      )
+    }
+  </div>
+</Wrapper>

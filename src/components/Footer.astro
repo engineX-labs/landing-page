@@ -1,0 +1,53 @@
+---
+import { nav, whatsapp } from "../lib/site";
+import Logo from "./Logo.astro";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line">
+  <div class="container-x flex flex-col gap-8 py-12 md:flex-row md:items-start md:justify-between">
+    <div class="flex flex-col gap-4">
+      <Logo height={24} title="engineX" />
+      <p class="small m-0 max-w-[36ch] text-ink-muted">
+        Diseñamos y desarrollamos software a medida para negocios que quieren crecer.
+      </p>
+    </div>
+    <nav aria-label="Pie de página">
+      <ul class="m-0 flex list-none flex-col gap-1 p-0 sm:flex-row sm:gap-6">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} class="footer-link small">
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <div class="flex flex-col gap-1">
+      <a href={whatsapp.url} class="footer-link small" target="_blank" rel="noopener">
+        WhatsApp {whatsapp.display}
+      </a>
+      <p class="small m-0 text-ink-muted">© {year} engineX</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast) ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .footer-link:hover {
+      color: var(--ink);
+    }
+  }
+</style>

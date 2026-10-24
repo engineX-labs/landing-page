@@ -1,0 +1,26 @@
+---
+import { steps } from "../lib/content";
+---
+
+<section
+  id="como-trabajamos"
+  class="section border-t border-line"
+  aria-labelledby="como-trabajamos-title"
+>
+  <div class="container-x flex flex-col gap-12">
+    <h2 id="como-trabajamos-title" class="heading-2 m-0">Cómo trabajamos</h2>
+    <ol class="m-0 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        steps.map((step, i) => (
+          <li class="flex flex-col gap-3 border-t border-line-strong pt-6">
+            <span class="label text-accent-ink" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3 class="heading-3 m-0">{step.title}</h3>
+            <p class="m-0 text-ink-muted">{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

@@ -1,0 +1,69 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = Omit<HTMLAttributes<"input">, "class" | "id"> & {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  optional?: boolean;
+  multiline?: boolean;
+  rows?: number;
+  class?: string;
+};
+
+const {
+  id,
+  label,
+  hint,
+  error,
+  optional = false,
+  multiline = false,
+  rows = 5,
+  class: className,
+  type = "text",
+  ...rest
+} = Astro.props;
+
+const hintId = `${id}-hint`;
+const errorId = `${id}-error`;
+// El error siempre existe en el DOM (oculto si no hay) para que el script lo pueda mostrar.
+const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
+// Se comparte entre <input> y <textarea>: el tipo amplio evita pelear con los dos sets de atributos.
+const controlAttrs: Record<string, unknown> = {
+  id,
+  class: "ex-field-control",
+  "aria-describedby": describedBy || undefined,
+  "aria-invalid": error ? "true" : undefined,
+  "data-hint-id": hint ? hintId : undefined,
+  "data-error-id": errorId,
+  ...rest,
+};
+---
+
+<div class:list={["ex-field", className]}>
+  <label class="ex-field-label" for={id}>
+    {label}
+    {optional && <span class="ex-field-optional"> (opcional)</span>}
+  </label>
+  {
+    multiline ? (
+      <textarea rows={rows} {...controlAttrs} />
+    ) : (
+      <input type={type} {...controlAttrs} />
+    )
+  }
+  {hint && <p id={hintId} class="ex-field-hint">{hint}</p>}
+  <p id={errorId} class="ex-field-error" hidden={!error}>
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
+      <path
+        d="M8 4.75 V8.5 M8 11.1 V11.2"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"></path>
+    </svg>
+    <span data-error-text>{error}</span>
+  </p>
+</div>

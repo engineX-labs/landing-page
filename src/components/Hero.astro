@@ -1,0 +1,89 @@
+---
+import { description, tagline } from "../lib/content";
+import Button from "./Button.astro";
+---
+
+<section id="inicio" class="hero section" aria-labelledby="hero-title">
+  <div class="container-x grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
+    <div class="flex max-w-[720px] flex-col gap-6">
+      <h1 id="hero-title" class="display-xl m-0" data-hero>{tagline}</h1>
+      <p class="body-lg m-0 max-w-[60ch] text-ink-muted" data-hero>
+        {description}
+      </p>
+      <div class="mt-2 flex flex-wrap gap-4" data-hero>
+        <Button size="lg" href="#contacto" arrow>Contanos tu proyecto</Button>
+        <Button size="lg" variant="secondary" href="#proyectos">Ver proyectos</Button>
+      </div>
+    </div>
+
+    <!--
+      Composición de la portada del sistema: la X que se vuelve flecha.
+      Bloque ignite con flechas que suben (el resultado para el cliente), bloque ink con una flecha
+      ignite y bloque stone cruzado por el trazo partido de la X.
+    -->
+    <div class="hero-art hidden lg:block" aria-hidden="true" data-hero>
+      <svg viewBox="0 0 440 400" width="440" height="400">
+        <rect class="fill-ignite" x="0" y="0" width="168" height="400" rx="24"></rect>
+        <rect class="fill-ink" x="184" y="168" width="128" height="232" rx="24"></rect>
+        <rect class="fill-stone" x="328" y="64" width="112" height="336" rx="24"></rect>
+        <path
+          class="hero-dash stroke-on-accent"
+          d="M32 344 L72 304 M48 304 L72 304 L72 328 M88 248 L128 208 M104 208 L128 208 L128 232 M32 152 L72 112 M48 112 L72 112 L72 136 M88 72 L128 32 M104 32 L128 32 L128 56"
+        ></path>
+        <path class="hero-dash stroke-ignite" d="M216 360 L280 296 M248 296 L280 296 L280 328"></path>
+        <path class="hero-dash stroke-carbon" d="M352 120 L384 152 M400 168 L424 192"></path>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-16);
+  }
+  @media (min-width: 768px) {
+    .hero {
+      padding-block: var(--space-24);
+    }
+  }
+  .hero-art svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hero-dash {
+    fill: none;
+    stroke-width: 16px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Estado inicial del momento del hero: solo si hay JS (clase puesta en el <head>). */
+  :global(.hero-pending) [data-hero] {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  import { animate, stagger } from "motion";
+
+  const items = document.querySelectorAll<HTMLElement>("[data-hero]");
+  const root = document.documentElement;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (items.length > 0 && root.classList.contains("hero-pending")) {
+    // El único momento del sitio: entra una vez, con el ease-out del sistema y cada pieza en 280ms.
+    const keyframes = reduce ? { opacity: [0, 1] } : { opacity: [0, 1], y: [8, 0] };
+    const controls = animate(items, keyframes, {
+      duration: 0.28,
+      ease: [0.23, 1, 0.32, 1],
+      delay: stagger(0.06),
+    });
+    root.classList.remove("hero-pending");
+    controls.then(() => {
+      for (const el of items) el.style.removeProperty("transform");
+    });
+  } else {
+    root.classList.remove("hero-pending");
+  }
+</script>

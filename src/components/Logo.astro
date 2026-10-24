@@ -1,0 +1,50 @@
+---
+// Logo de engineX (concepto 06) dibujado inline para que siga al tema.
+import { MARK_ACCENT, MARK_INK, WORD } from "./logo-paths";
+
+interface Props {
+  variant?: "full" | "mark";
+  tone?: "auto" | "onDark" | "onLight" | "mono";
+  height?: number;
+  title?: string;
+  class?: string;
+  decorative?: boolean;
+}
+
+const {
+  variant = "full",
+  tone = "auto",
+  height = variant === "mark" ? 40 : 32,
+  title = "engineX",
+  class: className,
+  decorative = false,
+} = Astro.props;
+
+// A 24px o menos el trazo de 28 se empasta: el isotipo usa un trazo óptico más grueso.
+const small = variant === "mark" && height <= 24;
+const viewBox =
+  variant === "mark" ? (small ? "700 42 175 175" : "706 48 163 163") : "44 48 826 197";
+const ratio = variant === "mark" ? 1 : 826 / 197;
+const a11y = decorative
+  ? { "aria-hidden": "true" as const }
+  : { role: "img" as const, "aria-label": title };
+---
+
+<svg
+  class:list={["ex-logo", `ex-logo-${tone}`, className]}
+  viewBox={viewBox}
+  height={height}
+  width={Math.round(height * ratio)}
+  {...a11y}
+>
+  {variant === "full" && <path class="ex-logo-ink-f" fill-rule="evenodd" d={WORD} />}
+  <g
+    fill="none"
+    stroke-width={small ? 34 : 28}
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path class="ex-logo-ink-s" d={MARK_INK} />
+    <path class="ex-logo-accent-s" d={MARK_ACCENT} />
+  </g>
+</svg>
