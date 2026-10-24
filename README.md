@@ -2,7 +2,7 @@
 
 Landing de **engineX**, agencia de software: diseñamos y desarrollamos sistemas a medida (gestión, facturación electrónica ARCA, reservas, pagos, webs) para negocios que quieren crecer.
 
-Es una sola página con hero, servicios, proyectos, cómo trabajamos y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario, que corre con el adapter Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño y **Motion** para la única animación de entrada, la del hero.
+Es una sola página con hero, servicios, proyectos, cómo trabajamos y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño y **Motion** para la única animación de entrada, la del hero.
 
 ## Requisitos
 
@@ -59,7 +59,9 @@ Todas están en [`.env.example`](.env.example).
 | --- | --- | --- | --- |
 | `SITE_URL` | Build | Dominio público (ver arriba). | vacío, o `DEFAULT_SITE_URL` |
 | `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545460` |
-| `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje. | `data/contacts` |
+| `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje cuando no hay Redis. | `data/contacts` |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
+| `VERCEL` | Build y runtime | La define Vercel. Elige el adapter de Vercel y evita guardar en disco. No se configura a mano. | vacío |
 | `HOST`, `PORT` | Runtime | Dónde escucha el servidor Node. | `localhost`, `4321` |
 
 En `dev` y `build` el `.env` se carga desde `astro.config.mjs`; `npm run preview` lo pasa con `--env-file-if-exists`. Lo que ya está definido en el entorno tiene prioridad sobre el `.env`.
@@ -78,6 +80,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **`npm run lint`**: Biome, lint y formato sin escribir. `npm run format` aplica los arreglos.
 - **`npm test`**: Vitest, en `tests/unit/`.
   - `contact.test.ts`: validación del formulario (mensajes de error en voseo), honeypot, límite de tamaño (también sin `Content-Length`), guardado del `.json`, errores al guardar y codificación de la URL de WhatsApp.
+  - `contact-store.test.ts`: guardado en archivos y en Redis (con un Redis simulado), elección del almacenamiento según el entorno y el límite de envíos por IP (solo en Vercel).
   - `seo.test.ts`: validación de `SITE_URL`, `robots.txt` con y sin dominio, `sitemap.xml`, JSON-LD sin datos inventados y `llms.txt`.
 - **`npm run build`**: chequeo de tipos (`astro check`) y build.
 - **`npm run test:e2e`**: Playwright en `tests/e2e/`. Compila y levanta el **build de producción** con un dominio y un número de prueba (ver `playwright.config.ts`) y comprueba:
@@ -97,7 +100,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Los ejemplos del sistema quedan como `draft` y no salen en producción.
 - **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero); `prefers-reduced-motion` quita escalas y desplazamientos.
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
-- **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` corre en el servidor: valida, guarda el mensaje en disco y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
+- **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` corre en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
 - **SEO y GEO.** `robots.txt` permite todo menos `/api/`, también a los crawlers de IA (búsqueda y entrenamiento). El sitemap, el canonical, Open Graph, el JSON-LD (`Organization` + `WebSite`) y `llms.txt` salen del dominio configurado.
 
 ## Estructura
@@ -105,7 +108,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 ```
 .
 ├── site.config.mjs          # ← dominio del sitio (único lugar)
-├── astro.config.mjs         # Astro: adapter Node, Tailwind, carga del .env, sitemap condicional
+├── astro.config.mjs         # Astro: adapter (Vercel o Node), Tailwind, carga del .env, sitemap
 ├── docs/                    # PDF del sistema de diseño
 ├── plans/                   # planes aprobados de cada feature
 ├── public/
@@ -123,7 +126,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   ├── lib/
 │   │   ├── content.ts       # copy de servicios y del proceso (página y llms.txt)
 │   │   ├── contact.ts       # validación y URL de WhatsApp (cliente y servidor)
-│   │   ├── contact-server.ts# lectura del request, guardado y respuesta
+│   │   ├── contact-server.ts# lectura del request, límite y respuesta
+│   │   ├── contact-store.ts # dónde se guardan los mensajes (archivos o Redis) y límite por IP
 │   │   ├── seo.ts           # robots.txt, sitemap.xml, llms.txt
 │   │   ├── structured-data.ts # JSON-LD
 │   │   └── site.ts          # número de WhatsApp y navegación
@@ -164,10 +168,23 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **Resto del copy:** en cada sección de `src/components/`. Header y footer toman la navegación de `src/lib/site.ts`.
 - **Colores, espaciado, radios y movimiento:** solo en `src/styles/tokens.css`, con los valores del sistema de diseño.
 
-## Deploy
+## Deploy en Vercel
 
-Fuera del alcance de este repo, pero el servidor necesita:
+El build elige solo el adapter: en Vercel (que define `VERCEL=1`) usa `@astrojs/vercel`; en cualquier otro lado, Node. La página, `robots.txt`, `sitemap.xml` y `llms.txt` se sirven como estáticos y `/api/contact` corre como función.
 
-- **Node 22.12+** corriendo `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `WHATSAPP_NUMBER` y `CONTACTS_DIR`.
-- **Disco persistente** para `CONTACTS_DIR`. En plataformas serverless el disco es efímero y los mensajes del formulario se perderían.
-- `SITE_URL` (o `site.config.mjs`) configurado **antes** del build.
+1. **Importar el repo** en Vercel (Add New → Project → `engineX-labs/landing-page`):
+   - **Root Directory**: `./` (la raíz, **no** `src`).
+   - **Application Preset**: **Astro**. Build Command y Output Directory se detectan solos.
+2. **Conectar Upstash Redis**: en el proyecto, Storage → Marketplace → **Upstash for Redis** → crear la base (el plan gratuito alcanza) y conectarla al proyecto. Eso carga `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
+3. **Variables de entorno** (Settings → Environment Variables), para Production y Preview:
+   - `SITE_URL`: el dominio con `https://` y sin barra final. Mientras no haya dominio propio, la URL `https://<proyecto>.vercel.app`.
+   - `WHATSAPP_NUMBER`: `5493548545460`.
+4. **Deploy**. Si en el log del build aparece `Build en Vercel sin Upstash Redis`, falta el paso 2: el sitio funciona, pero el formulario responde que no pudo guardar y ofrece WhatsApp directo.
+5. **Probar**: mandar un mensaje desde el formulario y verlo en la consola de Upstash (Data Browser → clave `contacts`, o `LRANGE contacts 0 -1`). El más nuevo queda primero.
+6. **Dominio propio**: agregarlo en Settings → Domains, actualizar `SITE_URL` y volver a deployar.
+
+Los mensajes viven en la lista `contacts` de Redis, uno por elemento, como JSON con `name`, `email`, `message` y `receivedAt`.
+
+### Servidor propio (alternativa)
+
+También corre en cualquier servidor con **Node 22.12+**: `npm run build` y `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `SITE_URL` y `WHATSAPP_NUMBER`. Sin Redis guarda los mensajes en `CONTACTS_DIR`, que necesita **disco persistente**. Con las variables de Redis guarda en Redis, pero sin límite de envíos: fuera de Vercel la IP del cliente se puede falsificar.

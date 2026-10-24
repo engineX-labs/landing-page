@@ -1,20 +1,24 @@
 // Parte server del formulario de contacto: lee el request, guarda el mensaje y arma la respuesta.
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import {
   buildWhatsappText,
   buildWhatsappUrl,
   type ContactErrors,
-  type ContactInput,
   LIMITS,
   validateContact,
 } from "./contact";
+import {
+  type ContactRateLimiter,
+  type ContactStore,
+  clientIp,
+  contactBackendFromEnv,
+} from "./contact-store";
 
 export interface ContactConfig {
-  /** Carpeta donde se guarda un .json por mensaje. */
-  dir: string;
   whatsappNumber: string;
+  /** Dónde se guarda cada mensaje (archivos o Redis). */
+  store: ContactStore;
+  /** Límite de envíos por IP; sin él no hay límite. */
+  rateLimiter?: ContactRateLimiter;
   now?: () => Date;
 }
 
@@ -27,8 +31,8 @@ export type ContactResponseBody =
  */
 export function contactConfigFromEnv(env: NodeJS.ProcessEnv = process.env): ContactConfig {
   return {
-    dir: path.resolve(env.CONTACTS_DIR || "data/contacts"),
     whatsappNumber: env.WHATSAPP_NUMBER ?? "",
+    ...contactBackendFromEnv(env),
   };
 }
 
@@ -37,23 +41,6 @@ function json(body: ContactResponseBody, status: number): Response {
     status,
     headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
   });
-}
-
-export async function saveContact(
-  data: ContactInput,
-  { dir, now = () => new Date() }: Pick<ContactConfig, "dir" | "now">,
-): Promise<string> {
-  const date = now();
-  const file = path.join(dir, `${date.toISOString().replace(/[:.]/g, "-")}-${randomUUID()}.json`);
-  await mkdir(dir, { recursive: true });
-  await writeFile(
-    file,
-    `${JSON.stringify({ ...data, receivedAt: date.toISOString() }, null, 2)}\n`,
-    {
-      flag: "wx",
-    },
-  );
-  return file;
 }
 
 /** Lee el body como texto; devuelve null si supera `limit` bytes, sin bufferear el resto. */
@@ -115,14 +102,30 @@ export async function handleContact(request: Request, config: ContactConfig): Pr
   // Al bot se le responde igual que a una persona, pero no se guarda nada.
   if (result.honeypot) return json({ ok: true, whatsappUrl }, 200);
 
+  const ip = clientIp(request);
+  if (config.rateLimiter && ip) {
+    let allowed = true;
+    try {
+      allowed = await config.rateLimiter.allow(ip);
+    } catch (error) {
+      // Si el límite no responde, se deja pasar: es mejor recibir el mensaje que perderlo.
+      console.error("[contact] no se pudo consultar el límite de envíos", error);
+    }
+    if (!allowed) {
+      return json(
+        { ok: false, error: "Mandaste varios mensajes seguidos: esperá unos minutos." },
+        429,
+      );
+    }
+  }
+
   try {
-    await saveContact(result.data, config);
+    const now = config.now ?? (() => new Date());
+    await config.store.save({ ...result.data, receivedAt: now().toISOString() });
   } catch (error) {
     console.error("[contact] no se pudo guardar el mensaje", error);
-    return json(
-      { ok: false, error: "No pudimos guardar tu mensaje. Escribinos directo por WhatsApp." },
-      500,
-    );
+    // El formulario agrega "Escribinos directo por WhatsApp." con el link.
+    return json({ ok: false, error: "No pudimos guardar tu mensaje." }, 500);
   }
   return json({ ok: true, whatsappUrl }, 200);
 }

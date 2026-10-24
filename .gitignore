@@ -21,3 +21,6 @@ coverage/
 # sistema
 .DS_Store
 *.log
+
+# salida del adapter de Vercel
+.vercel/

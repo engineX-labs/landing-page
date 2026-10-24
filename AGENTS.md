@@ -1,7 +1,8 @@
 # engineX · landing page
 
-Landing de engineX (agencia de software). Astro 7 prerenderizado con adapter Node; la única ruta
-server es `POST /api/contact`. El diseño sale del sistema de diseño de engineX
+Landing de engineX (agencia de software). Astro 7 prerenderizado; la única ruta server es
+`POST /api/contact`. Se deploya en Vercel (`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con
+`@astrojs/node` (dev, preview, e2e). El diseño sale del sistema de diseño de engineX
 (`docs/engineX-sistema-de-diseno.pdf` y el artifact del sistema), tema Carbón.
 
 El detalle de cómo correrla, configurar el dominio, la estructura y el contenido está en
@@ -35,8 +36,11 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
 - `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545460`. Se usa
   en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
   devuelve `/api/contact`). Tiene que estar definido igual en los dos.
-- `CONTACTS_DIR`: carpeta donde se guarda un `.json` por mensaje. Por defecto `data/contacts`
-  (ignorada por git). Necesita disco persistente: en serverless los mensajes se pierden.
+- `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los
+  mensajes van a la lista `contacts`; en Vercel, además, hay límite de 5 envíos por IP cada 10 minutos.
+- `CONTACTS_DIR`: sin Redis, carpeta donde se guarda un `.json` por mensaje. Por defecto
+  `data/contacts` (ignorada por git); necesita disco persistente. En Vercel no se usa: sin Redis el
+  endpoint responde 500 en vez de perder el mensaje.
 
 ## Estructura
 
@@ -50,7 +54,8 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   mismas props que su `index.d.ts`) y las secciones de la página.
 - `src/components/logo-paths.ts`: paths oficiales del logo. No redibujar.
 - `src/lib/contact.ts`: validación y URL de WhatsApp (puro, compartido con el cliente).
-  `src/lib/contact-server.ts`: lectura del request y guardado.
+  `src/lib/contact-server.ts`: lectura del request, límite y respuesta.
+  `src/lib/contact-store.ts`: almacenamiento (`FileContactStore`, `RedisContactStore`) y límite por IP.
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
 - `src/lib/content.ts`: copy de servicios y proceso, compartido con `/llms.txt`.

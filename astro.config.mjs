@@ -1,5 +1,6 @@
 // @ts-check
 import node from "@astrojs/node";
+import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import { loadEnv } from "vite";
@@ -17,6 +18,19 @@ const site = resolveSiteUrl();
 if (!site) {
   console.warn(
     "\n[engineX] Falta SITE_URL: se compila sin sitemap.xml ni URLs absolutas. Configuralo en site.config.mjs.\n",
+  );
+}
+
+// Vercel define VERCEL=1 en sus builds: ahí va su adapter. En el resto (dev, preview, e2e,
+// servidor propio) se usa Node.
+const onVercel = Boolean(process.env.VERCEL);
+const hasRedis = Boolean(
+  (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) &&
+    (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN),
+);
+if (onVercel && !hasRedis) {
+  console.warn(
+    "\n[engineX] Build en Vercel sin Upstash Redis: el formulario no va a poder guardar mensajes. Conectalo desde Storage.\n",
   );
 }
 
@@ -43,8 +57,8 @@ function sitemapWhenSite() {
 export default defineConfig({
   site,
   output: "static",
-  // El único endpoint recibe un JSON chico: el default del adapter es 1 GB.
-  adapter: node({ mode: "standalone", bodySizeLimit: 64 * 1024 }),
+  // Con Node, el único endpoint recibe un JSON chico: el default del adapter es 1 GB.
+  adapter: onVercel ? vercel() : node({ mode: "standalone", bodySizeLimit: 64 * 1024 }),
   // Astro 7 usa 'jsx' por defecto y se come los espacios entre elementos inline.
   compressHTML: true,
   integrations: [sitemapWhenSite()],
