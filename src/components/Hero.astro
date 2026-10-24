@@ -1,14 +1,14 @@
 ---
+import { description, tagline } from "../lib/content";
 import Button from "./Button.astro";
 ---
 
 <section id="inicio" class="hero section" aria-labelledby="hero-title">
   <div class="container-x grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
     <div class="flex max-w-[720px] flex-col gap-6">
-      <h1 id="hero-title" class="display-xl m-0" data-hero>Software que empuja tu negocio</h1>
+      <h1 id="hero-title" class="display-xl m-0" data-hero>{tagline}</h1>
       <p class="body-lg m-0 max-w-[60ch] text-ink-muted" data-hero>
-        Diseñamos y desarrollamos el software exacto que tu negocio necesita: gestión, facturación
-        ARCA, reservas, pagos y webs.
+        {description}
       </p>
       <div class="mt-2 flex flex-wrap gap-4" data-hero>
         <Button size="lg" href="#contacto" arrow>Contanos tu proyecto</Button>

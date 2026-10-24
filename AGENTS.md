@@ -4,13 +4,16 @@ Landing de engineX (agencia de software). Astro 7 prerenderizado con adapter Nod
 server es `POST /api/contact`. El diseño sale del sistema de diseño de engineX
 (`docs/engineX-sistema-de-diseno.pdf` y el artifact del sistema), tema Carbón.
 
+El detalle de cómo correrla, configurar el dominio, la estructura y el contenido está en
+`README.md`. Esta es la guía corta.
+
 ## Comandos
 
 | Comando | Qué hace |
 | --- | --- |
 | `npm run dev` | Servidor de desarrollo en `http://localhost:4321` (muestra también los proyectos `draft`). |
 | `npm run build` | `astro check` (tipos) + `astro build` en `dist/`. |
-| `npm run preview` | Sirve el build con Node (`dist/server/entry.mjs`). Usa `HOST`, `PORT`, `WHATSAPP_NUMBER`, `CONTACTS_DIR`. |
+| `npm run preview` | Sirve el build con Node (`dist/server/entry.mjs`) y el `.env`. Usa `HOST`, `PORT`, `WHATSAPP_NUMBER`, `CONTACTS_DIR`. |
 | `npm run lint` | Biome: lint y formato, sin escribir. |
 | `npm run format` | Biome con `--write`. |
 | `npm test` | Vitest: validación y endpoint de contacto (`tests/unit`). |
@@ -22,8 +25,12 @@ Requiere Node 22.12 o superior.
 
 ## Variables de entorno
 
-Ver `.env.example`. Se leen con `process.env` en runtime (en Astro 7 `import.meta.env` queda fijo
-en el build).
+Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` queda fijo en el build);
+`astro.config.mjs` carga el `.env` en `dev` y `build`.
+
+- `SITE_URL`: dominio público. **Se configura en `site.config.mjs`** (o con esta variable, que tiene
+  prioridad). Sin dominio no se genera `/sitemap.xml` ni hay URLs absolutas; mal formado, el build
+  falla.
 
 - `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545460`. Se usa
   en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
@@ -44,6 +51,9 @@ en el build).
 - `src/components/logo-paths.ts`: paths oficiales del logo. No redibujar.
 - `src/lib/contact.ts`: validación y URL de WhatsApp (puro, compartido con el cliente).
   `src/lib/contact-server.ts`: lectura del request y guardado.
+- `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
+  (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
+- `src/lib/content.ts`: copy de servicios y proceso, compartido con `/llms.txt`.
 - `src/content/projects/*.md`: proyectos del portfolio. `draft: true` se ve en dev y no sale en
   producción.
 - `public/brand/`: los 11 logos oficiales. `public/fonts/`: Plus Jakarta Sans y JetBrains Mono.
