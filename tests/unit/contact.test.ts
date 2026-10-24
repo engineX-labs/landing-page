@@ -13,6 +13,7 @@ import {
   validateField,
 } from "../../src/lib/contact";
 import { contactConfigFromEnv, handleContact } from "../../src/lib/contact-server";
+import { FileContactStore } from "../../src/lib/contact-store";
 
 const valid = {
   name: "Ana Pérez",
@@ -109,7 +110,10 @@ describe("handleContact", () => {
   });
 
   it("guarda el mensaje y devuelve la URL de WhatsApp con el número configurado", async () => {
-    const response = await handleContact(post(valid), { dir, whatsappNumber: number });
+    const response = await handleContact(post(valid), {
+      store: new FileContactStore(dir),
+      whatsappNumber: number,
+    });
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.ok).toBe(true);
@@ -124,7 +128,7 @@ describe("handleContact", () => {
 
   it("responde 400 con el error del campo si el email es inválido", async () => {
     const response = await handleContact(post({ ...valid, email: "hola@" }), {
-      dir,
+      store: new FileContactStore(dir),
       whatsappNumber: number,
     });
     expect(response.status).toBe(400);
@@ -138,7 +142,7 @@ describe("handleContact", () => {
 
   it("responde 400 si el mensaje está vacío", async () => {
     const response = await handleContact(post({ ...valid, message: "  " }), {
-      dir,
+      store: new FileContactStore(dir),
       whatsappNumber: number,
     });
     expect(response.status).toBe(400);
@@ -147,7 +151,7 @@ describe("handleContact", () => {
 
   it("con el honeypot lleno responde 200 y no guarda nada", async () => {
     const response = await handleContact(post({ ...valid, company: "bot" }), {
-      dir,
+      store: new FileContactStore(dir),
       whatsappNumber: number,
     });
     expect(response.status).toBe(200);
@@ -157,7 +161,10 @@ describe("handleContact", () => {
 
   it("rechaza un body demasiado grande con 413", async () => {
     const huge = { ...valid, message: "a".repeat(LIMITS.body + 1) };
-    const response = await handleContact(post(huge), { dir, whatsappNumber: number });
+    const response = await handleContact(post(huge), {
+      store: new FileContactStore(dir),
+      whatsappNumber: number,
+    });
     expect(response.status).toBe(413);
     expect(await readdir(dir)).toHaveLength(0);
   });
@@ -177,14 +184,20 @@ describe("handleContact", () => {
       body: stream,
       duplex: "half",
     } as RequestInit);
-    const response = await handleContact(request, { dir, whatsappNumber: number });
+    const response = await handleContact(request, {
+      store: new FileContactStore(dir),
+      whatsappNumber: number,
+    });
     expect(response.status).toBe(413);
     expect(pulled).toBeLessThan(20);
     expect(await readdir(dir)).toHaveLength(0);
   });
 
   it("rechaza lo que no es JSON", async () => {
-    const notJson = await handleContact(post("{roto"), { dir, whatsappNumber: number });
+    const notJson = await handleContact(post("{roto"), {
+      store: new FileContactStore(dir),
+      whatsappNumber: number,
+    });
     expect(notJson.status).toBe(400);
     const form = await handleContact(
       new Request("http://localhost/api/contact", {
@@ -192,7 +205,7 @@ describe("handleContact", () => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "name=Ana",
       }),
-      { dir, whatsappNumber: number },
+      { store: new FileContactStore(dir), whatsappNumber: number },
     );
     expect(form.status).toBe(415);
   });
@@ -201,7 +214,7 @@ describe("handleContact", () => {
     const blocked = path.join(dir, "archivo");
     await writeFile(blocked, "");
     const response = await handleContact(post(valid), {
-      dir: path.join(blocked, "sub"),
+      store: new FileContactStore(path.join(blocked, "sub")),
       whatsappNumber: number,
     });
     expect(response.status).toBe(500);
@@ -211,7 +224,10 @@ describe("handleContact", () => {
   it("lee la configuración de process.env en runtime", () => {
     const config = contactConfigFromEnv({ WHATSAPP_NUMBER: number, CONTACTS_DIR: "tmp/x" });
     expect(config.whatsappNumber).toBe(number);
-    expect(path.isAbsolute(config.dir)).toBe(true);
-    expect(config.dir.endsWith(path.join("tmp", "x"))).toBe(true);
+    expect(config.store).toBeInstanceOf(FileContactStore);
+    const { dir: storeDir } = config.store as FileContactStore;
+    expect(path.isAbsolute(storeDir)).toBe(true);
+    expect(storeDir.endsWith(path.join("tmp", "x"))).toBe(true);
+    expect(config.rateLimiter).toBeUndefined();
   });
 });
