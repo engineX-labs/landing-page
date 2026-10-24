@@ -1,4 +1,6 @@
 ---
+import { whatsapp } from "../lib/site";
+import { buildStructuredData, serializeJsonLd } from "../lib/structured-data";
 import "../styles/global.css";
 
 interface Props {
@@ -11,6 +13,9 @@ const ogImage = Astro.site
   ? new URL("/brand/enginex-app-icon-512.png", Astro.site).href
   : undefined;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const jsonLd = serializeJsonLd(
+  buildStructuredData({ site: Astro.site?.origin, whatsappNumber: whatsapp.number }),
+);
 ---
 
 <!doctype html>
@@ -23,6 +28,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta name="theme-color" content="#0e1116" />
     <meta name="color-scheme" content="dark" />
     {canonical && <link rel="canonical" href={canonical} />}
+    {Astro.site && <link rel="sitemap" type="application/xml" href="/sitemap.xml" />}
     <link rel="icon" type="image/svg+xml" href="/brand/enginex-favicon.svg" />
     <link rel="apple-touch-icon" href="/brand/enginex-app-icon-512.png" />
     <link
@@ -42,10 +48,12 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_AR" />
     <meta property="og:site_name" content="engineX" />
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json" is:inline set:html={jsonLd} />
     <!-- El momento del hero: se esconde antes de pintar solo si hay JS; si Motion no llega, se muestra igual. -->
     <script is:inline>
       document.documentElement.classList.add("hero-pending");
