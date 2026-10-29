@@ -97,7 +97,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 
 - **El sistema de diseño manda.** Todo sale de "engineX — Sistema de diseño, versión 2": el PDF está en [`docs/`](docs/engineX-sistema-de-diseno.pdf) y su fuente viva es el artifact del sistema. Los tokens, los logos oficiales, las fuentes y los componentes (`Logo`, `Button`, `Tag`, `ProjectCard`, `TextField`) están portados de ahí con los mismos valores y props.
 - **Oscuro, preciso, con una chispa.** Solo tema Carbón (el claro es para documentos). El naranja `ignite` aparece únicamente donde está la acción: botón primario, flecha, foco y hover de las tarjetas.
-- **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Los ejemplos del sistema quedan como `draft` y no salen en producción.
+- **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Reservo linkea a su sitio. Freggiaro abre una demo interactiva en un modal.
+- **Demos que no pesan.** La demo de Freggiaro es una página propia (`/demo/freggiaro`, `noindex`, fuera del sitemap). La home la muestra en un `<dialog>` con un `<iframe>` que se carga recién al abrirlo, así que la landing no paga su peso. Replica la interfaz real del sistema (sus colores y su tipografía, acotados a la demo) con datos ficticios y facturación simulada: no hay backend ni conexión con ARCA. `/#demo-freggiaro` abre el modal y `/demo/freggiaro` sirve como link para compartir.
 - **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero); `prefers-reduced-motion` quita escalas y desplazamientos.
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
 - **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` corre en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
@@ -116,9 +117,12 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   └── fonts/               # Plus Jakarta Sans y JetBrains Mono (woff2)
 ├── src/
 │   ├── assets/projects/     # capturas de proyectos (se optimizan a WebP en el build)
+│   ├── assets/freggiaro/    # emblema de Freggiaro para la demo
 │   ├── components/
 │   │   ├── Logo, Button, Tag, ProjectCard, TextField, Arrow   # componentes del sistema
 │   │   ├── Header, Hero, Services, Projects, Process, ContactForm, Footer  # secciones
+│   │   ├── DemoDialog.astro # modal que abre una demo en un iframe
+│   │   ├── FreggiaroDemo.astro # la demo de Freggiaro (réplica de su interfaz)
 │   │   └── logo-paths.ts    # paths oficiales del logo (no redibujar)
 │   ├── content/projects/    # un .md por proyecto del portfolio
 │   ├── content.config.ts    # esquema de la colección de proyectos
@@ -128,11 +132,13 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   │   ├── contact.ts       # validación y URL de WhatsApp (cliente y servidor)
 │   │   ├── contact-server.ts# lectura del request, límite y respuesta
 │   │   ├── contact-store.ts # dónde se guardan los mensajes (archivos o Redis) y límite por IP
+│   │   ├── freggiaro-demo.ts# datos ficticios y reglas de la demo de Freggiaro
 │   │   ├── seo.ts           # robots.txt, sitemap.xml, llms.txt
 │   │   ├── structured-data.ts # JSON-LD
 │   │   └── site.ts          # número de WhatsApp y navegación
 │   ├── pages/
 │   │   ├── index.astro      # la landing
+│   │   ├── demo/freggiaro.astro # la demo sola; con ?embed, sin barra (para el modal)
 │   │   ├── api/contact.ts   # POST /api/contact (única ruta server)
 │   │   ├── robots.txt.ts
 │   │   └── llms.txt.ts
@@ -158,6 +164,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
   image: ../../assets/projects/<captura>.png   # opcional, 16:10; sin imagen se muestra el isotipo
   imageAlt: Descripción de la captura
   href: https://...                    # opcional: la tarjeta entera linkea ahí
+  demo: /demo/<slug>                   # opcional, en lugar de href: la tarjeta abre esa página en el modal
   cta: Ver el proyecto
   order: 2                             # orden en la grilla
   draft: false                         # true: solo se ve en desarrollo
