@@ -111,7 +111,7 @@ test("un solo display-xl y un solo primary en el hero", async ({ page }) => {
 test("producción: solo proyectos reales, sin los borradores", async ({ page }) => {
   await page.goto("/");
   const cards = page.locator("#proyectos .ex-card");
-  await expect(cards).toHaveCount(1);
+  await expect(cards).toHaveCount(2);
   const reservo = page.getByRole("link", {
     name: /Reservo, gestión de reservas para alojamientos/,
   });
