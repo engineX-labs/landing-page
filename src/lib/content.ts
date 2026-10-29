@@ -1,16 +1,27 @@
 // Copy compartido entre las secciones de la página y /llms.txt.
 
-export const tagline = "Sistemas de gestión y facturación ARCA para tu negocio";
+export const tagline = "Software a medida para negocios que quieren crecer";
+
+/** Lo que somos, arriba del titular: el hero presenta a la agencia, no un producto. */
+export const heroEyebrow = "Agencia de desarrollo de software";
 
 /** Bajada del hero: el "empuja" de la marca vive acá. */
 export const heroLead =
-  "Software a medida que empuja tu negocio: stock, ventas, reservas y cobros en un solo lugar, armado según cómo trabajás.";
+  "Somos engineX. Diseñamos y desarrollamos sistemas de gestión, webs, reservas online y facturación ARCA, y los dejamos funcionando en tu negocio.";
+
+/** Tipos de trabajo que flotan sobre el mockup del hero. */
+export const heroChips = [
+  "Sistemas de gestión",
+  "Webs y landings",
+  "Reservas online",
+  "Facturación ARCA",
+] as const;
 
 /** Lo que saca objeciones justo debajo de los botones del hero. */
 export const trustSignals = [
   "Propuesta y presupuesto sin cargo",
   "Respuesta en menos de 24 h hábiles",
-  "Facturación ARCA integrada",
+  "Te acompañamos después de la entrega",
 ] as const;
 
 /** Texto prearmado de los botones de WhatsApp (el formulario arma el suyo con los datos). */
@@ -26,9 +37,9 @@ export const services = [
     text: "Stock, ventas, clientes y reportes en un solo lugar, armado según cómo trabajás.",
   },
   {
-    key: "facturacion",
-    title: "Facturación electrónica ARCA",
-    text: "Facturás desde tu sistema, sin entrar a la web de ARCA ni cargar los datos dos veces.",
+    key: "webs",
+    title: "Webs y landings",
+    text: "Sitios rápidos que cuentan lo que hacés y llevan a la consulta.",
   },
   {
     key: "reservas",
@@ -36,14 +47,14 @@ export const services = [
     text: "Tus clientes reservan solos y vos ves la ocupación al día desde el celular.",
   },
   {
+    key: "facturacion",
+    title: "Facturación electrónica ARCA",
+    text: "Facturás desde tu sistema, sin entrar a la web de ARCA ni cargar los datos dos veces.",
+  },
+  {
     key: "pagos",
     title: "Pagos online",
     text: "Cobrás con Mercado Pago y cada pago queda registrado en tu sistema.",
-  },
-  {
-    key: "webs",
-    title: "Webs",
-    text: "Sitios rápidos que cuentan lo que hacés y llevan a la consulta.",
   },
   {
     key: "integraciones",
