@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseSiteUrl, resolveSiteUrl } from "../../site.config.mjs";
+import { faqs } from "../../src/lib/content";
 import { AI_CRAWLERS, buildLlmsTxt, buildRobotsTxt, buildSitemapXml } from "../../src/lib/seo";
 import { buildStructuredData, serializeJsonLd } from "../../src/lib/structured-data";
 
@@ -87,9 +88,24 @@ describe("JSON-LD", () => {
 
   it("sin dominio no publica URLs del sitio", () => {
     const data = buildStructuredData({ whatsappNumber: "5493548545460" });
-    expect(data["@graph"]).toHaveLength(1);
-    expect(data["@graph"][0]).not.toHaveProperty("url");
-    expect(data["@graph"][0]).not.toHaveProperty("logo");
+    expect(data["@graph"].map((n) => n["@type"])).toEqual([
+      ["Organization", "ProfessionalService"],
+      "FAQPage",
+    ]);
+    for (const node of data["@graph"]) {
+      expect(node).not.toHaveProperty("url");
+      expect(node).not.toHaveProperty("logo");
+    }
+  });
+
+  it("publica las preguntas frecuentes de la página como FAQPage", () => {
+    const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545460" });
+    const faq = data["@graph"].find((n) => n["@type"] === "FAQPage");
+    expect(faq).toMatchObject({ url: `${SITE}/#preguntas`, inLanguage: "es-AR" });
+    const entities = faq?.mainEntity as { name: string; acceptedAnswer: { text: string } }[];
+    expect(entities).toHaveLength(faqs.length);
+    expect(entities.map((q) => q.name)).toEqual(faqs.map((f) => f.question));
+    expect(entities.every((q) => q.acceptedAnswer.text.length > 0)).toBe(true);
   });
 
   it("no deja cerrar el <script> desde los datos", () => {
@@ -116,6 +132,8 @@ describe("llms.txt", () => {
     const txt = buildLlmsTxt({ ...base, site: SITE });
     expect(txt.startsWith("# engineX\n")).toBe(true);
     expect(txt).toContain("## Servicios");
+    expect(txt).toContain("## Preguntas frecuentes");
+    expect(txt).toContain(`### ${faqs[0].question}`);
     expect(txt).toContain(`[Facturación electrónica ARCA](${SITE}/#servicios)`);
     expect(txt).toContain("[Reservo](https://www.mireservo.online)");
     expect(txt).toContain(`[Formulario de contacto](${SITE}/#contacto)`);

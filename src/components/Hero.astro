@@ -1,44 +1,81 @@
 ---
-import { description, tagline } from "../lib/content";
+import CalendarCheck from "@lucide/astro/icons/calendar-check";
+import CircleCheck from "@lucide/astro/icons/circle-check";
+import Globe from "@lucide/astro/icons/globe";
+import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
+import ReceiptText from "@lucide/astro/icons/receipt-text";
+import dashboardDesktop from "../assets/projects/freggiaro-desktop.jpg";
+import reservoMobile from "../assets/projects/reservo-mobile.jpg";
+import { heroChips, heroEyebrow, heroLead, tagline, trustSignals } from "../lib/content";
+import { whatsapp } from "../lib/site";
 import Button from "./Button.astro";
+import DeviceShowcase from "./DeviceShowcase.astro";
+
+const chipIcons = [LayoutDashboard, Globe, CalendarCheck, ReceiptText];
 ---
 
 <section id="inicio" class="hero section" aria-labelledby="hero-title">
-  <div class="container-x grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
-    <div class="flex max-w-[720px] flex-col gap-6">
-      <h1 id="hero-title" class="display-xl m-0" data-hero>{tagline}</h1>
-      <p class="body-lg m-0 max-w-[60ch] text-ink-muted" data-hero>
-        {description}
+  <!-- Fondo: dos brillos de la marca que derivan muy lento y una grilla tenue. Decorativo. -->
+  <div class="hero-bg" aria-hidden="true" data-hero-bg>
+    <span class="hero-glow hero-glow-a"></span>
+    <span class="hero-glow hero-glow-b"></span>
+    <span class="hero-grid-lines"></span>
+  </div>
+
+  <div class="container-x hero-layout">
+    <div class="flex max-w-[640px] flex-col gap-6">
+      <p class="hero-eyebrow glass small m-0" data-hero style="--i: 0">
+        <span class="hero-eyebrow-dot" aria-hidden="true"></span>
+        {heroEyebrow}
       </p>
-      <div class="mt-2 flex flex-wrap gap-4" data-hero>
-        <Button size="lg" href="#contacto" arrow>Contanos tu proyecto</Button>
+      <h1 id="hero-title" class="display hero-title m-0" data-hero style="--i: 1">{tagline}</h1>
+      <p class="body-lg m-0 max-w-[56ch] text-ink-muted" data-hero style="--i: 2">{heroLead}</p>
+      <div class="mt-2 flex flex-wrap gap-4" data-hero style="--i: 3">
+        <Button size="lg" href={whatsapp.chatUrl} target="_blank" rel="noopener" arrow>
+          Escribinos por WhatsApp<span class="sr-only"> (se abre en otra pestaña)</span>
+        </Button>
         <Button size="lg" variant="secondary" href="#proyectos">Ver proyectos</Button>
       </div>
+      <ul class="hero-trust" data-hero style="--i: 4">
+        {
+          trustSignals.map((signal) => (
+            <li>
+              <CircleCheck size={18} aria-hidden="true" class="shrink-0 text-success" />
+              <span>{signal}</span>
+            </li>
+          ))
+        }
+      </ul>
     </div>
 
     <!--
-      Composición de la portada del sistema: la X que se vuelve flecha.
-      Bloque ignite con flechas que suben (el resultado para el cliente), bloque ink con una flecha
-      ignite y bloque stone cruzado por el trazo partido de la X.
+      Mostrar, no prometer: un sistema que hicimos en la compu y otro en el celular, con los tipos
+      de trabajo alrededor. Es decorativo: el protagonista es engineX, no un producto.
     -->
-    <div class="hero-art hidden lg:block" aria-hidden="true" data-hero>
-      <svg viewBox="0 0 440 400" width="440" height="400">
-        <rect class="fill-ignite" x="0" y="0" width="168" height="400" rx="24"></rect>
-        <rect class="fill-ink" x="184" y="168" width="128" height="232" rx="24"></rect>
-        <rect class="fill-stone" x="328" y="64" width="112" height="336" rx="24"></rect>
-        <path
-          class="hero-dash stroke-on-accent"
-          d="M32 344 L72 304 M48 304 L72 304 L72 328 M88 248 L128 208 M104 208 L128 208 L128 232 M32 152 L72 112 M48 112 L72 112 L72 136 M88 72 L128 32 M104 32 L128 32 L128 56"
-        ></path>
-        <path class="hero-dash stroke-ignite" d="M216 360 L280 296 M248 296 L280 296 L280 328"></path>
-        <path class="hero-dash stroke-carbon" d="M352 120 L384 152 M400 168 L424 192"></path>
-      </svg>
+    <div class="hero-visual" aria-hidden="true">
+      <div data-hero style="--i: 5">
+        <DeviceShowcase desktop={dashboardDesktop} mobile={reservoMobile} size="hero" />
+      </div>
+      {
+        heroChips.map((chip, i) => {
+          const Icon = chipIcons[i];
+          return (
+            <span class={`hero-chip hero-chip-${i} glass small`} data-hero style={`--i: ${6 + i}`}>
+              <Icon size={16} />
+              {chip}
+            </span>
+          );
+        })
+      }
     </div>
   </div>
 </section>
 
 <style>
   .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
     padding-block: var(--space-16);
   }
   @media (min-width: 768px) {
@@ -46,44 +83,192 @@ import Button from "./Button.astro";
       padding-block: var(--space-24);
     }
   }
-  .hero-art svg {
-    display: block;
-    width: 100%;
-    height: auto;
+  .hero-layout {
+    display: grid;
+    align-items: center;
+    gap: var(--space-16);
   }
-  .hero-dash {
-    fill: none;
-    stroke-width: 16px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  @media (min-width: 1024px) {
+    .hero-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 540px);
+      gap: var(--space-12);
+    }
   }
 
-  /* Estado inicial del momento del hero: solo si hay JS (clase puesta en el <head>). */
-  :global(.hero-pending) [data-hero] {
-    opacity: 0;
+  /* Fondo */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hero-glow {
+    position: absolute;
+    border-radius: var(--radius-pill);
+    will-change: transform;
+  }
+  .hero-glow-a {
+    width: 720px;
+    height: 720px;
+    top: -280px;
+    right: -200px;
+    background: radial-gradient(closest-side, var(--glow-ignite), transparent);
+    animation: hero-drift-a 22s var(--ease-in-out) infinite alternate;
+  }
+  .hero-glow-b {
+    width: 560px;
+    height: 560px;
+    bottom: -320px;
+    left: -180px;
+    background: radial-gradient(closest-side, var(--glow-stone), transparent);
+    animation: hero-drift-b 28s var(--ease-in-out) infinite alternate;
+  }
+  /* Grilla de 48px que se desvanece hacia los bordes. */
+  .hero-grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--glass-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.35;
+    mask-image: radial-gradient(ellipse 60% 70% at 70% 40%, black, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 60% 70% at 70% 40%, black, transparent);
+  }
+  /* Fuera de pantalla no gasta: el script pausa los brillos. */
+  .hero-bg[data-paused] .hero-glow {
+    animation-play-state: paused;
+  }
+
+  /* Texto */
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    font-weight: 600;
+    color: var(--ink);
+    border-radius: var(--radius-pill);
+  }
+  .hero-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+  }
+  .hero-title {
+    text-wrap: balance;
+  }
+  .hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--ink-muted);
+  }
+  .hero-trust li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* Mockup y chips */
+  .hero-visual {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    justify-self: center;
+  }
+  .hero-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    border-radius: var(--radius-pill);
+  }
+  .hero-chip :global(svg) {
+    color: var(--accent-ink);
+  }
+  .hero-chip-0 {
+    top: 8%;
+    left: -4%;
+  }
+  .hero-chip-1 {
+    top: 46%;
+    left: -8%;
+  }
+  .hero-chip-2 {
+    bottom: 0;
+    left: 18%;
+  }
+  .hero-chip-3 {
+    top: -5%;
+    right: 20%;
+  }
+  /* En pantallas chicas quedan dos chips, para no tapar el mockup. */
+  @media (max-width: 639px) {
+    .hero-chip-1,
+    .hero-chip-2 {
+      display: none;
+    }
+    .hero-chip-0 {
+      top: 4%;
+      left: 0;
+    }
+    .hero-chip-3 {
+      top: auto;
+      bottom: 2%;
+      right: auto;
+      left: 4%;
+    }
+  }
+
+  /*
+   * El único momento del sitio: cada pieza entra una vez (220 ms, ease-out del sistema), con
+   * 60 ms entre una y otra. Es CSS: arranca en el primer cuadro, aunque el JS todavía no llegó,
+   * y con `backwards` el estado final es el natural (sin transform residual).
+   */
+  [data-hero] {
+    animation: ex-rise var(--duration-base) var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+
+  @keyframes hero-drift-a {
+    to {
+      transform: translate(-80px, 60px) scale(1.08);
+    }
+  }
+  @keyframes hero-drift-b {
+    to {
+      transform: translate(90px, -50px) scale(1.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-hero] {
+      animation-name: ex-fade;
+    }
+    .hero-glow {
+      animation: none;
+    }
   }
 </style>
 
 <script>
-  import { animate, stagger } from "motion";
-
-  const items = document.querySelectorAll<HTMLElement>("[data-hero]");
-  const root = document.documentElement;
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (items.length > 0 && root.classList.contains("hero-pending")) {
-    // El único momento del sitio: entra una vez, con el ease-out del sistema y cada pieza en 280ms.
-    const keyframes = reduce ? { opacity: [0, 1] } : { opacity: [0, 1], y: [8, 0] };
-    const controls = animate(items, keyframes, {
-      duration: 0.28,
-      ease: [0.23, 1, 0.32, 1],
-      delay: stagger(0.06),
-    });
-    root.classList.remove("hero-pending");
-    controls.then(() => {
-      for (const el of items) el.style.removeProperty("transform");
-    });
-  } else {
-    root.classList.remove("hero-pending");
+  // Los brillos del fondo se mueven solo mientras el hero está en pantalla.
+  const bg = document.querySelector<HTMLElement>("[data-hero-bg]");
+  if (bg && "IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => {
+      bg.toggleAttribute("data-paused", !entry.isIntersecting);
+    }).observe(bg);
   }
 </script>

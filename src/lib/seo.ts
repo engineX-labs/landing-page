@@ -1,5 +1,5 @@
 // robots.txt, sitemap.xml y llms.txt, como funciones puras para poder testearlas.
-import { description, services, steps } from "./content";
+import { description, faqs, services, steps } from "./content";
 
 /** Crawlers de motores con IA, permitidos todos (búsqueda y entrenamiento). */
 export const AI_CRAWLERS = [
@@ -91,6 +91,9 @@ export function buildLlmsTxt({
     "",
     ...steps.map((s, i) => `${i + 1}. ${s.title}: ${s.text}`),
     "",
+    "## Preguntas frecuentes",
+    "",
+    ...faqs.flatMap((f) => [`### ${f.question}`, "", f.answer, ""]),
     "## Contacto",
     "",
     `- [Formulario de contacto](${link("contacto")})`,

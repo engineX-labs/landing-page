@@ -44,6 +44,8 @@ test.describe("modal en la home", () => {
     await page.getByRole("button", { name: "Cerrar demo" }).click();
     await expect(dialog(page)).toBeHidden();
     await expect(card(page)).toBeFocused();
+    // Una vez cargada, la demo quedó visible (el iframe aparece con un fundido al cargar).
+    await expect(page.locator("[data-demo-frame]")).toHaveAttribute("data-ready", "");
   });
 
   test("en escritorio el modal queda centrado", async ({ page }) => {
@@ -308,10 +310,11 @@ test.describe("página de la demo", () => {
 test.describe("movimiento reducido", () => {
   test.use({ reducedMotion: "reduce" });
 
-  test("el modal entra solo con opacidad", async ({ page }) => {
+  test("el modal entra y sale sin escala, solo con opacidad", async ({ page }) => {
     await page.goto("/");
     await card(page).click();
-    await expect(dialog(page)).toHaveCSS("animation-name", "ex-fade");
+    await expect(dialog(page)).toBeVisible();
+    await expect(dialog(page)).toHaveCSS("transform", "none");
   });
 });
 

@@ -1,0 +1,77 @@
+---
+import ChevronDown from "@lucide/astro/icons/chevron-down";
+import { faqs } from "../lib/content";
+---
+
+<section id="preguntas" class="section border-t border-line" aria-labelledby="preguntas-title">
+  <div class="container-x grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,720px)]">
+    <div class="flex max-w-[420px] flex-col gap-4">
+      <h2 id="preguntas-title" class="heading-2 m-0">Preguntas frecuentes</h2>
+      <p class="body-lg m-0 text-ink-muted">
+        Lo que nos preguntan antes de arrancar. Si te queda otra duda, escribinos.
+      </p>
+    </div>
+    <div class="faq-list">
+      {
+        faqs.map((f) => (
+          <details class="faq">
+            <summary class="faq-q">
+              <span class="body-strong">{f.question}</span>
+              <ChevronDown size={20} aria-hidden="true" class="faq-icon" />
+            </summary>
+            <p class="faq-a m-0 text-ink-muted">{f.answer}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-list {
+    border-top: 1px solid var(--line);
+  }
+  .faq {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: 56px;
+    padding-block: var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--radius-sm);
+  }
+  .faq-q::-webkit-details-marker {
+    display: none;
+  }
+  .faq-icon {
+    flex-shrink: 0;
+    color: var(--ink-muted);
+    transition: transform 180ms var(--ease-out);
+  }
+  .faq[open] .faq-icon {
+    transform: rotate(180deg);
+  }
+  .faq-a {
+    max-width: 62ch;
+    padding-bottom: var(--space-6);
+  }
+  /* Al abrir, la respuesta aparece; la altura no se anima (re-maqueta la página). */
+  .faq[open] .faq-a {
+    animation: ex-fade 160ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .faq-q:hover .faq-icon {
+      color: var(--ink);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-icon {
+      transition: none;
+    }
+  }
+</style>

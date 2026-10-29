@@ -1,12 +1,12 @@
 ---
 import MenuIcon from "@lucide/astro/icons/menu";
 import XIcon from "@lucide/astro/icons/x";
-import { nav } from "../lib/site";
+import { nav, whatsapp } from "../lib/site";
 import Button from "./Button.astro";
 import Logo from "./Logo.astro";
 ---
 
-<header class="sticky top-0 z-50 border-b border-line bg-surface">
+<header class="site-header sticky top-0 z-50 border-b border-line">
   <div class="container-x flex h-16 items-center justify-between gap-6 md:h-[72px]">
     <a href="#inicio" class="-m-2 rounded-md p-2" aria-label="engineX, ir al inicio">
       <Logo height={28} decorative />
@@ -17,7 +17,12 @@ import Logo from "./Logo.astro";
         {
           nav.map((item) => (
             <li>
-              <a href={item.href} class="nav-link small">
+              <a
+                href={item.href}
+                class="nav-link small"
+                data-opens-demo={"demo" in item ? "" : undefined}
+                aria-haspopup={"demo" in item ? "dialog" : undefined}
+              >
                 {item.label}
               </a>
             </li>
@@ -27,7 +32,9 @@ import Logo from "./Logo.astro";
     </nav>
 
     <div class="hidden md:block">
-      <Button variant="secondary" href="#contacto">Contanos tu proyecto</Button>
+      <Button variant="secondary" href={whatsapp.chatUrl} target="_blank" rel="noopener">
+        Escribinos<span class="sr-only"> por WhatsApp (se abre en otra pestaña)</span>
+      </Button>
     </div>
 
     <div class="relative md:hidden" data-menu>
@@ -48,7 +55,13 @@ import Logo from "./Logo.astro";
             {
               nav.map((item) => (
                 <li>
-                  <a href={item.href} class="menu-link body-strong" data-menu-link>
+                  <a
+                    href={item.href}
+                    class="menu-link body-strong"
+                    data-menu-link
+                    data-opens-demo={"demo" in item ? "" : undefined}
+                    aria-haspopup={"demo" in item ? "dialog" : undefined}
+                  >
                     {item.label}
                   </a>
                 </li>
@@ -62,6 +75,17 @@ import Logo from "./Logo.astro";
 </header>
 
 <style>
+  /* Vidrio: el contenido se ve pasar por debajo al scrollear. */
+  .site-header {
+    background: var(--glass-surface);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .site-header {
+      background: var(--surface);
+    }
+  }
   .nav-link {
     display: inline-flex;
     align-items: center;

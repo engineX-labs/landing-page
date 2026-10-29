@@ -3,6 +3,7 @@ import CircleAlert from "@lucide/astro/icons/circle-alert";
 import CircleCheck from "@lucide/astro/icons/circle-check";
 import MessageCircle from "@lucide/astro/icons/message-circle";
 import { whatsapp } from "../lib/site";
+import Arrow from "./Arrow.astro";
 import Button from "./Button.astro";
 import TextField from "./TextField.astro";
 ---
@@ -12,17 +13,19 @@ import TextField from "./TextField.astro";
     <div class="flex max-w-[520px] flex-col gap-6">
       <h2 id="contacto-title" class="heading-2 m-0">Contanos tu proyecto</h2>
       <p class="body-lg m-0 text-ink-muted">
-        Contanos qué querés resolver y te respondemos en 24 h. La propuesta y el presupuesto son
-        sin cargo.
+        Contanos qué querés resolver. La propuesta y el presupuesto son sin cargo.
       </p>
-      <a href={whatsapp.url} class="contact-direct" target="_blank" rel="noopener">
-        <MessageCircle size={24} aria-hidden="true" class="shrink-0 text-ink-muted" />
-        <span class="flex flex-col">
-          <span class="body-strong">WhatsApp</span>
+      <a href={whatsapp.chatUrl} class="contact-direct" target="_blank" rel="noopener">
+        <MessageCircle size={28} aria-hidden="true" class="shrink-0 text-accent-ink" />
+        <span class="flex min-w-0 flex-1 flex-col gap-1">
+          <span class="label text-ink-muted">La forma más rápida</span>
+          <span class="heading-3">Escribinos por WhatsApp</span>
           <span class="small text-ink-muted">{whatsapp.display}</span>
         </span>
+        <Arrow />
         <span class="sr-only">(se abre en otra pestaña)</span>
       </a>
+      <p class="small m-0 text-ink-muted">¿Preferís escribir con más detalle? Usá el formulario.</p>
     </div>
 
     <div class="rounded-xl border border-line bg-surface-raised p-6 md:p-8">
@@ -108,21 +111,28 @@ import TextField from "./TextField.astro";
 
 <style>
   .contact-direct {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: var(--space-4);
-    align-self: flex-start;
-    padding: var(--space-4) var(--space-6) var(--space-4) var(--space-4);
+    padding: var(--space-6);
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface-raised);
     color: var(--ink);
     text-decoration: none;
-    transition: border-color var(--duration-fast) ease;
+    transition:
+      border-color var(--duration-fast) ease,
+      transform var(--duration-press) var(--ease-out);
+  }
+  .contact-direct:active {
+    transform: scale(0.98);
   }
   @media (hover: hover) and (pointer: fine) {
     .contact-direct:hover {
-      border-color: var(--line-strong);
+      border-color: var(--accent);
+    }
+    .contact-direct:hover :global(.ex-btn-arrow) {
+      transform: translate(2px, -2px);
     }
   }
 
@@ -165,6 +175,10 @@ import TextField from "./TextField.astro";
   @media (prefers-reduced-motion: reduce) {
     [data-form-success]:not([hidden]) {
       animation-name: ex-fade;
+    }
+    .contact-direct:active,
+    .contact-direct:hover :global(.ex-btn-arrow) {
+      transform: none;
     }
   }
 </style>

@@ -15,30 +15,91 @@ const icons: Record<ServiceKey, typeof Globe> = {
   webs: Globe,
   integraciones: Workflow,
 };
+
+// Lo que define a la agencia va primero y más grande: la jerarquía guía la lectura.
+const FEATURED: ServiceKey[] = ["gestion", "webs"];
 ---
 
 <section id="servicios" class="section border-t border-line" aria-labelledby="servicios-title">
   <div class="container-x flex flex-col gap-12">
     <div class="flex max-w-[720px] flex-col gap-4">
-      <h2 id="servicios-title" class="display m-0">Lo que construimos</h2>
+      <h2 id="servicios-title" class="heading-2 m-0">Lo que construimos</h2>
       <p class="body-lg m-0 max-w-[60ch] text-ink-muted">
         Sistemas a medida para negocios que quieren crecer. Vos nos contás qué querés resolver;
         la tecnología la elegimos nosotros.
       </p>
     </div>
-    <ul class="m-0 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+    <ul class="services">
       {
         services.map(({ key, title, text }) => {
           const Icon = icons[key];
           return (
-          <li class="flex flex-col gap-4 rounded-xl border border-line bg-surface-raised p-6">
-            <Icon size={24} aria-hidden="true" class="text-ink-muted" />
-            <h3 class="heading-3 m-0">{title}</h3>
-            <p class="m-0 text-ink-muted">{text}</p>
-          </li>
+            <li class:list={["service", FEATURED.includes(key) && "service-featured"]}>
+              <span class="service-icon" aria-hidden="true">
+                <Icon size={24} />
+              </span>
+              <div class="flex min-w-0 flex-col gap-2">
+                <h3 class="heading-3 m-0">{title}</h3>
+                <p class="m-0 text-ink-muted">{text}</p>
+              </div>
+            </li>
           );
         })
       }
     </ul>
   </div>
 </section>
+
+<style>
+  /* Móvil: filas separadas por línea, sin caja, para no apilar 6 tarjetas altas. */
+  .services {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .service {
+    display: flex;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--line);
+  }
+  .service:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .service-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--ink-muted);
+  }
+  .service-featured .service-icon {
+    color: var(--accent-ink);
+  }
+
+  /* Desde tablet: tarjetas; las dos destacadas ocupan el doble. */
+  @media (min-width: 640px) {
+    .services {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+    .service,
+    .service:last-child {
+      flex-direction: column;
+      padding: var(--space-6);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface-raised);
+    }
+  }
+  @media (min-width: 1024px) {
+    .services {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .service-featured {
+      grid-column: span 2;
+      padding: var(--space-8);
+    }
+  }
+</style>

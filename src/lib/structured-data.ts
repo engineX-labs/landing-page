@@ -1,5 +1,5 @@
 // Datos estructurados (JSON-LD) de engineX. Solo datos reales: sin dirección, redes ni reseñas.
-import { description, services } from "./content";
+import { description, faqs, services } from "./content";
 
 interface StructuredDataInput {
   /** Origen del sitio, por ejemplo "https://enginex.com.ar". Sin dominio no hay URLs. */
@@ -41,6 +41,18 @@ export function buildStructuredData({ site, whatsappNumber }: StructuredDataInpu
       publisher: { "@id": orgId },
     });
   }
+
+  // Las mismas preguntas que muestra la sección "Preguntas frecuentes" de la home.
+  graph.push({
+    "@type": "FAQPage",
+    ...(site ? { "@id": `${site}/#preguntas`, url: `${site}/#preguntas` } : {}),
+    inLanguage: "es-AR",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  });
 
   return { "@context": "https://schema.org", "@graph": graph };
 }

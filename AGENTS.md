@@ -58,7 +58,9 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   `src/lib/contact-store.ts`: almacenamiento (`FileContactStore`, `RedisContactStore`) y límite por IP.
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
-- `src/lib/content.ts`: copy de servicios y proceso, compartido con `/llms.txt`.
+- `src/lib/content.ts`: copy del hero, servicios, proceso y preguntas frecuentes, compartido con
+  `/llms.txt` y el JSON-LD (`FAQPage`). `PRICE_FROM` es el precio "desde" de la pregunta del precio:
+  vacío, la respuesta no da cifra.
 - `src/content/projects/*.md`: proyectos del portfolio (Reservo y Freggiaro). `draft: true` se ve
   en dev y no sale en producción. `demo: /demo/<slug>` hace que la tarjeta abra esa página en el
   modal (`DemoDialog`) en lugar de linkear afuera.
@@ -69,16 +71,26 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   excepción a "solo tema Carbón".
 - `public/clientes/`: logos PNG transparentes de la barra "Confían en nosotros". Para sumar un
   cliente: copiar el logo acá y agregar una entrada a `clients` en `src/lib/content.ts` (`tone: "mono"` o `"color"`).
+- `src/components/DeviceShowcase.astro`: mockup de compu y celular. Lo usan el hero y las tarjetas
+  de proyecto (`image` + `mobileImage` en el `.md`). Las capturas van en `src/assets/projects/`:
+  `<slug>-desktop.jpg` (1440×900) y `<slug>-mobile.jpg` (390×844 a 2x).
 - `public/brand/`: los 11 logos oficiales. `public/fonts/`: Plus Jakarta Sans y JetBrains Mono.
 
 ## Convenciones del sistema de diseño
 
 - Tema Carbón únicamente. Usar tokens semánticos, nunca hex.
 - Un solo `display-xl` por página y un solo botón `primary` por vista.
-- Separar con bordes `line`, sin sombras, vidrio ni degradados.
+- Separar con bordes `line`, sin sombras. **Vidrio y brillos, acotados:** el vidrio (`.glass`,
+  `--glass-*`) va solo en superficies que flotan sobre algo con color (header, chips del hero,
+  barra de WhatsApp); los brillos radiales (`--glow-*`) solo de fondo, en el hero y en el medio de
+  las tarjetas de proyecto. Nada de degradados en texto, botones ni tarjetas.
 - Movimiento: solo `transform` y `opacity`, nada de UI por encima de 300ms, nunca `ease-in`, hover
   solo con `(hover: hover) and (pointer: fine)`, sin animaciones de entrada al hacer scroll. El
-  único momento es el hero. `prefers-reduced-motion` quita escalas y desplazamientos.
+  único momento es el hero (CSS, `@keyframes ex-rise`; no hay librería de animación). El fondo del
+  hero tiene dos brillos que derivan muy lento (22 y 28 s, solo `transform`), pausados fuera de
+  pantalla y quietos con movimiento reducido.
+  `prefers-reduced-motion` quita escalas y desplazamientos. Excepción aprobada: la barra de WhatsApp
+  en móvil (`MobileWhatsappBar`) aparece al pasar el hero, porque es un control y no contenido.
 - Foco: 2px sólido `focus-ring` con 2px de separación en todo lo clickeable.
 - Copy: voseo, primera persona del plural, sentence case, sin emojis ni exclamaciones en
   titulares. La marca se escribe siempre "engineX".

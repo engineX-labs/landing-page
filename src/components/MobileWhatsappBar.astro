@@ -1,0 +1,100 @@
+---
+import MessageCircle from "@lucide/astro/icons/message-circle";
+import { whatsapp } from "../lib/site";
+---
+
+<!--
+  Solo en móvil: el botón de WhatsApp a mano mientras se recorre la página. Aparece cuando el hero
+  sale de pantalla y se esconde en Contacto, donde ya está la misma opción.
+-->
+<div class="wa-bar" data-visible="false" data-wa-bar>
+  <a
+    href={whatsapp.chatUrl}
+    class="ex-btn ex-btn-primary ex-btn-md wa-bar-btn"
+    target="_blank"
+    rel="noopener"
+    tabindex="-1"
+    data-wa-bar-link
+  >
+    <MessageCircle size={20} aria-hidden="true" />
+    <span>Escribinos por WhatsApp</span>
+    <span class="sr-only">(se abre en otra pestaña)</span>
+  </a>
+</div>
+
+<style>
+  .wa-bar {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .wa-bar {
+      position: fixed;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 40;
+      display: block;
+      padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+      background: var(--glass-surface);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-top: 1px solid var(--glass-border);
+      /* Oculta: sale rápido (150 ms) y recién después deja de ser visible. */
+      transform: translateY(100%);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        transform 150ms var(--ease-out),
+        opacity 150ms var(--ease-out),
+        visibility 0s linear 150ms;
+    }
+    .wa-bar[data-visible="true"] {
+      transform: none;
+      opacity: 1;
+      visibility: visible;
+      transition:
+        transform var(--duration-base) var(--ease-out),
+        opacity var(--duration-base) var(--ease-out),
+        visibility 0s;
+    }
+    /* El final de la página no queda tapado por la barra. */
+    :global(body) {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    }
+  }
+  .wa-bar-btn {
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa-bar,
+    .wa-bar[data-visible="true"] {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-wa-bar]");
+  const link = bar?.querySelector<HTMLAnchorElement>("[data-wa-bar-link]");
+  const hero = document.querySelector("#inicio");
+  const contact = document.querySelector("#contacto");
+
+  if (bar && link && hero && contact && "IntersectionObserver" in window) {
+    const onScreen = new Map<Element, boolean>([
+      [hero, true],
+      [contact, false],
+    ]);
+    const update = () => {
+      const show = !onScreen.get(hero) && !onScreen.get(contact);
+      bar.dataset.visible = String(show);
+      // Oculta no se puede enfocar con Tab.
+      link.tabIndex = show ? 0 : -1;
+    };
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) onScreen.set(entry.target, entry.isIntersecting);
+      update();
+    });
+    observer.observe(hero);
+    observer.observe(contact);
+  }
+</script>
