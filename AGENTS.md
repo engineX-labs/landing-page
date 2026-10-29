@@ -67,6 +67,8 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   sitemap); la home la muestra en un `<dialog>` con un `<iframe>` que carga recién al abrirlo
   (`?embed` oculta su barra). Usa los colores de Freggiaro acotados a `.demo`: es la única
   excepción a "solo tema Carbón".
+- `public/clientes/`: logos PNG transparentes de la barra "Confían en nosotros". Para sumar un
+  cliente: copiar el logo acá y agregar una entrada a `clients` en `src/lib/content.ts` (`tone: "mono"` o `"color"`).
 - `public/brand/`: los 11 logos oficiales. `public/fonts/`: Plus Jakarta Sans y JetBrains Mono.
 
 ## Convenciones del sistema de diseño

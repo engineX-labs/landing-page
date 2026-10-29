@@ -111,12 +111,35 @@ test("un solo display-xl y un solo primary en el hero", async ({ page }) => {
 test("producción: solo proyectos reales, sin los borradores", async ({ page }) => {
   await page.goto("/");
   const cards = page.locator("#proyectos .ex-card");
-  await expect(cards).toHaveCount(2);
+  await expect(cards).toHaveCount(3);
   const reservo = page.getByRole("link", {
     name: /Reservo, gestión de reservas para alojamientos/,
   });
   await expect(reservo).toHaveAttribute("href", "https://www.mireservo.online");
   await expect(reservo.locator("img")).toHaveAttribute("alt", /calendario de reservas/);
+});
+
+test("la granja: tarjeta con link al sitio en punycode y logo en la barra de clientes", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const granja = page.getByRole("link", { name: /Cabañas La Granja, landing para un complejo/ });
+  await expect(granja).toHaveAttribute("href", "https://www.xn--cabaaslagranja-tnb.com");
+  await expect(granja.locator("img")).toHaveAttribute("alt", /pileta/);
+
+  const clientes = page.getByRole("region", { name: "Confían en nosotros" });
+  await expect(clientes.getByRole("img", { name: "Cabañas La Granja" })).toBeVisible();
+  await expect(clientes.getByRole("img", { name: "Freggiaro Frenos y Embragues" })).toBeVisible();
+  await expect(clientes.getByRole("listitem")).toHaveCount(2);
+  await expect(clientes.getByRole("link")).toHaveCount(0);
+  // La barra va justo debajo del hero.
+  const [hero, barra, servicios] = await Promise.all(
+    ["#inicio", "#clientes-title", "#servicios"].map((sel) =>
+      page.locator(sel).evaluate((el) => el.getBoundingClientRect().top + window.scrollY),
+    ),
+  );
+  expect(hero).toBeLessThan(barra);
+  expect(barra).toBeLessThan(servicios);
 });
 
 test.describe("movimiento reducido", () => {
