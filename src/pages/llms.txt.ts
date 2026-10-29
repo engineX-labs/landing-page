@@ -13,7 +13,8 @@ export const GET: APIRoute = async ({ site }) => {
       client: data.client,
       summary: data.summary,
       tags: data.tags,
-      href: data.href,
+      // La demo es una ruta interna: en llms.txt va absoluta, o no va si no hay dominio.
+      href: data.href ?? (data.demo && site ? new URL(data.demo, site).href : undefined),
     }));
 
   const body = buildLlmsTxt({
