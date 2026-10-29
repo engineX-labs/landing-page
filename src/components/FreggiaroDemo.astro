@@ -1,0 +1,1747 @@
+---
+import { Image } from "astro:assets";
+import DollarSign from "@lucide/astro/icons/dollar-sign";
+import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
+import Package from "@lucide/astro/icons/package";
+import Receipt from "@lucide/astro/icons/receipt";
+import ShoppingCart from "@lucide/astro/icons/shopping-cart";
+import TrendingUp from "@lucide/astro/icons/trending-up";
+import User from "@lucide/astro/icons/user";
+import Users from "@lucide/astro/icons/users";
+import Wallet from "@lucide/astro/icons/wallet";
+import emblem from "../assets/freggiaro/emblem.webp";
+import {
+  areaOf,
+  categories,
+  clientSearchText,
+  clients,
+  donutSegments,
+  formatArs,
+  formatCuit,
+  linePoints,
+  pathOf,
+  periods,
+  products,
+  ratios,
+  sales,
+  searchText,
+  stockLevel,
+  totalDebt,
+} from "../lib/freggiaro-demo";
+
+const tabs = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "productos", label: "Productos", icon: Package },
+  { id: "clientes", label: "Clientes", icon: Users },
+  { id: "ventas", label: "Ventas", icon: ShoppingCart },
+  { id: "facturacion", label: "Facturación", icon: Receipt },
+] as const;
+
+const percent = (n: number) => `${n.toFixed(1).replace(".", ",")} %`;
+const number = (n: number) => n.toLocaleString("es-AR");
+
+// Lienzo del gráfico de línea: el SVG se estira al ancho, así que las posiciones se guardan
+// como fracciones y el marcador del hover se ubica con porcentajes.
+const CHART_W = 600;
+const CHART_H = 200;
+const SEGMENT_COLORS = ["#fbbf24", "#f59e0b", "#d97706", "#b45309"];
+
+const views = periods.map((p) => {
+  const points = linePoints(
+    p.series.map((s) => s.value),
+    CHART_W,
+    CHART_H,
+  );
+  return {
+    ...p,
+    line: pathOf(points),
+    area: areaOf(points, CHART_H),
+    // Lo que lee el script al pasar el cursor: posición relativa y texto ya formateado.
+    hover: JSON.stringify(
+      points.map((pt, i) => ({
+        x: pt.x / CHART_W,
+        y: pt.y / CHART_H,
+        text: `${p.series[i].label}: ${formatArs(p.series[i].value)}`,
+      })),
+    ),
+    topRatios: ratios(p.top.map((t) => t.amount)),
+    segments: donutSegments(p.payments),
+  };
+});
+
+const debt = totalDebt(clients.map((c) => c.balance));
+---
+
+<!-- La ventana replica la interfaz de Freggiaro: sus colores y su tipografía, no los de engineX. -->
+    <div class="demo" data-demo>
+      <div class="fg-logo">
+        <Image src={emblem} alt="Freggiaro" width={48} height={48} loading="lazy" />
+      </div>
+
+      <header class="fg-header">
+        <div class="fg-title">
+          <span class="fg-title-bar" aria-hidden="true"></span>
+          <p class="fg-title-text" aria-hidden="true" data-title>Dashboard</p>
+        </div>
+        <div class="fg-user">
+          <span class="fg-user-icon" aria-hidden="true"><User size={16} /></span>
+          <span class="fg-user-text">
+            <span class="fg-user-name">Administrador</span>
+            <span class="fg-user-sub">Datos ficticios</span>
+          </span>
+        </div>
+      </header>
+
+      <div
+        class="fg-nav"
+        role="tablist"
+        aria-orientation="vertical"
+        aria-label="Secciones de Freggiaro"
+      >
+        {
+          tabs.map((tab, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`demo-tab-${tab.id}`}
+              class="fg-tab"
+              aria-selected={i === 0 ? "true" : "false"}
+              aria-controls={`demo-panel-${tab.id}`}
+              tabindex={i === 0 ? 0 : -1}
+              data-tab
+              data-label={tab.label}
+            >
+              <tab.icon size={22} aria-hidden="true" />
+              <span>{tab.label}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- Dashboard -->
+      <div
+        role="tabpanel"
+        id="demo-panel-dashboard"
+        class="fg-panel"
+        aria-labelledby="demo-tab-dashboard"
+        tabindex="0"
+        data-panel
+      >
+        <div class="fg-head">
+          <div>
+            <h3 class="fg-h">Resumen principal</h3>
+            <p class="fg-sub">Las métricas clave de tu negocio, en un vistazo.</p>
+          </div>
+          <div class="fg-chips" role="group" aria-label="Período">
+            {
+              periods.map((p) => (
+                <button
+                  type="button"
+                  class="fg-chip"
+                  aria-pressed={p.id === "mes" ? "true" : "false"}
+                  data-period={p.id}
+                >
+                  {p.label}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        {
+          views.map((p) => (
+            <div class="fg-view" hidden={p.id !== "mes"} data-period-view={p.id}>
+              <dl class="fg-stats">
+                <div class="fg-card fg-stat">
+                  <span class="fg-stat-icon" aria-hidden="true">
+                    <DollarSign size={22} />
+                  </span>
+                  <dt class="fg-muted">Ventas totales</dt>
+                  <dd class="fg-stat-value">{formatArs(p.total)}</dd>
+                  <dd class="fg-stat-note">
+                    <TrendingUp size={16} aria-hidden="true" class="fg-up" />
+                    <span class="fg-up">+{percent(p.delta)}</span>
+                    <span class="fg-muted">vs. período anterior</span>
+                  </dd>
+                </div>
+                <div class="fg-card fg-stat">
+                  <span class="fg-stat-icon" aria-hidden="true">
+                    <ShoppingCart size={22} />
+                  </span>
+                  <dt class="fg-muted">Cant. de ventas</dt>
+                  <dd class="fg-stat-value">{number(p.count)}</dd>
+                  <dd class="fg-stat-note fg-muted">Ticket prom.: {formatArs(p.total / p.count)}</dd>
+                </div>
+                <div class="fg-card fg-stat">
+                  <span class="fg-stat-icon" aria-hidden="true">
+                    <Users size={22} />
+                  </span>
+                  <dt class="fg-muted">Clientes activos</dt>
+                  <dd class="fg-stat-value">{number(p.clients)}</dd>
+                  <dd class="fg-stat-note fg-muted">Con compras en el período</dd>
+                </div>
+                <div class="fg-card fg-stat">
+                  <span class="fg-stat-icon" aria-hidden="true">
+                    <Package size={22} />
+                  </span>
+                  <dt class="fg-muted">Ítems vendidos</dt>
+                  <dd class="fg-stat-value">{number(p.items)}</dd>
+                  <dd class="fg-stat-note fg-muted">Unidades en total</dd>
+                </div>
+              </dl>
+
+              <section class="fg-card fg-block" aria-label="Evolución de ventas">
+                <div class="fg-block-head">
+                  <h4 class="fg-h4">Evolución de ventas</h4>
+                  <p class="fg-readout" data-readout aria-hidden="true">
+                    Pasá el cursor o tocá el gráfico
+                  </p>
+                </div>
+                <div class="fg-chart" data-chart data-points={p.hover}>
+                  <svg
+                    viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path class="fg-area" d={p.area} />
+                    <path class="fg-line" d={p.line} />
+                  </svg>
+                  <span class="fg-marker" data-marker hidden />
+                </div>
+                <ol class="fg-xlabels" aria-label={p.seriesLabel}>
+                  {
+                    p.series.map((s) => (
+                      <li>
+                        <span class="sr-only">
+                          {s.label}: {formatArs(s.value)}
+                        </span>
+                        <span aria-hidden="true">{s.label}</span>
+                      </li>
+                    ))
+                  }
+                </ol>
+              </section>
+
+              <div class="fg-pair">
+                <section class="fg-card fg-block" aria-label="Métodos de pago">
+                  <h4 class="fg-h4">Métodos de pago</h4>
+                  <div class="fg-donut-wrap">
+                    <div class="fg-donut">
+                      <svg viewBox="0 0 42 42" aria-hidden="true" focusable="false">
+                        {p.segments.map((seg, i) => (
+                          <circle
+                            cx="21"
+                            cy="21"
+                            r="15.9155"
+                            fill="none"
+                            stroke={SEGMENT_COLORS[i]}
+                            stroke-width="5"
+                            stroke-dasharray={`${Math.max(seg.pct - 0.8, 0)} ${100 - Math.max(seg.pct - 0.8, 0)}`}
+                            stroke-dashoffset={25 + seg.offset}
+                          />
+                        ))}
+                      </svg>
+                      <span class="fg-donut-center">
+                        <strong>{number(p.count)}</strong>
+                        <span class="fg-muted">ventas</span>
+                      </span>
+                    </div>
+                    <ul class="fg-legend">
+                      {p.payments.map((m, i) => (
+                        <li>
+                          <span
+                            class="fg-swatch"
+                            style={`background:${SEGMENT_COLORS[i]}`}
+                            aria-hidden="true"
+                          />
+                          <span class="fg-legend-label">{m.label}</span>
+                          <strong class="fg-up">{m.pct} %</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+
+                <section class="fg-card fg-block" aria-label="Productos que más venden">
+                  <h4 class="fg-h4">Top productos</h4>
+                  <ol class="fg-top">
+                    {p.top.map((t, i) => (
+                      <li>
+                        <div class="fg-top-row">
+                          <span class="fg-top-name">{t.name}</span>
+                          <strong class="fg-num fg-up">{formatArs(t.amount)}</strong>
+                        </div>
+                        <span class="fg-top-track" aria-hidden="true">
+                          <span class="fg-top-fill" style={`--r:${p.topRatios[i].toFixed(3)}`} />
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <!-- Productos -->
+      <div
+        role="tabpanel"
+        id="demo-panel-productos"
+        class="fg-panel"
+        aria-labelledby="demo-tab-productos"
+        tabindex="0"
+        hidden
+        data-panel
+      >
+        <div class="fg-head">
+          <div>
+            <h3 class="fg-h">Gestión de productos</h3>
+            <p class="fg-sub">Catálogo, precios y stock de tu negocio.</p>
+          </div>
+          <p class="fg-muted fg-count" role="status" data-products-count>
+            {products.length} de {products.length} productos
+          </p>
+        </div>
+
+        <div class="fg-field">
+          <label class="fg-label" for="demo-search">Buscar</label>
+          <input
+            id="demo-search"
+            class="fg-input"
+            type="search"
+            placeholder="Buscar por SKU, nombre, marca o categoría…"
+            autocomplete="off"
+            data-search
+          />
+        </div>
+
+        <div class="fg-chips" role="group" aria-label="Categoría">
+          <button type="button" class="fg-chip" aria-pressed="true" data-category="">
+            Todas
+          </button>
+          {
+            categories.map((c) => (
+              <button type="button" class="fg-chip" aria-pressed="false" data-category={c}>
+                {c}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="fg-card fg-table-wrap">
+          <table class="fg-table">
+            <caption class="sr-only">Productos del catálogo</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="fg-md">SKU</th>
+                <th scope="col">Nombre</th>
+                <th scope="col" class="fg-md">Categoría</th>
+                <th scope="col">Stock</th>
+                <th scope="col" class="fg-right">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                products.map((p) => {
+                  const level = stockLevel(p.stock);
+                  return (
+                    <tr data-product data-text={searchText(p)} data-cat={p.category}>
+                      <td class="fg-md">
+                        <span class="fg-sku">{p.sku}</span>
+                      </td>
+                      <td>
+                        <span class="fg-strong">{p.name}</span>
+                        <span class="fg-small fg-muted">
+                          {p.brand}
+                          <span class="fg-mono fg-sm-only"> · {p.sku}</span>
+                        </span>
+                      </td>
+                      <td class="fg-md">
+                        <span class="fg-pill">{p.category}</span>
+                      </td>
+                      <td>
+                        <span class:list={["fg-stock", level === "out" && "fg-stock-out"]}>
+                          {level === "out" ? "Sin stock" : `${p.stock} un.`}
+                        </span>
+                        {level === "low" && <span class="sr-only">Stock bajo</span>}
+                      </td>
+                      <td class="fg-right fg-num fg-price">{formatArs(p.price)}</td>
+                    </tr>
+                  );
+                })
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="fg-sub" hidden data-products-empty>
+          No encontramos productos con esa búsqueda.
+        </p>
+      </div>
+
+      <!-- Clientes -->
+      <div
+        role="tabpanel"
+        id="demo-panel-clientes"
+        class="fg-panel"
+        aria-labelledby="demo-tab-clientes"
+        tabindex="0"
+        hidden
+        data-panel
+      >
+        <div class="fg-head">
+          <div>
+            <h3 class="fg-h">Cartera de clientes</h3>
+            <p class="fg-sub">Contacto, condición frente al IVA y cuenta corriente de cada cliente.</p>
+          </div>
+          <button type="button" class="fg-chip" hidden data-clients-reset>Reiniciar saldos</button>
+        </div>
+
+        <dl class="fg-stats fg-stats-3">
+          <div class="fg-card fg-stat">
+            <span class="fg-stat-icon" aria-hidden="true"><Users size={22} /></span>
+            <dt class="fg-muted">Clientes</dt>
+            <dd class="fg-stat-value">{clients.length}</dd>
+          </div>
+          <div class="fg-card fg-stat">
+            <span class="fg-stat-icon" aria-hidden="true"><Wallet size={22} /></span>
+            <dt class="fg-muted">A cobrar en cuenta corriente</dt>
+            <dd class="fg-stat-value" data-debt-total>{formatArs(debt.total)}</dd>
+          </div>
+          <div class="fg-card fg-stat">
+            <span class="fg-stat-icon" aria-hidden="true"><DollarSign size={22} /></span>
+            <dt class="fg-muted">Con saldo pendiente</dt>
+            <dd class="fg-stat-value" data-debtors>{debt.debtors}</dd>
+          </div>
+        </dl>
+
+        <div class="fg-field">
+          <label class="fg-label" for="demo-client-search">Buscar cliente</label>
+          <input
+            id="demo-client-search"
+            class="fg-input"
+            type="search"
+            placeholder="Nombre o CUIT…"
+            autocomplete="off"
+            data-client-search
+          />
+        </div>
+
+        <div class="fg-head">
+          <div class="fg-chips" role="group" aria-label="Saldo">
+            <button type="button" class="fg-chip" aria-pressed="true" data-debt-filter="all">
+              Todos
+            </button>
+            <button type="button" class="fg-chip" aria-pressed="false" data-debt-filter="debt">
+              Con saldo pendiente
+            </button>
+          </div>
+          <p class="fg-muted fg-count" role="status" data-clients-count>
+            {clients.length} de {clients.length} clientes
+          </p>
+        </div>
+
+        <p class="fg-sub fg-notice-text" role="status" tabindex="-1" data-pay-status></p>
+
+        <div class="fg-card fg-table-wrap">
+          <table class="fg-table">
+            <caption class="sr-only">Cartera de clientes</caption>
+            <thead>
+              <tr>
+                <th scope="col">Cliente</th>
+                <th scope="col" class="fg-md">CUIT</th>
+                <th scope="col" class="fg-md">Condición</th>
+                <th scope="col" class="fg-md">Última compra</th>
+                <th scope="col" class="fg-right">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                clients.map((c) => (
+                  <tr
+                    data-client-row
+                    data-name={c.name}
+                    data-text={clientSearchText(c)}
+                    data-balance={c.balance}
+                    data-initial={c.balance}
+                  >
+                    <td>
+                      <span class="fg-strong">{c.name}</span>
+                      <span class="fg-small fg-muted">
+                        {c.phone || "Sin datos de contacto"}
+                        <span class="fg-mono fg-sm-only"> · {formatCuit(c.cuit)}</span>
+                      </span>
+                    </td>
+                    <td class="fg-md fg-mono fg-muted">{formatCuit(c.cuit)}</td>
+                    <td class="fg-md">
+                      <span class="fg-pill">{c.condition}</span>
+                    </td>
+                    <td class="fg-md fg-muted">{c.lastPurchase}</td>
+                    <td class="fg-right">
+                      <div class="fg-balance-cell">
+                        <span
+                          class:list={["fg-badge fg-num", c.balance > 0 ? "fg-badge-warn" : "fg-badge-ok"]}
+                          data-balance-label
+                        >
+                          {c.balance > 0 ? formatArs(c.balance) : "Al día"}
+                        </span>
+                        {c.balance > 0 && (
+                          <button type="button" class="fg-link fg-link-sm" data-pay>
+                            Registrar pago
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="fg-sub" hidden data-clients-empty>No encontramos clientes con esa búsqueda.</p>
+      </div>
+
+      <!-- Ventas -->
+      <div
+        role="tabpanel"
+        id="demo-panel-ventas"
+        class="fg-panel"
+        aria-labelledby="demo-tab-ventas"
+        tabindex="0"
+        hidden
+        data-panel
+      >
+        <div class="fg-head">
+          <div>
+            <h3 class="fg-h">Ventas y remitos</h3>
+            <p class="fg-sub">Registrá ventas y emití el comprobante fiscal cuando lo necesites.</p>
+          </div>
+          <button type="button" class="fg-chip" hidden data-sales-reset>Reiniciar ventas</button>
+        </div>
+
+        <div class="fg-notice">
+          <p class="fg-sub" role="status" data-sales-status>
+            Tocá «Facturar» en una venta para emitir una factura de prueba.
+          </p>
+          <button type="button" class="fg-link" hidden data-goto-fiscal>Ver en Facturación</button>
+        </div>
+
+        <div class="fg-card fg-table-wrap">
+          <table class="fg-table">
+            <caption class="sr-only">Ventas recientes</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="fg-md">Remito</th>
+                <th scope="col" class="fg-md">Fecha</th>
+                <th scope="col">Cliente</th>
+                <th scope="col" class="fg-right">Total</th>
+                <th scope="col" class="fg-md">Cobro</th>
+                <th scope="col">Fiscal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                sales.map((s, i) => (
+                  <tr data-sale>
+                    <td class="fg-md fg-mono fg-up">{s.number}</td>
+                    <td class="fg-md fg-muted">{s.date}</td>
+                    <td>
+                      <span class="fg-strong">{s.client}</span>
+                      <span class="fg-small fg-muted fg-mono fg-sm-only">{s.number}</span>
+                    </td>
+                    <td class="fg-right fg-num fg-bold">{formatArs(s.total)}</td>
+                    <td class="fg-md">
+                      <span
+                        class:list={[
+                          "fg-badge",
+                          s.payment === "Pagado" && "fg-badge-ok",
+                          s.payment === "Pendiente" && "fg-badge-warn",
+                        ]}
+                      >
+                        {s.payment}
+                      </span>
+                    </td>
+                    <td>
+                      {s.invoice ? (
+                        <span class="fg-badge fg-badge-afip" data-fiscal>
+                          {s.invoice.label}
+                        </span>
+                      ) : (
+                        <div class="fg-fiscal-cell">
+                          <span class="fg-badge fg-badge-none" data-fiscal data-empty="Sin facturar">
+                            Sin facturar
+                          </span>
+                          <button
+                            type="button"
+                            class="fg-btn-afip"
+                            data-invoice
+                            data-index={i}
+                            data-client={s.client}
+                          >
+                            <Receipt size={16} aria-hidden="true" />
+                            <span>Facturar</span>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Facturación -->
+      <div
+        role="tabpanel"
+        id="demo-panel-facturacion"
+        class="fg-panel"
+        aria-labelledby="demo-tab-facturacion"
+        tabindex="0"
+        hidden
+        data-panel
+      >
+        <div class="fg-head">
+          <div>
+            <h3 class="fg-h">Facturación</h3>
+            <p class="fg-sub">Comprobantes emitidos. Las facturas nuevas aparecen acá.</p>
+          </div>
+          <span class="fg-badge fg-badge-afip">Simulación · sin validez fiscal</span>
+        </div>
+
+        <div class="fg-card fg-table-wrap">
+          <table class="fg-table">
+            <caption class="sr-only">Comprobantes emitidos</caption>
+            <thead>
+              <tr>
+                <th scope="col">Comprobante</th>
+                <th scope="col" class="fg-md">Cliente</th>
+                <th scope="col" class="fg-right">Total</th>
+                <th scope="col" class="fg-md">CAE</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                sales.map((s) => (
+                  <tr hidden={!s.invoice} data-fiscal-row>
+                    <td>
+                      <span class="fg-strong" data-fiscal-label>
+                        {s.invoice?.label}
+                      </span>
+                      <span class="fg-small fg-muted fg-sm-only">{s.client}</span>
+                    </td>
+                    <td class="fg-md">{s.client}</td>
+                    <td class="fg-right fg-num fg-bold">{formatArs(s.total)}</td>
+                    <td class="fg-md fg-mono fg-muted" data-fiscal-cae>
+                      {s.invoice?.cae}
+                    </td>
+                    <td>
+                      <span class="fg-badge fg-badge-ok">Aprobada</span>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+<style>
+  /*
+   * Tokens de Freggiaro (src/styles/theme.css del sistema), acotados a la demo. El resto de la
+   * página sigue con los de engineX. Se omiten los degradados y las sombras de la interfaz real.
+   */
+  .demo {
+    --fg-bg: #0f0f0f;
+    --fg-fg: #fafafa;
+    --fg-card: #1a1a1a;
+    --fg-sidebar: #141414;
+    --fg-secondary: #2a2a2a;
+    --fg-muted: #a3a3a3;
+    --fg-primary: #fbbf24;
+    --fg-on-primary: #0f0f0f;
+    --fg-primary-subtle: rgb(251 191 36 / 0.1);
+    --fg-border: rgb(251 191 36 / 0.15);
+    --fg-input: rgb(251 191 36 / 0.2);
+    --fg-sidebar-border: rgb(251 191 36 / 0.1);
+    --fg-success: #34d399;
+    --fg-success-subtle: rgb(16 185 129 / 0.1);
+    --fg-warning-subtle: rgb(245 158 11 / 0.12);
+    --fg-destructive-subtle: rgb(239 68 68 / 0.12);
+    --fg-afip: #4f46e5;
+    --fg-afip-text: #a5b4fc;
+    --fg-afip-subtle: rgb(79 70 229 / 0.12);
+    --fg-radius: 12px;
+
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-areas:
+      "logo header"
+      "nav nav"
+      "panel panel";
+    grid-template-rows: auto auto 1fr;
+    height: 100%;
+    background: var(--fg-bg);
+    color: var(--fg-fg);
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .demo :focus-visible {
+    outline: 2px solid var(--fg-primary);
+    outline-offset: 2px;
+  }
+  @media (min-width: 768px) {
+    .demo {
+      grid-template-columns: 88px minmax(0, 1fr);
+      grid-template-areas:
+        "logo header"
+        "nav panel";
+      grid-template-rows: auto 1fr;
+    }
+  }
+
+  /* Estructura */
+  .fg-logo {
+    grid-area: logo;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fg-sidebar);
+    border-bottom: 1px solid var(--fg-sidebar-border);
+    border-right: 1px solid var(--fg-sidebar-border);
+  }
+  .fg-logo :global(img) {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--fg-radius);
+  }
+  @media (min-width: 768px) {
+    .fg-logo {
+      height: 88px;
+    }
+    .fg-logo :global(img) {
+      width: 48px;
+      height: 48px;
+    }
+  }
+  .fg-header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--fg-card);
+    border-bottom: 1px solid var(--fg-border);
+    min-width: 0;
+  }
+  @media (min-width: 768px) {
+    .fg-header {
+      padding-inline: 32px;
+    }
+  }
+  .fg-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .fg-title-bar {
+    width: 4px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--fg-primary);
+    flex-shrink: 0;
+  }
+  .fg-title-text {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 700;
+    color: var(--fg-primary);
+    white-space: nowrap;
+  }
+  @media (min-width: 768px) {
+    .fg-title-text {
+      font-size: 24px;
+      line-height: 32px;
+    }
+  }
+  .fg-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    background: var(--fg-secondary);
+    border-radius: var(--fg-radius);
+    min-width: 0;
+  }
+  .fg-user-icon {
+    display: inline-flex;
+    padding: 6px;
+    background: var(--fg-primary);
+    color: var(--fg-on-primary);
+    border-radius: 8px;
+  }
+  .fg-user-text {
+    display: none;
+    flex-direction: column;
+  }
+  @media (min-width: 480px) {
+    .fg-user-text {
+      display: flex;
+    }
+  }
+  .fg-user-name {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  .fg-user-sub {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--fg-muted);
+  }
+
+  /* Menú: riel lateral en escritorio, fila de iconos en móvil. */
+  .fg-nav {
+    grid-area: nav;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 2px;
+    padding: 8px;
+    background: var(--fg-sidebar);
+    border-bottom: 1px solid var(--fg-sidebar-border);
+  }
+  @media (min-width: 768px) {
+    .fg-nav {
+      display: flex;
+      flex-direction: column;
+      align-content: flex-start;
+      padding: 12px;
+      border-bottom: 0;
+      border-right: 1px solid var(--fg-sidebar-border);
+    }
+  }
+  .fg-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 56px;
+    padding: 6px 4px;
+    font: inherit;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 600;
+    color: var(--fg-fg);
+    background: transparent;
+    border: 0;
+    border-radius: var(--fg-radius);
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+  @media (min-width: 768px) {
+    .fg-tab {
+      font-size: 11px;
+    }
+  }
+  .fg-tab[aria-selected="true"] {
+    background: var(--fg-primary);
+    color: var(--fg-on-primary);
+  }
+
+  .fg-panel {
+    grid-area: panel;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 16px;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  /* El panel scrollea: sus bloques mantienen su alto en vez de encogerse y cortar tablas. */
+  .fg-panel > * {
+    flex-shrink: 0;
+  }
+  .fg-panel[hidden],
+  .fg-view[hidden] {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .fg-panel {
+      padding: 32px;
+    }
+  }
+  .fg-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .fg-h {
+    margin: 0;
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .fg-h {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+  .fg-h4 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 600;
+  }
+  .fg-sub {
+    margin: 4px 0 0;
+    color: var(--fg-muted);
+  }
+  .fg-muted {
+    color: var(--fg-muted);
+  }
+  .fg-up {
+    color: var(--fg-primary);
+  }
+  .fg-strong {
+    display: block;
+    font-weight: 600;
+  }
+  .fg-bold {
+    font-weight: 600;
+  }
+  .fg-small {
+    display: block;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .fg-mono {
+    font-family: var(--font-mono);
+  }
+  .fg-num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .fg-count {
+    margin: 0;
+  }
+
+  .fg-card {
+    background: var(--fg-card);
+    border: 1px solid var(--fg-border);
+    border-radius: 16px;
+  }
+
+  /* Chips y botones */
+  .fg-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .fg-chip {
+    min-height: 44px;
+    padding-inline: 16px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: var(--fg-card);
+    border: 1px solid var(--fg-border);
+    border-radius: var(--fg-radius);
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      transform 140ms var(--ease-out);
+  }
+  .fg-chip:active,
+  .fg-btn-afip:active {
+    transform: scale(0.97);
+  }
+  .fg-chip[aria-pressed="true"] {
+    color: var(--fg-on-primary);
+    background: var(--fg-primary);
+    border-color: var(--fg-primary);
+  }
+  .fg-chip[hidden],
+  .fg-link[hidden] {
+    display: none;
+  }
+  .fg-link {
+    padding: 0;
+    min-height: 44px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--fg-primary);
+    background: none;
+    border: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .fg-btn-afip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding-inline: 14px;
+    font: inherit;
+    font-weight: 700;
+    color: #fff;
+    background: var(--fg-afip);
+    border: 0;
+    border-radius: var(--fg-radius);
+    cursor: pointer;
+    transition: transform 140ms var(--ease-out);
+  }
+  .fg-btn-afip[aria-disabled="true"] {
+    color: var(--fg-muted);
+    background: var(--fg-secondary);
+    cursor: default;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .fg-chip[aria-pressed="false"]:hover {
+      color: var(--fg-fg);
+      border-color: var(--fg-input);
+    }
+    .fg-tab[aria-selected="false"]:hover {
+      background: var(--fg-card);
+    }
+    .fg-btn-afip:not([aria-disabled="true"]):hover {
+      background: #6366f1;
+    }
+  }
+
+  .fg-notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+  .fg-notice .fg-sub {
+    margin: 0;
+  }
+
+  /* Dashboard */
+  .fg-view {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: ex-fade 160ms var(--ease-out);
+  }
+  .fg-stats {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+  }
+  @media (min-width: 560px) {
+    .fg-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .fg-stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .fg-stats-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .fg-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 20px;
+  }
+  .fg-stat dd {
+    margin: 0;
+  }
+  /* En móvil el icono va al costado para que las cuatro métricas no ocupen una pantalla entera. */
+  @media (max-width: 559px) {
+    .fg-stat {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      column-gap: 16px;
+      align-items: center;
+      padding: 16px;
+    }
+    .fg-stat-icon {
+      grid-row: 1 / span 3;
+      margin-bottom: 0;
+    }
+  }
+  .fg-stat-icon {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 12px;
+    margin-bottom: 12px;
+    color: var(--fg-on-primary);
+    background: var(--fg-primary);
+    border-radius: var(--fg-radius);
+  }
+  .fg-stat-value {
+    font-size: 26px;
+    line-height: 34px;
+    font-weight: 700;
+    color: var(--fg-primary);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .fg-stat-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .fg-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    min-width: 0;
+  }
+  .fg-block-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .fg-readout {
+    margin: 0;
+    font-size: 13px;
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .fg-chart {
+    position: relative;
+    height: 200px;
+    border-bottom: 1px solid var(--fg-border);
+    touch-action: pan-y;
+    cursor: crosshair;
+  }
+  .fg-chart svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .fg-area {
+    fill: rgb(251 191 36 / 0.12);
+  }
+  .fg-line {
+    fill: none;
+    stroke: var(--fg-primary);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .fg-marker {
+    position: absolute;
+    left: calc(var(--x, 0) * 100%);
+    top: calc(var(--y, 0) * 100%);
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    background: var(--fg-primary);
+    border: 2px solid var(--fg-bg);
+    border-radius: 9999px;
+    pointer-events: none;
+  }
+  .fg-marker[hidden] {
+    display: none;
+  }
+  .fg-xlabels {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fg-xlabels li {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  @media (max-width: 639px) {
+    .fg-xlabels li:nth-child(even) [aria-hidden] {
+      visibility: hidden;
+    }
+  }
+
+  .fg-pair {
+    display: grid;
+    gap: 24px;
+  }
+  @media (min-width: 1024px) {
+    .fg-pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .fg-donut-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+  }
+  .fg-donut {
+    position: relative;
+    width: 148px;
+    height: 148px;
+    flex-shrink: 0;
+  }
+  .fg-donut svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .fg-donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .fg-donut-center strong {
+    font-size: 20px;
+    line-height: 24px;
+  }
+  .fg-legend {
+    flex: 1 1 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fg-legend li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .fg-legend-label {
+    flex: 1;
+  }
+  .fg-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .fg-top {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fg-top-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .fg-top-track {
+    display: block;
+    height: 6px;
+    margin-top: 6px;
+    background: var(--fg-secondary);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .fg-top-fill {
+    display: block;
+    height: 100%;
+    background: var(--fg-primary);
+    border-radius: 9999px;
+    transform: scaleX(var(--r));
+    transform-origin: left;
+  }
+
+  /* Formularios y tablas */
+  .fg-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fg-label {
+    font-weight: 600;
+  }
+  .fg-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 16px;
+    color: var(--fg-fg);
+    background: var(--fg-card);
+    border: 1px solid var(--fg-input);
+    border-radius: var(--fg-radius);
+  }
+  .fg-input::placeholder {
+    color: var(--fg-muted);
+    opacity: 1;
+  }
+  .fg-input:focus-visible {
+    border-color: var(--fg-primary);
+  }
+  .fg-table-wrap {
+    overflow-x: auto;
+  }
+  .fg-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .fg-table th {
+    padding: 14px 8px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: rgb(42 42 42 / 0.3);
+    border-bottom: 1px solid var(--fg-border);
+  }
+  .fg-table td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgb(255 255 255 / 0.05);
+  }
+  .fg-table tr:last-child td {
+    border-bottom: 0;
+  }
+  .fg-table tr[hidden] {
+    display: none;
+  }
+  .fg-table .fg-right {
+    text-align: right;
+  }
+  .fg-md {
+    display: none;
+  }
+  .fg-sm-only {
+    display: inline;
+  }
+  .fg-small.fg-sm-only {
+    display: block;
+  }
+  @media (min-width: 768px) {
+    .fg-md {
+      display: table-cell;
+    }
+    .fg-sm-only,
+    .fg-small.fg-sm-only {
+      display: none;
+    }
+    .fg-table th,
+    .fg-table td {
+      padding-inline: 16px;
+    }
+  }
+  .fg-sku {
+    display: inline-block;
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--fg-primary);
+    background: var(--fg-primary-subtle);
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .fg-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: var(--fg-muted);
+    background: var(--fg-secondary);
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .fg-stock {
+    display: inline-block;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-primary);
+    background: var(--fg-primary-subtle);
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .fg-stock-out {
+    color: #f87171;
+    background: var(--fg-destructive-subtle);
+  }
+  .fg-price {
+    font-weight: 700;
+    color: var(--fg-primary);
+  }
+  .fg-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    background: var(--fg-secondary);
+    border-radius: 8px;
+  }
+  .fg-badge-ok {
+    color: var(--fg-success);
+    background: var(--fg-success-subtle);
+  }
+  .fg-badge-warn {
+    color: #fb923c;
+    background: var(--fg-warning-subtle);
+  }
+  .fg-badge-afip {
+    color: var(--fg-afip-text);
+    background: var(--fg-afip-subtle);
+    border: 1px solid rgb(79 70 229 / 0.3);
+  }
+  .fg-badge-none {
+    background: transparent;
+    border: 1px dashed rgb(255 255 255 / 0.2);
+  }
+  @media (max-width: 767px) {
+    .fg-badge {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .fg-table th,
+    .fg-table td {
+      padding-inline: 6px;
+    }
+  }
+  .fg-balance-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .fg-link-sm {
+    min-height: 32px;
+    font-size: 13px;
+  }
+  .fg-notice-text {
+    margin: 0;
+  }
+  .fg-notice-text:empty {
+    display: none;
+  }
+  .fg-fiscal-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fg-chip:active,
+    .fg-btn-afip:active {
+      transform: none;
+    }
+    .fg-view {
+      animation-name: none;
+    }
+  }
+</style>
+
+<script>
+  import {
+    formatArs,
+    LAST_INVOICE_NUMBER,
+    matchesQuery,
+    simulateInvoice,
+    totalDebt,
+  } from "../lib/freggiaro-demo";
+
+  const root = document.querySelector<HTMLElement>("[data-demo]");
+
+  if (root) {
+    // Menú: flechas arriba/abajo (o izquierda/derecha), Home y End mueven la selección.
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-tab]")];
+    const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
+    const title = root.querySelector<HTMLElement>("[data-title]");
+
+    const selectTab = (index: number, { focus = false } = {}) => {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        panels[i].hidden = !on;
+      });
+      if (title) title.textContent = tabs[index].dataset.label ?? "";
+      if (focus) tabs[index].focus();
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => selectTab(i));
+      tab.addEventListener("keydown", (event) => {
+        const last = tabs.length - 1;
+        const next =
+          event.key === "ArrowDown" || event.key === "ArrowRight"
+            ? (i + 1) % tabs.length
+            : event.key === "ArrowUp" || event.key === "ArrowLeft"
+              ? (i + last) % tabs.length
+              : event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? last
+                  : null;
+        if (next === null) return;
+        event.preventDefault();
+        selectTab(next, { focus: true });
+      });
+    });
+
+    // Dashboard: un período a la vez.
+    const periodButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-period]")];
+    const periodViews = [...root.querySelectorAll<HTMLElement>("[data-period-view]")];
+    for (const button of periodButtons) {
+      button.addEventListener("click", () => {
+        for (const other of periodButtons) {
+          other.setAttribute("aria-pressed", String(other === button));
+        }
+        for (const view of periodViews) {
+          view.hidden = view.dataset.periodView !== button.dataset.period;
+        }
+      });
+    }
+
+    // Gráfico de línea: el punto más cercano al cursor o al dedo.
+    interface HoverPoint {
+      x: number;
+      y: number;
+      text: string;
+    }
+    for (const chart of root.querySelectorAll<HTMLElement>("[data-chart]")) {
+      const points: HoverPoint[] = JSON.parse(chart.dataset.points ?? "[]");
+      const marker = chart.querySelector<HTMLElement>("[data-marker]");
+      const readout = chart.closest("section")?.querySelector<HTMLElement>("[data-readout]");
+      const show = (event: PointerEvent) => {
+        if (!marker || !readout || points.length === 0) return;
+        const box = chart.getBoundingClientRect();
+        const at = (event.clientX - box.left) / box.width;
+        let best = points[0];
+        for (const point of points) {
+          if (Math.abs(point.x - at) < Math.abs(best.x - at)) best = point;
+        }
+        marker.hidden = false;
+        marker.style.setProperty("--x", String(best.x));
+        marker.style.setProperty("--y", String(best.y));
+        readout.textContent = best.text;
+      };
+      chart.addEventListener("pointermove", show);
+      chart.addEventListener("pointerdown", show);
+    }
+
+    // Productos: búsqueda y categoría juntas.
+    const search = root.querySelector<HTMLInputElement>("[data-search]");
+    const categoryButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-category]")];
+    const rows = [...root.querySelectorAll<HTMLElement>("[data-product]")];
+    const count = root.querySelector<HTMLElement>("[data-products-count]");
+    const empty = root.querySelector<HTMLElement>("[data-products-empty]");
+    let category = "";
+
+    const applyFilter = () => {
+      const query = search?.value ?? "";
+      let shown = 0;
+      for (const row of rows) {
+        const visible =
+          (!category || row.dataset.cat === category) &&
+          matchesQuery(row.dataset.text ?? "", query);
+        row.hidden = !visible;
+        if (visible) shown++;
+      }
+      if (count) count.textContent = `${shown} de ${rows.length} productos`;
+      if (empty) empty.hidden = shown > 0;
+    };
+
+    search?.addEventListener("input", applyFilter);
+    for (const button of categoryButtons) {
+      button.addEventListener("click", () => {
+        category = button.dataset.category ?? "";
+        for (const other of categoryButtons) {
+          other.setAttribute("aria-pressed", String(other === button));
+        }
+        applyFilter();
+      });
+    }
+
+    // Clientes: búsqueda, filtro de deuda y pagos simulados.
+    const clientRows = [...root.querySelectorAll<HTMLElement>("[data-client-row]")];
+    const clientSearch = root.querySelector<HTMLInputElement>("[data-client-search]");
+    const debtButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-debt-filter]")];
+    const clientCount = root.querySelector<HTMLElement>("[data-clients-count]");
+    const clientEmpty = root.querySelector<HTMLElement>("[data-clients-empty]");
+    const debtTotalEl = root.querySelector<HTMLElement>("[data-debt-total]");
+    const debtorsEl = root.querySelector<HTMLElement>("[data-debtors]");
+    const payStatus = root.querySelector<HTMLElement>("[data-pay-status]");
+    const clientsReset = root.querySelector<HTMLButtonElement>("[data-clients-reset]");
+    let onlyDebt = false;
+
+    const balanceOf = (row: HTMLElement) => Number(row.dataset.balance ?? 0);
+
+    const applyClients = () => {
+      const query = clientSearch?.value ?? "";
+      let shown = 0;
+      for (const row of clientRows) {
+        const visible =
+          (!onlyDebt || balanceOf(row) > 0) && matchesQuery(row.dataset.text ?? "", query);
+        row.hidden = !visible;
+        if (visible) shown++;
+      }
+      if (clientCount) clientCount.textContent = `${shown} de ${clientRows.length} clientes`;
+      if (clientEmpty) clientEmpty.hidden = shown > 0;
+    };
+
+    const setBalance = (row: HTMLElement, balance: number) => {
+      row.dataset.balance = String(balance);
+      const label = row.querySelector<HTMLElement>("[data-balance-label]");
+      if (label) {
+        label.textContent = balance > 0 ? formatArs(balance) : "Al día";
+        label.classList.toggle("fg-badge-warn", balance > 0);
+        label.classList.toggle("fg-badge-ok", balance <= 0);
+      }
+      const pay = row.querySelector<HTMLButtonElement>("[data-pay]");
+      if (pay) pay.hidden = balance <= 0;
+    };
+
+    const refreshDebt = () => {
+      const { total, debtors } = totalDebt(clientRows.map(balanceOf));
+      if (debtTotalEl) debtTotalEl.textContent = formatArs(total);
+      if (debtorsEl) debtorsEl.textContent = String(debtors);
+    };
+
+    clientSearch?.addEventListener("input", applyClients);
+    for (const button of debtButtons) {
+      button.addEventListener("click", () => {
+        onlyDebt = button.dataset.debtFilter === "debt";
+        for (const other of debtButtons) {
+          other.setAttribute("aria-pressed", String(other === button));
+        }
+        applyClients();
+      });
+    }
+
+    for (const row of clientRows) {
+      row.querySelector<HTMLButtonElement>("[data-pay]")?.addEventListener("click", () => {
+        const amount = balanceOf(row);
+        setBalance(row, 0);
+        refreshDebt();
+        applyClients();
+        if (payStatus) {
+          payStatus.textContent = `Registramos un pago de ${formatArs(amount)} de ${row.dataset.name}. Su cuenta corriente quedó al día. Es una simulación.`;
+          // El botón desaparece: el foco pasa al aviso para no perderse.
+          payStatus.focus();
+        }
+        if (clientsReset) clientsReset.hidden = false;
+      });
+    }
+
+    clientsReset?.addEventListener("click", () => {
+      for (const row of clientRows) setBalance(row, Number(row.dataset.initial ?? 0));
+      refreshDebt();
+      applyClients();
+      if (payStatus) payStatus.textContent = "";
+      clientsReset.hidden = true;
+      clientSearch?.focus();
+    });
+
+    // Ventas y Facturación: la factura es de mentira y vive solo en la página.
+    const status = root.querySelector<HTMLElement>("[data-sales-status]");
+    const reset = root.querySelector<HTMLButtonElement>("[data-sales-reset]");
+    const gotoFiscal = root.querySelector<HTMLButtonElement>("[data-goto-fiscal]");
+    const idleStatus = status?.textContent?.trim() ?? "";
+    const invoiceButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-invoice]")];
+    const fiscalRows = [...root.querySelectorAll<HTMLTableRowElement>("[data-fiscal-row]")];
+    let sequence = LAST_INVOICE_NUMBER;
+
+    const fiscalOf = (button: HTMLButtonElement) =>
+      button.closest("td")?.querySelector<HTMLElement>("[data-fiscal]") ?? null;
+    const labelOf = (button: HTMLButtonElement) => button.querySelector("span");
+
+    for (const button of invoiceButtons) {
+      button.addEventListener("click", () => {
+        if (button.getAttribute("aria-disabled") === "true") return;
+        const fiscal = fiscalOf(button);
+        const row = fiscalRows[Number(button.dataset.index)];
+        if (!fiscal || !row) return;
+
+        sequence += 1;
+        const invoice = simulateInvoice(sequence);
+        fiscal.textContent = invoice.label;
+        fiscal.classList.remove("fg-badge-none");
+        fiscal.classList.add("fg-badge-afip");
+        button.setAttribute("aria-disabled", "true");
+        const label = labelOf(button);
+        if (label) label.textContent = "Facturada";
+
+        const labelCell = row.querySelector("[data-fiscal-label]");
+        const caeCell = row.querySelector("[data-fiscal-cae]");
+        if (labelCell) labelCell.textContent = invoice.label;
+        if (caeCell) caeCell.textContent = invoice.cae;
+        row.hidden = false;
+
+        if (status) {
+          status.textContent = `Emitimos la ${invoice.label} para ${button.dataset.client}. CAE de prueba ${invoice.cae}. Es una simulación, sin validez fiscal.`;
+        }
+        if (gotoFiscal) gotoFiscal.hidden = false;
+        if (reset) reset.hidden = false;
+      });
+    }
+
+    gotoFiscal?.addEventListener("click", () => selectTab(tabs.length - 1, { focus: true }));
+
+    reset?.addEventListener("click", () => {
+      sequence = LAST_INVOICE_NUMBER;
+      for (const button of invoiceButtons) {
+        const fiscal = fiscalOf(button);
+        if (fiscal) {
+          fiscal.textContent = fiscal.dataset.empty ?? "";
+          fiscal.classList.remove("fg-badge-afip");
+          fiscal.classList.add("fg-badge-none");
+        }
+        button.removeAttribute("aria-disabled");
+        const label = labelOf(button);
+        if (label) label.textContent = "Facturar";
+        const row = fiscalRows[Number(button.dataset.index)];
+        if (row) row.hidden = true;
+      }
+      if (status) status.textContent = idleStatus;
+      if (gotoFiscal) gotoFiscal.hidden = true;
+      reset.hidden = true;
+      invoiceButtons[0]?.focus();
+    });
+  }
+</script>

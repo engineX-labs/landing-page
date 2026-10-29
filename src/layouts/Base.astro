@@ -6,9 +6,11 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description: string;
+  /** Páginas que no tienen que aparecer en buscadores (la demo con datos ficticios). */
+  noindex?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 const ogImage = Astro.site
   ? new URL("/brand/enginex-app-icon-512.png", Astro.site).href
   : undefined;
@@ -25,6 +27,7 @@ const jsonLd = serializeJsonLd(
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#0e1116" />
     <meta name="color-scheme" content="dark" />
     {canonical && <link rel="canonical" href={canonical} />}
@@ -53,7 +56,8 @@ const jsonLd = serializeJsonLd(
     <meta property="og:description" content={description} />
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary" />
-    <script type="application/ld+json" is:inline set:html={jsonLd} />
+    {!noindex && <script type="application/ld+json" is:inline set:html={jsonLd} />}
+    <slot name="head" />
     <!-- El momento del hero: se esconde antes de pintar solo si hay JS; si Motion no llega, se muestra igual. -->
     <script is:inline>
       document.documentElement.classList.add("hero-pending");
