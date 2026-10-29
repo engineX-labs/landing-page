@@ -135,6 +135,35 @@ test.describe("hero", () => {
     await expect(page.locator("#inicio")).not.toContainText("Probala");
   });
 
+  test("presenta a la agencia: etiqueta, titular y tipos de trabajo", async ({ page }) => {
+    await page.goto("/");
+    const hero = page.locator("#inicio");
+    await expect(hero.locator(".hero-eyebrow")).toHaveText("Agencia de desarrollo de software");
+    await expect(page.locator("#hero-title")).toHaveText(
+      "Software a medida para negocios que quieren crecer",
+    );
+    await expect(hero.locator(".hero-chip")).toHaveCount(4);
+    await expect(hero.locator(".hero-visual .device-browser img")).toHaveCount(1);
+    await expect(hero.locator(".hero-visual .device-phone img")).toHaveCount(1);
+  });
+
+  test("los brillos del fondo se pausan cuando el hero sale de pantalla", async ({ page }) => {
+    await page.goto("/");
+    const bg = page.locator("[data-hero-bg]");
+    await expect(bg).not.toHaveAttribute("data-paused", "");
+    await page.locator("#contacto").scrollIntoViewIfNeeded();
+    await expect(bg).toHaveAttribute("data-paused", "");
+    await expect(page.locator(".hero-glow").first()).toHaveCSS("animation-play-state", "paused");
+  });
+
+  test("el header es de vidrio", async ({ page }) => {
+    await page.goto("/");
+    const filter = await page
+      .locator("header.site-header")
+      .evaluate((el) => getComputedStyle(el).backdropFilter);
+    expect(filter).toContain("blur(16px)");
+  });
+
   test("las señales de confianza están debajo de los botones", async ({ page }) => {
     await page.goto("/");
     const trust = page.locator("#inicio .hero-trust li");
@@ -149,7 +178,7 @@ test.describe("sin JavaScript", () => {
   test("el titular se ve igual: la animación es CSS", async ({ page }) => {
     await page.goto("/");
     const title = page.locator("#hero-title");
-    await expect(title).toHaveText("Sistemas de gestión y facturación ARCA para tu negocio");
+    await expect(title).toHaveText("Software a medida para negocios que quieren crecer");
     await expect(title).toHaveCSS("opacity", "1");
     await expect(title).toHaveCSS("transform", "none");
   });
@@ -184,6 +213,24 @@ test("preguntas frecuentes: se abren con teclado y están en el JSON-LD", async 
   expect(faq.mainEntity[0].name).toBe(await summary.textContent().then((t) => t?.trim()));
 });
 
+test("proyectos: cada tarjeta muestra su vista de compu y de celular", async ({ page }) => {
+  await page.goto("/#proyectos");
+  const cards = page.locator("#proyectos .ex-card");
+  const count = await cards.count();
+  expect(count).toBe(3);
+  for (let i = 0; i < count; i++) {
+    const card = cards.nth(i);
+    await expect(card.locator(".device-browser img")).toHaveCount(1);
+    await expect(card.locator(".device-phone img")).toHaveCount(1);
+    // La descripción va en la vista de compu; la del celular es decorativa.
+    await expect(card.locator(".device-browser img")).toHaveAttribute(
+      "alt",
+      /compu y en el celular/,
+    );
+    await expect(card.locator(".device-phone img")).toHaveAttribute("alt", "");
+  }
+});
+
 test("proyectos: la etiqueta avisa qué pasa al tocar cada tarjeta", async ({ page }) => {
   await page.goto("/");
   const cards = page.locator("#proyectos .ex-card");
@@ -203,7 +250,7 @@ test("producción: solo proyectos reales, sin los borradores", async ({ page }) 
     name: /Reservo, gestión de reservas para alojamientos/,
   });
   await expect(reservo).toHaveAttribute("href", "https://www.mireservo.online");
-  await expect(reservo.locator("img")).toHaveAttribute("alt", /calendario de reservas/);
+  await expect(reservo.locator("img").first()).toHaveAttribute("alt", /calendario de reservas/);
 });
 
 test("la granja: tarjeta con link al sitio en punycode y logo en la barra de clientes", async ({
@@ -212,7 +259,7 @@ test("la granja: tarjeta con link al sitio en punycode y logo en la barra de cli
   await page.goto("/");
   const granja = page.getByRole("link", { name: /Cabañas La Granja, landing para un complejo/ });
   await expect(granja).toHaveAttribute("href", "https://www.xn--cabaaslagranja-tnb.com");
-  await expect(granja.locator("img")).toHaveAttribute("alt", /pileta/);
+  await expect(granja.locator("img").first()).toHaveAttribute("alt", /pileta/);
 
   const clientes = page.getByRole("region", { name: "Confían en nosotros" });
   await expect(clientes.getByRole("img", { name: "Cabañas La Granja" })).toBeVisible();
@@ -236,7 +283,13 @@ test.describe("movimiento reducido", () => {
     await page.goto("/#proyectos");
     const card = page.locator("#proyectos .ex-card-link").first();
     await card.hover();
-    await expect(card.locator(".ex-card-shot")).toHaveCSS("transform", "none");
+    await expect(card.locator(".device-browser")).toHaveCSS("transform", "none");
+    await expect(card.locator(".device-phone")).toHaveCSS("transform", "none");
+  });
+
+  test("los brillos del fondo del hero quedan quietos", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".hero-glow").first()).toHaveCSS("animation-name", "none");
   });
 
   test("el hero entra solo con opacidad, sin desplazamiento", async ({ page }) => {
