@@ -1,5 +1,7 @@
 ---
 import { steps } from "../lib/content";
+import { whatsapp } from "../lib/site";
+import Button from "./Button.astro";
 ---
 
 <section
@@ -22,5 +24,10 @@ import { steps } from "../lib/content";
         ))
       }
     </ol>
+    <div>
+      <Button variant="secondary" href={whatsapp.chatUrl} target="_blank" rel="noopener" arrow>
+        Empezá por el paso 1: escribinos<span class="sr-only"> por WhatsApp (se abre en otra pestaña)</span>
+      </Button>
+    </div>
   </div>
 </section>
