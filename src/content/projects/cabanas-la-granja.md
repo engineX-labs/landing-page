@@ -7,5 +7,5 @@ image: ../../assets/projects/cabanas-la-granja.png
 imageAlt: Página de inicio de Cabañas La Granja con la pileta, las cabañas y los botones para reservar por WhatsApp
 href: https://www.xn--cabaaslagranja-tnb.com
 cta: Ver sitio
-order: 2
+order: 3
 ---

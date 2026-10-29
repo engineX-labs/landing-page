@@ -50,7 +50,7 @@ Cabañas La Granja y la landing que les hicimos como proyecto del portfolio.
   imageAlt: Página de inicio de Cabañas La Granja con ...
   href: https://www.xn--cabaaslagranja-tnb.com
   cta: Ver sitio
-  order: 2
+  order: 3
   ```
   - `href` en punycode: es lo que valida `z.url()` y lo que funciona en cualquier navegador (los
     navegadores igual muestran `cabañaslagranja.com` en la barra). En el texto visible, si aparece el

@@ -13,7 +13,7 @@ test.describe("modal en la home", () => {
     page.on("request", (req) => requests.push(req.url()));
     await page.goto("/");
 
-    await expect(page.locator("#proyectos .ex-card")).toHaveCount(2);
+    await expect(page.locator("#proyectos .ex-card")).toHaveCount(3);
     await expect(page.locator(demo)).toHaveCount(0);
     await expect(page.locator("[data-demo-frame]")).not.toHaveAttribute("src", /.+/);
     expect(requests.some((url) => url.includes(DEMO))).toBe(false);
