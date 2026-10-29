@@ -80,9 +80,9 @@ export const clients: {
   },
   {
     name: "Freggiaro Frenos y Embragues",
-    logo: "/clientes/freggiaro.png",
+    logo: "/clientes/freggiaro-mono.png",
     width: 640,
     height: 210,
-    tone: "color",
+    tone: "mono",
   },
 ];

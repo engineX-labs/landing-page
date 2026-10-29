@@ -102,9 +102,10 @@ Cabañas La Granja y la landing que les hicimos como proyecto del portfolio.
 
 ## Ampliación (pedida antes de entregar)
 
-- Se suma **Freggiaro Frenos y Embragues** a la barra: `public/clientes/freggiaro.png` (640×210,
-  transparente).
-- Su logo es una placa negra, roja y amarilla: en un solo tono quedaría como una mancha. Decisión:
-  cada cliente en `clients` lleva `tone`: `mono` (Cabañas La Granja, `ink-muted` con máscara) o `color`
-  (Freggiaro, colores originales con `<img>`).
-- Sin link en el logo, igual que el anterior. No se agrega proyecto al portfolio de este cliente.
+- Se suma **Freggiaro Frenos y Embragues** a la barra, sin link y sin proyecto en el portfolio.
+- Su logo original es una placa negra, roja y amarilla: con la máscara directa quedaría como una
+  mancha. Primero se mostró a color; después se pidió en un solo tono, igual que Cabañas La Granja.
+- Para eso se derivó `public/clientes/freggiaro-mono.png` (blanco con alfa según la luminosidad del
+  original: letras amarillas y blancas opacas, placa negra y rojo transparentes). El original a color
+  quedó solo en el historial de git (`44cd48a`).
+- `clients` conserva el campo `tone` (`mono` | `color`) por si un próximo logo no admite un solo tono.
