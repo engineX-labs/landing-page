@@ -1,0 +1,135 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  /** Captura de escritorio, 16:10 (1440×900). */
+  desktop: ImageMetadata;
+  /** Captura de celular, 390×844 a 2x. */
+  mobile: ImageMetadata;
+  /** Describe las dos vistas juntas. Vacío si el mockup es decorativo. */
+  alt?: string;
+  /** `hero`: grande y con carga inmediata. `card`: chico y con carga diferida. */
+  size?: "hero" | "card";
+  class?: string;
+}
+
+const { desktop, mobile, alt = "", size = "card", class: className } = Astro.props;
+const hero = size === "hero";
+const loading = hero ? "eager" : "lazy";
+---
+
+<!--
+  Mockup de un proyecto: la vista de escritorio en un navegador y la de celular encima, abajo a la
+  derecha. La descripción va en la imagen de escritorio; la del celular la repite, así que es "".
+-->
+<div class:list={["device", `device-${size}`, className]}>
+  <div class="device-browser">
+    <div class="device-bar" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <Image
+      src={desktop}
+      alt={alt}
+      widths={hero ? [560, 840, 1120] : [400, 640, 880]}
+      sizes={hero ? "(min-width: 1024px) 480px, 80vw" : "(min-width: 1024px) 300px, (min-width: 640px) 40vw, 78vw"}
+      format="webp"
+      loading={loading}
+    />
+  </div>
+  <div class="device-phone" aria-hidden="true">
+    <Image
+      src={mobile}
+      alt=""
+      widths={hero ? [180, 280, 360] : [120, 200, 280]}
+      sizes={hero ? "(min-width: 1024px) 150px, 26vw" : "(min-width: 1024px) 90px, 22vw"}
+      format="webp"
+      loading={loading}
+    />
+  </div>
+</div>
+
+<style>
+  /*
+   * El navegador ocupa el 86 % del ancho; el celular, el 27 %, apoyado abajo a la derecha.
+   * El alto lo da el contenido: el celular baja un poco más que el navegador.
+   */
+  .device {
+    --phone-w: 27%;
+    position: relative;
+    width: 100%;
+    padding-bottom: 12%;
+  }
+  .device-browser {
+    width: 86%;
+    overflow: hidden;
+    background: var(--surface-raised);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .device-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 18px;
+    padding-inline: 10px;
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .device-bar span {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--line-strong);
+  }
+  .device-browser :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top;
+  }
+  .device-phone {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: var(--phone-w);
+    aspect-ratio: 390 / 844;
+    padding: 3px;
+    box-sizing: border-box;
+    background: var(--carbon);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+  .device-phone :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 11px;
+  }
+
+  .device-hero .device-bar {
+    height: 24px;
+    gap: 7px;
+    padding-inline: 14px;
+  }
+  .device-hero .device-bar span {
+    width: 8px;
+    height: 8px;
+  }
+  .device-hero .device-browser {
+    border-radius: var(--radius-lg);
+  }
+  .device-hero .device-phone {
+    padding: 5px;
+    border-radius: 24px;
+  }
+  .device-hero .device-phone :global(img) {
+    border-radius: 19px;
+  }
+</style>

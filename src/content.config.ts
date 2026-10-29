@@ -12,6 +12,8 @@ const projects = defineCollection({
       summary: z.string(),
       tags: z.array(z.string()).max(5).default([]),
       image: image().optional(),
+      /** Vista de celular (390×844 a 2x). Con `image`, la tarjeta muestra los dos dispositivos. */
+      mobileImage: image().optional(),
       imageAlt: z.string().optional(),
       href: z.url().optional(),
       /** Página de la demo interactiva (`/demo/...`). La tarjeta la abre en un modal. */
