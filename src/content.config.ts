@@ -20,6 +20,8 @@ const projects = defineCollection({
         .regex(/^\/[\w\-/]+$/)
         .optional(),
       cta: z.string().optional(),
+      /** Etiqueta sobre la captura: qué pasa al tocar la tarjeta ("Demo interactiva", "Sitio en vivo"). */
+      badge: z.string().optional(),
       order: z.number().default(100),
       /** Los borradores se ven en desarrollo y no salen en el build de producción. */
       draft: z.boolean().default(false),

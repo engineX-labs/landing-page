@@ -16,6 +16,7 @@ interface Props {
   /** Página de la demo: la tarjeta lleva ahí y, con JS, la abre en el modal (`DemoDialog`). */
   demo?: string;
   cta?: string;
+  badge?: string;
   class?: string;
 }
 
@@ -29,6 +30,7 @@ const {
   href: externalHref,
   demo,
   cta = "Ver caso",
+  badge,
   class: className,
 } = Astro.props;
 
@@ -48,6 +50,7 @@ const linkAttrs = href
 
 <Wrapper class:list={["ex-card", href && "ex-card-link", className]} {...linkAttrs}>
   <div class="ex-card-media">
+    {badge && <Tag text={badge} tone="accent" class="ex-card-badge" />}
     {
       image ? (
         <div class="ex-card-shot">

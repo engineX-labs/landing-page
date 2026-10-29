@@ -7,5 +7,6 @@ image: ../../assets/projects/freggiaro.png
 imageAlt: Resumen del negocio de Freggiaro con las ventas del mes, el gráfico por semana y los productos que más venden
 demo: /demo/freggiaro
 cta: Probar la demo
+badge: Demo interactiva
 order: 2
 ---

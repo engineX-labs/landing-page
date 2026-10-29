@@ -8,5 +8,6 @@ image: ../../assets/projects/reservo.png
 imageAlt: Página de inicio de Reservo con el calendario de reservas por unidad en un celular
 href: https://www.mireservo.online
 cta: Ver Reservo
+badge: Sitio en vivo
 order: 1
 ---
