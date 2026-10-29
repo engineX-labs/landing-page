@@ -2,7 +2,7 @@
 
 Landing de **engineX**, agencia de software: diseñamos y desarrollamos sistemas a medida (gestión, facturación electrónica ARCA, reservas, pagos, webs) para negocios que quieren crecer.
 
-Es una sola página con hero, servicios, proyectos, cómo trabajamos y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño y **Motion** para la única animación de entrada, la del hero.
+Es una sola página con hero, clientes, servicios, proyectos, cómo trabajamos, preguntas frecuentes y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño. La única animación de entrada, la del hero, es CSS: la home no carga JavaScript para animar.
 
 ## Requisitos
 
@@ -87,7 +87,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
   - El envío completo del formulario (guarda el mensaje y arma el link de WhatsApp).
   - Los errores conectados por `aria-describedby`.
   - El foco visible con teclado.
-  - Un solo `display-xl` y un solo botón primario en el hero.
+  - Un solo `h1` (como máximo un `display-xl`) y un solo botón primario en el hero.
   - Que no salgan los borradores.
   - El movimiento reducido.
   - Móvil sin scroll horizontal y con el menú funcionando.
@@ -99,7 +99,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **Oscuro, preciso, con una chispa.** Solo tema Carbón (el claro es para documentos). El naranja `ignite` aparece únicamente donde está la acción: botón primario, flecha, foco y hover de las tarjetas.
 - **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Reservo linkea a su sitio. Freggiaro abre una demo interactiva en un modal.
 - **Demos que no pesan.** La demo de Freggiaro es una página propia (`/demo/freggiaro`, `noindex`, fuera del sitemap). La home la muestra en un `<dialog>` con un `<iframe>` que se carga recién al abrirlo, así que la landing no paga su peso. Replica la interfaz real del sistema (sus colores y su tipografía, acotados a la demo) con datos ficticios y facturación simulada: no hay backend ni conexión con ARCA. `/#demo-freggiaro` abre el modal y `/demo/freggiaro` sirve como link para compartir.
-- **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero); `prefers-reduced-motion` quita escalas y desplazamientos.
+- **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero, con `@keyframes ex-rise` en CSS); `prefers-reduced-motion` quita escalas y desplazamientos. La barra de WhatsApp en móvil aparece al pasar el hero: es un control que cambia de estado, no contenido que se revela al scrollear.
+- **WhatsApp primero.** Es el canal que más usa una pyme: el botón primario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
 - **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` corre en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
 - **SEO y GEO.** `robots.txt` permite todo menos `/api/`, también a los crawlers de IA (búsqueda y entrenamiento). El sitemap, el canonical, Open Graph, el JSON-LD (`Organization` + `WebSite`) y `llms.txt` salen del dominio configurado.
@@ -121,7 +122,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   ├── assets/freggiaro/    # emblema de Freggiaro para la demo
 │   ├── components/
 │   │   ├── Logo, Button, Tag, ProjectCard, TextField, Arrow   # componentes del sistema
-│   │   ├── Header, Hero, Services, Projects, Process, ContactForm, Footer  # secciones
+│   │   ├── Header, Hero, Clients, Services, Projects, Process, Faq, ContactForm, Footer  # secciones
+│   │   ├── MobileWhatsappBar.astro # botón fijo de WhatsApp en móvil
 │   │   ├── DemoDialog.astro # modal que abre una demo en un iframe
 │   │   ├── FreggiaroDemo.astro # la demo de Freggiaro (réplica de su interfaz)
 │   │   └── logo-paths.ts    # paths oficiales del logo (no redibujar)

@@ -58,7 +58,9 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   `src/lib/contact-store.ts`: almacenamiento (`FileContactStore`, `RedisContactStore`) y límite por IP.
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
-- `src/lib/content.ts`: copy de servicios y proceso, compartido con `/llms.txt`.
+- `src/lib/content.ts`: copy del hero, servicios, proceso y preguntas frecuentes, compartido con
+  `/llms.txt` y el JSON-LD (`FAQPage`). `PRICE_FROM` es el precio "desde" de la pregunta del precio:
+  vacío, la respuesta no da cifra.
 - `src/content/projects/*.md`: proyectos del portfolio (Reservo y Freggiaro). `draft: true` se ve
   en dev y no sale en producción. `demo: /demo/<slug>` hace que la tarjeta abra esa página en el
   modal (`DemoDialog`) en lugar de linkear afuera.
@@ -78,7 +80,9 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
 - Separar con bordes `line`, sin sombras, vidrio ni degradados.
 - Movimiento: solo `transform` y `opacity`, nada de UI por encima de 300ms, nunca `ease-in`, hover
   solo con `(hover: hover) and (pointer: fine)`, sin animaciones de entrada al hacer scroll. El
-  único momento es el hero. `prefers-reduced-motion` quita escalas y desplazamientos.
+  único momento es el hero (CSS, `@keyframes ex-rise`; no hay librería de animación).
+  `prefers-reduced-motion` quita escalas y desplazamientos. Excepción aprobada: la barra de WhatsApp
+  en móvil (`MobileWhatsappBar`) aparece al pasar el hero, porque es un control y no contenido.
 - Foco: 2px sólido `focus-ring` con 2px de separación en todo lo clickeable.
 - Copy: voseo, primera persona del plural, sentence case, sin emojis ni exclamaciones en
   titulares. La marca se escribe siempre "engineX".
