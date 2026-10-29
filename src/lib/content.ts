@@ -58,3 +58,13 @@ export const steps = [
     text: "Lo instalamos, te enseñamos a usarlo y seguimos cerca para ajustar lo que haga falta.",
   },
 ] as const;
+
+/** Clientes de la barra "Confían en nosotros". El logo es un PNG transparente en `public/clientes/`. */
+export const clients = [
+  {
+    name: "Cabañas La Granja",
+    logo: "/clientes/cabanas-la-granja.png",
+    width: 655,
+    height: 213,
+  },
+];

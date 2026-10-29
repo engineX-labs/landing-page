@@ -114,6 +114,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 ├── plans/                   # planes aprobados de cada feature
 ├── public/
 │   ├── brand/               # los 11 logos oficiales (favicon, app icon, mono…)
+│   ├── clientes/            # logos PNG transparentes de la barra "Confían en nosotros"
 │   └── fonts/               # Plus Jakarta Sans y JetBrains Mono (woff2)
 ├── src/
 │   ├── assets/projects/     # capturas de proyectos (se optimizan a WebP en el build)
@@ -171,6 +172,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
   ---
   ```
 
+- **Agregar un cliente a la barra:** copiá su logo (PNG transparente) a `public/clientes/` y sumá una entrada a `clients` en `src/lib/content.ts` con `name`, `logo`, `width` y `height`. Se pinta en un solo tono del tema.
 - **Copy de servicios y del proceso:** `src/lib/content.ts`, que también alimenta `/llms.txt`.
 - **Resto del copy:** en cada sección de `src/components/`. Header y footer toman la navegación de `src/lib/site.ts`.
 - **Colores, espaciado, radios y movimiento:** solo en `src/styles/tokens.css`, con los valores del sistema de diseño.
