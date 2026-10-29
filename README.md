@@ -100,6 +100,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Reservo linkea a su sitio. Freggiaro abre una demo interactiva en un modal.
 - **Demos que no pesan.** La demo de Freggiaro es una página propia (`/demo/freggiaro`, `noindex`, fuera del sitemap). La home la muestra en un `<dialog>` con un `<iframe>` que se carga recién al abrirlo, así que la landing no paga su peso. Replica la interfaz real del sistema (sus colores y su tipografía, acotados a la demo) con datos ficticios y facturación simulada: no hay backend ni conexión con ARCA. `/#demo-freggiaro` abre el modal y `/demo/freggiaro` sirve como link para compartir.
 - **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero, con `@keyframes ex-rise` en CSS); `prefers-reduced-motion` quita escalas y desplazamientos. La barra de WhatsApp en móvil aparece al pasar el hero: es un control que cambia de estado, no contenido que se revela al scrollear.
+- **Una agencia, no un producto.** El hero presenta a engineX ("Software a medida para negocios que quieren crecer") con un mockup de sistemas que hicimos y chips de vidrio con los tipos de trabajo. Cada proyecto se muestra en compu y en celular (`DeviceShowcase`).
+- **Vidrio y brillo, con medida.** El vidrio va solo donde flota sobre algo con color y los brillos son de fondo; las animaciones de fondo son lentas, se pausan fuera de pantalla y respetan el movimiento reducido.
 - **WhatsApp primero.** Es el canal que más usa una pyme: el botón primario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
 - **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` corre en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
@@ -164,7 +166,8 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
   client: "Alojamientos turísticos: cabañas, departamentos y suites"
   summary: Manejan todas sus reservas desde cualquier dispositivo.  # resultado para el cliente, no la tecnología
   tags: [React, FastAPI, Python]       # hasta 5, con la grafía oficial
-  image: ../../assets/projects/<captura>.png   # opcional, 16:10; sin imagen se muestra el isotipo
+  image: ../../assets/projects/<slug>-desktop.jpg   # opcional, 16:10 (1440×900); sin imagen, el isotipo
+  mobileImage: ../../assets/projects/<slug>-mobile.jpg   # opcional, 390×844 a 2x: con las dos, mockup de compu y celular
   imageAlt: Descripción de la captura
   href: https://...                    # opcional: la tarjeta entera linkea ahí
   demo: /demo/<slug>                   # opcional, en lugar de href: la tarjeta abre esa página en el modal
