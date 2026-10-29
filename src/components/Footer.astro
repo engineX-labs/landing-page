@@ -18,7 +18,12 @@ const year = new Date().getFullYear();
         {
           nav.map((item) => (
             <li>
-              <a href={item.href} class="footer-link small">
+              <a
+                href={item.href}
+                class="footer-link small"
+                data-opens-demo={"demo" in item ? "" : undefined}
+                aria-haspopup={"demo" in item ? "dialog" : undefined}
+              >
                 {item.label}
               </a>
             </li>
