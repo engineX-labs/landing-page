@@ -1,0 +1,81 @@
+---
+import Button from "../../components/Button.astro";
+import FreggiaroDemo from "../../components/FreggiaroDemo.astro";
+import Logo from "../../components/Logo.astro";
+import Tag from "../../components/Tag.astro";
+import Base from "../../layouts/Base.astro";
+
+// Se abre sola (link para compartir) o dentro del modal de la home con `?embed`.
+---
+
+<Base
+  title="Demo de Freggiaro · engineX"
+  description="Probá Freggiaro, el sistema de gestión con stock, clientes, ventas y facturación ARCA que hicimos en engineX. Datos ficticios."
+  noindex
+>
+  <script is:inline slot="head">
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.documentElement.classList.add("demo-embed");
+    }
+  </script>
+
+  <div class="demo-page">
+    <header class="demo-bar">
+      <a href="/" class="-m-2 rounded-md p-2" aria-label="engineX, volver al inicio">
+        <Logo height={24} decorative />
+      </a>
+      <div class="flex min-w-0 items-center gap-4">
+        <Tag text="Demo · datos ficticios" tone="accent" class="hidden sm:inline-flex" />
+        <Button variant="secondary" href="/#contacto" arrow>Quiero algo así</Button>
+      </div>
+    </header>
+    <main id="contenido" class="demo-app" tabindex="-1">
+      <h1 class="sr-only">Demo de Freggiaro</h1>
+      <FreggiaroDemo />
+    </main>
+  </div>
+</Base>
+
+<style>
+  :global(html),
+  :global(body) {
+    height: 100%;
+  }
+  .demo-page {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+  .demo-bar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .demo-app {
+    flex: 1;
+    min-height: 0;
+  }
+  .demo-app:focus {
+    outline: none;
+  }
+  /* Dentro del modal, el encabezado lo pone la home. */
+  :global(html.demo-embed) .demo-bar {
+    display: none;
+  }
+</style>
+
+<script>
+  // Dentro del modal, Esc no le llega al <dialog> de la home: se lo avisamos.
+  if (window.parent !== window) {
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        window.parent.postMessage({ type: "freggiaro-demo:close" }, window.location.origin);
+      }
+    });
+  }
+</script>

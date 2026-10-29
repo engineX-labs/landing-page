@@ -1,0 +1,231 @@
+---
+import XIcon from "@lucide/astro/icons/x";
+import Button from "./Button.astro";
+import Tag from "./Tag.astro";
+
+interface Props {
+  /** Página de la demo. Se carga con `?embed` recién cuando alguien abre el modal. */
+  src: string;
+  title: string;
+}
+
+const { src, title } = Astro.props;
+---
+
+<dialog class="demo-dialog" aria-labelledby="demo-dialog-title" data-demo-dialog>
+  <div class="demo-dialog-box">
+    <header class="demo-dialog-head">
+      <div class="flex min-w-0 items-center gap-3">
+        <h2 id="demo-dialog-title" class="heading-3 m-0 truncate">{title}</h2>
+        <Tag text="Datos ficticios" tone="accent" class="hidden sm:inline-flex" />
+      </div>
+      <button type="button" class="demo-dialog-close" aria-label="Cerrar demo" data-demo-close>
+        <XIcon size={22} aria-hidden="true" />
+      </button>
+    </header>
+
+    <div class="demo-dialog-body">
+      <p class="demo-dialog-loading small" data-demo-loading>
+        <span class="ex-btn-spinner" aria-hidden="true"></span>
+        Cargando la demo…
+      </p>
+      <iframe title={`${title}, interactiva`} data-demo-frame data-src={`${src}?embed`}></iframe>
+    </div>
+
+    <footer class="demo-dialog-foot">
+      <p class="small m-0 hidden text-ink-muted md:block">
+        Simulación: no se conecta con ARCA y los comprobantes no tienen validez fiscal.
+        <a href={src} target="_blank" rel="noopener" class="text-ink"
+          >Abrir en otra pestaña<span class="sr-only"> (se abre en otra pestaña)</span></a
+        >
+      </p>
+      <Button variant="secondary" href="#contacto" arrow data-demo-contact>Quiero algo así</Button>
+    </footer>
+  </div>
+</dialog>
+
+<style>
+  .demo-dialog {
+    width: min(1200px, 100vw - 64px);
+    height: min(820px, 100dvh - 64px);
+    max-width: none;
+    max-height: none;
+    /* El reset de Tailwind saca el margin: auto que centra al <dialog>. */
+    margin: auto;
+    padding: 0;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+  .demo-dialog[open] {
+    animation: ex-pop var(--duration-base) var(--ease-out);
+    transform-origin: center;
+  }
+  .demo-dialog::backdrop {
+    background: color-mix(in srgb, var(--surface-inset) 85%, transparent);
+    animation: ex-fade var(--duration-base) var(--ease-out);
+  }
+  /* En móvil la demo necesita toda la pantalla. */
+  @media (max-width: 767px) {
+    .demo-dialog {
+      width: 100vw;
+      height: 100dvh;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
+  .demo-dialog-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .demo-dialog-head,
+  .demo-dialog-foot {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+  }
+  .demo-dialog-head {
+    border-bottom: 1px solid var(--line);
+  }
+  .demo-dialog-foot {
+    justify-content: flex-end;
+    border-top: 1px solid var(--line);
+  }
+  @media (min-width: 768px) {
+    .demo-dialog-head,
+    .demo-dialog-foot {
+      padding-inline: var(--space-6);
+    }
+    .demo-dialog-foot {
+      justify-content: space-between;
+    }
+  }
+  .demo-dialog-close {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+  .demo-dialog-close:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .demo-dialog-close:hover {
+      border-color: var(--ink);
+    }
+  }
+
+  .demo-dialog-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: var(--surface-inset);
+  }
+  .demo-dialog-body iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .demo-dialog-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    margin: 0;
+    color: var(--ink-muted);
+  }
+  .demo-dialog-loading[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-dialog[open] {
+      animation-name: ex-fade;
+    }
+    .demo-dialog-close:active {
+      transform: none;
+    }
+  }
+
+  :global(html.demo-dialog-open) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("[data-demo-dialog]");
+  const frame = dialog?.querySelector<HTMLIFrameElement>("[data-demo-frame]");
+  const loading = dialog?.querySelector<HTMLElement>("[data-demo-loading]");
+  const HASH = "#demo-freggiaro";
+
+  if (dialog && frame) {
+    let trigger: HTMLElement | null = null;
+
+    const open = (from: HTMLElement | null) => {
+      trigger = from;
+      // El iframe no pide nada hasta acá: la home no paga el peso de la demo.
+      if (!frame.getAttribute("src") && frame.dataset.src) frame.src = frame.dataset.src;
+      if (!dialog.open) dialog.showModal();
+      document.documentElement.classList.add("demo-dialog-open");
+    };
+
+    frame.addEventListener("load", () => {
+      if (frame.getAttribute("src") && loading) loading.hidden = true;
+    });
+
+    dialog.addEventListener("close", () => {
+      document.documentElement.classList.remove("demo-dialog-open");
+      if (location.hash === HASH) history.replaceState(null, "", location.pathname + location.search);
+      if (trigger?.isConnected) trigger.focus();
+    });
+
+    for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-opens-demo]")) {
+      link.addEventListener("click", (event) => {
+        // Ctrl/Cmd/Shift o clic del medio: que abra la página en otra pestaña, como un link.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        event.preventDefault();
+        open(link);
+      });
+    }
+
+    dialog.querySelector("[data-demo-close]")?.addEventListener("click", () => dialog.close());
+    // Ir al formulario: se cierra el modal y el ancla hace el resto.
+    dialog.querySelector("[data-demo-contact]")?.addEventListener("click", () => dialog.close());
+    // Clic en el fondo (fuera de la caja) cierra.
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    // Esc dentro del iframe no le llega al <dialog>: la demo avisa por mensaje.
+    window.addEventListener("message", (event) => {
+      if (event.origin === location.origin && event.data?.type === "freggiaro-demo:close") {
+        dialog.close();
+      }
+    });
+
+    // `/#demo-freggiaro` abre el modal: sirve para mandar el link.
+    const openFromHash = () => {
+      if (location.hash === HASH) open(document.querySelector<HTMLElement>("[data-opens-demo]"));
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+  }
+</script>

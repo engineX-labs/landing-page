@@ -14,6 +14,11 @@ const projects = defineCollection({
       image: image().optional(),
       imageAlt: z.string().optional(),
       href: z.url().optional(),
+      /** Página de la demo interactiva (`/demo/...`). La tarjeta la abre en un modal. */
+      demo: z
+        .string()
+        .regex(/^\/[\w\-/]+$/)
+        .optional(),
       cta: z.string().optional(),
       order: z.number().default(100),
       /** Los borradores se ven en desarrollo y no salen en el build de producción. */

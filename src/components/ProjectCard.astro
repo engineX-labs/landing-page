@@ -13,6 +13,8 @@ interface Props {
   image?: ImageMetadata;
   imageAlt?: string;
   href?: string;
+  /** Página de la demo: la tarjeta lleva ahí y, con JS, la abre en el modal (`DemoDialog`). */
+  demo?: string;
   cta?: string;
   class?: string;
 }
@@ -24,15 +26,23 @@ const {
   tags = [],
   image,
   imageAlt = "",
-  href,
+  href: externalHref,
+  demo,
   cta = "Ver caso",
   class: className,
 } = Astro.props;
 
+const href = demo ?? externalHref;
 const external = href ? /^https?:\/\//.test(href) : false;
 const Wrapper = href ? "a" : "article";
 const linkAttrs = href
-  ? { href, target: external ? "_blank" : undefined, rel: external ? "noopener" : undefined }
+  ? {
+      href,
+      target: external ? "_blank" : undefined,
+      rel: external ? "noopener" : undefined,
+      "data-opens-demo": demo ? "" : undefined,
+      "aria-haspopup": demo ? ("dialog" as const) : undefined,
+    }
   : {};
 ---
 

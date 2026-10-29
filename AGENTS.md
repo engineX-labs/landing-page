@@ -59,8 +59,14 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
 - `src/lib/content.ts`: copy de servicios y proceso, compartido con `/llms.txt`.
-- `src/content/projects/*.md`: proyectos del portfolio. `draft: true` se ve en dev y no sale en
-  producción.
+- `src/content/projects/*.md`: proyectos del portfolio (Reservo y Freggiaro). `draft: true` se ve
+  en dev y no sale en producción. `demo: /demo/<slug>` hace que la tarjeta abra esa página en el
+  modal (`DemoDialog`) en lugar de linkear afuera.
+- `src/pages/demo/freggiaro.astro` + `src/components/FreggiaroDemo.astro` + `src/lib/freggiaro-demo.ts`:
+  demo interactiva de Freggiaro con datos ficticios. Es una página propia (`noindex`, fuera del
+  sitemap); la home la muestra en un `<dialog>` con un `<iframe>` que carga recién al abrirlo
+  (`?embed` oculta su barra). Usa los colores de Freggiaro acotados a `.demo`: es la única
+  excepción a "solo tema Carbón".
 - `public/brand/`: los 11 logos oficiales. `public/fonts/`: Plus Jakarta Sans y JetBrains Mono.
 
 ## Convenciones del sistema de diseño
