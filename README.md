@@ -172,7 +172,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
   ---
   ```
 
-- **Agregar un cliente a la barra:** copiá su logo (PNG transparente) a `public/clientes/` y sumá una entrada a `clients` en `src/lib/content.ts` con `name`, `logo`, `width` y `height`. Se pinta en un solo tono del tema.
+- **Agregar un cliente a la barra:** copiá su logo (PNG transparente) a `public/clientes/` y sumá una entrada a `clients` en `src/lib/content.ts` con `name`, `logo`, `width`, `height` y `tone`: `mono` pinta el logo en un solo tono del tema (para logos de línea) y `color` lo deja con sus colores (para placas y rellenos).
 - **Copy de servicios y del proceso:** `src/lib/content.ts`, que también alimenta `/llms.txt`.
 - **Resto del copy:** en cada sección de `src/components/`. Header y footer toman la navegación de `src/lib/site.ts`.
 - **Colores, espaciado, radios y movimiento:** solo en `src/styles/tokens.css`, con los valores del sistema de diseño.

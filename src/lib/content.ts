@@ -59,12 +59,30 @@ export const steps = [
   },
 ] as const;
 
-/** Clientes de la barra "Confían en nosotros". El logo es un PNG transparente en `public/clientes/`. */
-export const clients = [
+/**
+ * Clientes de la barra "Confían en nosotros". El logo es un PNG transparente en `public/clientes/`.
+ * `tone: "mono"` lo pinta con `ink-muted` (logos de línea sobre transparente); `"color"` lo muestra
+ * con sus colores, para marcas con placa o relleno que en un solo tono quedarían como una mancha.
+ */
+export const clients: {
+  name: string;
+  logo: string;
+  width: number;
+  height: number;
+  tone: "mono" | "color";
+}[] = [
   {
     name: "Cabañas La Granja",
     logo: "/clientes/cabanas-la-granja.png",
     width: 655,
     height: 213,
+    tone: "mono",
+  },
+  {
+    name: "Freggiaro Frenos y Embragues",
+    logo: "/clientes/freggiaro.png",
+    width: 640,
+    height: 210,
+    tone: "color",
   },
 ];

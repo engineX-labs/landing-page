@@ -12,12 +12,23 @@ import { clients } from "../lib/content";
       {
         clients.map((c) => (
           <li class="flex">
-            <span
-              class="client-logo"
-              role="img"
-              aria-label={c.name}
-              style={`--logo: url(${c.logo}); aspect-ratio: ${c.width} / ${c.height};`}
-            />
+            {c.tone === "mono" ? (
+              <span
+                class="client-logo"
+                role="img"
+                aria-label={c.name}
+                style={`--logo: url(${c.logo}); aspect-ratio: ${c.width} / ${c.height};`}
+              />
+            ) : (
+              <img
+                class="client-logo-color"
+                src={c.logo}
+                alt={c.name}
+                width={c.width}
+                height={c.height}
+                loading="lazy"
+              />
+            )}
           </li>
         ))
       }
@@ -33,5 +44,10 @@ import { clients } from "../lib/content";
     background-color: var(--color-ink-muted);
     mask: var(--logo) center / contain no-repeat;
     -webkit-mask: var(--logo) center / contain no-repeat;
+  }
+  .client-logo-color {
+    display: block;
+    height: 72px;
+    width: auto;
   }
 </style>

@@ -99,3 +99,12 @@ Cabañas La Granja y la landing que les hicimos como proyecto del portfolio.
 6. El logo no linkea.
 7. Summary de la tarjeta: "Un sitio propio que les da una imagen más profesional y lleva las consultas
    directo a WhatsApp." (a confirmar).
+
+## Ampliación (pedida antes de entregar)
+
+- Se suma **Freggiaro Frenos y Embragues** a la barra: `public/clientes/freggiaro.png` (640×210,
+  transparente).
+- Su logo es una placa negra, roja y amarilla: en un solo tono quedaría como una mancha. Decisión:
+  cada cliente en `clients` lleva `tone`: `mono` (Cabañas La Granja, `ink-muted` con máscara) o `color`
+  (Freggiaro, colores originales con `<img>`).
+- Sin link en el logo, igual que el anterior. No se agrega proyecto al portfolio de este cliente.

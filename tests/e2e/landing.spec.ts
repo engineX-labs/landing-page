@@ -129,6 +129,8 @@ test("la granja: tarjeta con link al sitio en punycode y logo en la barra de cli
 
   const clientes = page.getByRole("region", { name: "Confían en nosotros" });
   await expect(clientes.getByRole("img", { name: "Cabañas La Granja" })).toBeVisible();
+  await expect(clientes.getByRole("img", { name: "Freggiaro Frenos y Embragues" })).toBeVisible();
+  await expect(clientes.getByRole("listitem")).toHaveCount(2);
   await expect(clientes.getByRole("link")).toHaveCount(0);
   // La barra va justo debajo del hero.
   const [hero, barra, servicios] = await Promise.all(
