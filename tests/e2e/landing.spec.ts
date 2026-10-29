@@ -96,16 +96,103 @@ test("teclado: el foco se ve con el anillo de 2px en todo lo clickeable", async 
       width: "2px",
     });
   }
-  expect([...seen]).toEqual(
-    expect.arrayContaining(["Servicios", "Contanos tu proyecto", "Ver proyectos"]),
-  );
+  expect([...seen]).toEqual(expect.arrayContaining(["Servicios", "Demo", "Ver proyectos"]));
 });
 
-test("un solo display-xl y un solo primary en el hero", async ({ page }) => {
+test("un solo h1, como máximo un display-xl y un solo primary en el hero", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".display-xl")).toHaveCount(1);
+  await expect(page.locator("h1")).toHaveCount(1);
+  expect(await page.locator(".display-xl").count()).toBeLessThanOrEqual(1);
   await expect(page.locator("#inicio .ex-btn-primary")).toHaveCount(1);
   await expect(page.locator("header .ex-btn-primary")).toHaveCount(0);
+});
+
+test.describe("hero", () => {
+  test("el primario abre WhatsApp con un saludo y el secundario lleva a proyectos", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const hero = page.locator("#inicio");
+    const primary = hero.locator(".ex-btn-primary");
+    await expect(primary).toHaveAccessibleName(/Escribinos por WhatsApp/);
+    await expect(primary).toHaveAttribute("target", "_blank");
+    const url = new URL((await primary.getAttribute("href")) ?? "");
+    expect(url.origin + url.pathname).toBe(`https://wa.me/${E2E_WHATSAPP_NUMBER}`);
+    expect(url.searchParams.get("text")).toContain("Hola engineX");
+
+    await expect(hero.getByRole("link", { name: "Ver proyectos" })).toHaveAttribute(
+      "href",
+      "#proyectos",
+    );
+  });
+
+  test("las capturas del hero son decorativas: no promocionan la demo", async ({ page }) => {
+    await page.goto("/");
+    const visual = page.locator("#inicio .hero-visual");
+    await expect(visual).toHaveAttribute("aria-hidden", "true");
+    await expect(visual.locator("a")).toHaveCount(0);
+    await expect(page.locator("#inicio [data-opens-demo]")).toHaveCount(0);
+    await expect(page.locator("#inicio")).not.toContainText("Probala");
+  });
+
+  test("las señales de confianza están debajo de los botones", async ({ page }) => {
+    await page.goto("/");
+    const trust = page.locator("#inicio .hero-trust li");
+    await expect(trust).toHaveCount(3);
+    await expect(trust.first()).toHaveText("Propuesta y presupuesto sin cargo");
+  });
+});
+
+test.describe("sin JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("el titular se ve igual: la animación es CSS", async ({ page }) => {
+    await page.goto("/");
+    const title = page.locator("#hero-title");
+    await expect(title).toHaveText("Sistemas de gestión y facturación ARCA para tu negocio");
+    await expect(title).toHaveCSS("opacity", "1");
+    await expect(title).toHaveCSS("transform", "none");
+  });
+});
+
+test("el ítem Demo del menú abre el modal", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .getByRole("navigation", { name: "Principal" })
+    .getByRole("link", { name: "Demo" })
+    .click();
+  await expect(page.getByRole("dialog", { name: "Demo de Freggiaro" })).toBeVisible();
+});
+
+test("preguntas frecuentes: se abren con teclado y están en el JSON-LD", async ({ page }) => {
+  await page.goto("/#preguntas");
+  const first = page.locator("#preguntas details").first();
+  const summary = first.locator("summary");
+  await expect(page.locator("#preguntas details")).toHaveCount(6);
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await expect(first).toHaveAttribute("open", "");
+  await expect(first.locator(".faq-a")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(first).not.toHaveAttribute("open", "");
+
+  const raw = await page.locator('script[type="application/ld+json"]').textContent();
+  const faq = JSON.parse(raw ?? "")["@graph"].find(
+    (n: { "@type": string }) => n["@type"] === "FAQPage",
+  );
+  expect(faq.mainEntity).toHaveLength(6);
+  expect(faq.mainEntity[0].name).toBe(await summary.textContent().then((t) => t?.trim()));
+});
+
+test("proyectos: la etiqueta avisa qué pasa al tocar cada tarjeta", async ({ page }) => {
+  await page.goto("/");
+  const cards = page.locator("#proyectos .ex-card");
+  await expect(cards.filter({ hasText: "Freggiaro" }).locator(".ex-card-badge")).toHaveText(
+    "Demo interactiva",
+  );
+  await expect(cards.filter({ hasText: "Reservo" }).locator(".ex-card-badge")).toHaveText(
+    "Sitio en vivo",
+  );
 });
 
 test("producción: solo proyectos reales, sin los borradores", async ({ page }) => {
@@ -145,6 +232,13 @@ test("la granja: tarjeta con link al sitio en punycode y logo en la barra de cli
 test.describe("movimiento reducido", () => {
   test.use({ reducedMotion: "reduce" });
 
+  test("la captura de las tarjetas no se mueve en hover", async ({ page }) => {
+    await page.goto("/#proyectos");
+    const card = page.locator("#proyectos .ex-card-link").first();
+    await card.hover();
+    await expect(card.locator(".ex-card-shot")).toHaveCSS("transform", "none");
+  });
+
   test("el hero entra solo con opacidad, sin desplazamiento", async ({ page }) => {
     await page.goto("/");
     const items = page.locator("[data-hero]");
@@ -182,7 +276,7 @@ test.describe("móvil", () => {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBe(0);
-    await expect(page.locator(".display-xl")).toHaveCSS("font-size", "44px");
+    await expect(page.locator("#hero-title")).toHaveCSS("font-size", "36px");
 
     // El nombre accesible cambia con el estado: "Abrir menú" / "Cerrar menú".
     const toggle = page.locator('button[aria-controls="menu-movil"]');
@@ -246,5 +340,52 @@ test.describe("SEO y GEO", () => {
     const org = data["@graph"].find((n: { name?: string }) => n.name === "engineX");
     expect(org.url).toBe(`${E2E_SITE_URL}/`);
     expect(org.contactPoint.telephone).toBe(`+${E2E_WHATSAPP_NUMBER}`);
+  });
+});
+
+test.describe("móvil: WhatsApp y demo a mano", () => {
+  test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
+
+  test("la barra de WhatsApp aparece al pasar el hero y se esconde en Contacto", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const bar = page.locator("[data-wa-bar]");
+    const link = bar.getByRole("link", { name: /Escribinos por WhatsApp/ });
+    await expect(bar).toHaveAttribute("data-visible", "false");
+    await expect(link).toBeHidden();
+
+    await page.locator("#servicios").scrollIntoViewIfNeeded();
+    await expect(bar).toHaveAttribute("data-visible", "true");
+    await expect(link).toBeVisible();
+    const url = new URL((await link.getAttribute("href")) ?? "");
+    expect(url.pathname).toBe(`/${E2E_WHATSAPP_NUMBER}`);
+
+    await page.locator("#contacto").scrollIntoViewIfNeeded();
+    await expect(bar).toHaveAttribute("data-visible", "false");
+
+    // Al final de la página la barra no tapa el footer: el body le reserva lugar.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const padding = await page.evaluate(() =>
+      Number.parseFloat(getComputedStyle(document.body).paddingBottom),
+    );
+    expect(padding).toBeGreaterThanOrEqual(72);
+  });
+
+  test("Demo en el menú cierra el menú y abre el modal", async ({ page }) => {
+    await page.goto("/");
+    await page.locator('button[aria-controls="menu-movil"]').click();
+    const menu = page.locator("#menu-movil");
+    await menu.getByRole("link", { name: "Demo" }).click();
+    await expect(menu).toBeHidden();
+    await expect(page.getByRole("dialog", { name: "Demo de Freggiaro" })).toBeVisible();
+  });
+
+  test("en escritorio la barra no existe", async ({ browser }) => {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await page.goto("/");
+    await page.locator("#servicios").scrollIntoViewIfNeeded();
+    await expect(page.locator("[data-wa-bar]")).toBeHidden();
+    await page.close();
   });
 });
