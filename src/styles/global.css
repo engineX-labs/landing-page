@@ -376,6 +376,16 @@
   .ex-card-shot {
     transition: transform var(--duration-base) var(--ease-out);
   }
+  /* Tarjeta con mockup de compu y celular, sobre un brillo de la marca. */
+  .ex-card-media-device {
+    aspect-ratio: auto;
+    align-items: flex-end;
+    padding: var(--space-16) var(--space-6) var(--space-6);
+    background:
+      radial-gradient(120% 90% at 85% 0%, var(--glow-ignite-soft), transparent 60%),
+      var(--surface-inset);
+    border-bottom: 1px solid var(--line);
+  }
   .ex-card-shot img {
     width: 100%;
     height: auto;
@@ -527,6 +537,13 @@
     .ex-card-link:hover .ex-card-shot {
       transform: translateY(-4px);
     }
+    /* Con mockup, el celular sube más que la compu: se separan y se nota la profundidad. */
+    .ex-card-link:hover .device-browser {
+      transform: translateY(-4px);
+    }
+    .ex-card-link:hover .device-phone {
+      transform: translateY(-10px);
+    }
     .ex-field-control:hover:not(:focus) {
       border-color: var(--ink-muted);
     }
@@ -545,7 +562,9 @@
     }
     .ex-btn:hover .ex-btn-arrow,
     .ex-card-link:hover .ex-btn-arrow,
-    .ex-card-link:hover .ex-card-shot {
+    .ex-card-link:hover .ex-card-shot,
+    .ex-card-link:hover .device-browser,
+    .ex-card-link:hover .device-phone {
       transform: none;
     }
     .ex-btn-spinner {
@@ -568,6 +587,21 @@
     transform: scale(0.95);
   }
 }
+/* Vidrio: fondo translúcido + desenfoque. Sin soporte, queda el fondo casi opaco. */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass {
+      background: var(--surface-raised);
+    }
+  }
+}
+
 /* Entrada del hero: sube 8px mientras aparece. */
 @keyframes ex-rise {
   from {

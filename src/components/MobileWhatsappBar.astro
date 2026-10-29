@@ -34,8 +34,10 @@ import { whatsapp } from "../lib/site";
       z-index: 40;
       display: block;
       padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
-      background: var(--surface);
-      border-top: 1px solid var(--line);
+      background: var(--glass-surface);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      border-top: 1px solid var(--glass-border);
       /* Oculta: sale rápido (150 ms) y recién después deja de ser visible. */
       transform: translateY(100%);
       opacity: 0;

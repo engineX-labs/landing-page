@@ -79,6 +79,22 @@
   --success: #5fd68a;
   --danger: #ff9eb0;
 
+  /*
+   * Vidrio: solo en superficies que flotan sobre algo con color (el header sobre la página, los
+   * chips del hero sobre su brillo, la barra de WhatsApp). Translúcido oscuro, no blanco: así el
+   * texto mantiene el contraste del tema Carbón.
+   */
+  --glass-bg: rgb(22 26 33 / 0.62);
+  /* Barras fijas (header, WhatsApp): Carbón translúcido. */
+  --glass-surface: rgb(14 17 22 / 0.72);
+  --glass-border: rgb(244 244 242 / 0.12);
+  --glass-blur: 16px;
+
+  /* Brillos de fondo con el color de la marca. */
+  --glow-ignite: rgb(255 91 46 / 0.22);
+  --glow-ignite-soft: rgb(255 91 46 / 0.1);
+  --glow-stone: rgb(217 219 214 / 0.07);
+
   /* Espaciado: grilla de 4px. */
   --space-1: 4px;
   --space-2: 8px;
@@ -140,4 +156,6 @@
   --color-focus-ring: var(--focus-ring);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-glass: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
 }
