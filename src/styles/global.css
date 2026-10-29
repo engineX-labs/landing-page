@@ -363,6 +363,19 @@
     border-bottom: 0;
     box-sizing: border-box;
   }
+  /* Etiqueta sobre la captura: avisa qué pasa al tocar la tarjeta. */
+  .ex-card-media {
+    position: relative;
+  }
+  .ex-card-badge {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: 1;
+  }
+  .ex-card-shot {
+    transition: transform var(--duration-base) var(--ease-out);
+  }
   .ex-card-shot img {
     width: 100%;
     height: auto;
@@ -510,6 +523,10 @@
     .ex-card-link:hover {
       border-color: var(--accent);
     }
+    /* La captura sube: confirma que la tarjeta entera se puede tocar. */
+    .ex-card-link:hover .ex-card-shot {
+      transform: translateY(-4px);
+    }
     .ex-field-control:hover:not(:focus) {
       border-color: var(--ink-muted);
     }
@@ -527,7 +544,8 @@
       transform: none;
     }
     .ex-btn:hover .ex-btn-arrow,
-    .ex-card-link:hover .ex-btn-arrow {
+    .ex-card-link:hover .ex-btn-arrow,
+    .ex-card-link:hover .ex-card-shot {
       transform: none;
     }
     .ex-btn-spinner {
@@ -548,6 +566,13 @@
   from {
     opacity: 0;
     transform: scale(0.95);
+  }
+}
+/* Entrada del hero: sube 8px mientras aparece. */
+@keyframes ex-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
 @keyframes ex-fade {
