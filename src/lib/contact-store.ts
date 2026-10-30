@@ -6,24 +6,32 @@ import path from "node:path";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { ContactInput } from "./contact";
+import type { WaitlistInput } from "./waitlist";
 
 export interface StoredContact extends ContactInput {
   receivedAt: string;
 }
 
-export interface ContactStore {
-  save(message: StoredContact): Promise<void>;
+export interface StoredWaitlist extends WaitlistInput {
+  receivedAt: string;
+}
+
+/** Dónde se guarda un registro (mensaje de contacto o email de la lista de espera). */
+export interface ContactStore<T = StoredContact> {
+  save(record: T): Promise<void>;
 }
 
 /** Un .json por mensaje en una carpeta. Para desarrollo, tests y servidores con disco persistente. */
-export class FileContactStore implements ContactStore {
+export class FileContactStore<T extends { receivedAt: string } = StoredContact>
+  implements ContactStore<T>
+{
   constructor(readonly dir: string) {}
 
-  async save(message: StoredContact): Promise<void> {
-    const stamp = message.receivedAt.replace(/[:.]/g, "-");
+  async save(record: T): Promise<void> {
+    const stamp = record.receivedAt.replace(/[:.]/g, "-");
     const file = path.join(this.dir, `${stamp}-${randomUUID()}.json`);
     await mkdir(this.dir, { recursive: true });
-    await writeFile(file, `${JSON.stringify(message, null, 2)}\n`, { flag: "wx" });
+    await writeFile(file, `${JSON.stringify(record, null, 2)}\n`, { flag: "wx" });
   }
 }
 
@@ -34,20 +42,22 @@ export interface RedisList {
 
 export const REDIS_CONTACTS_KEY = "contacts";
 
-/** Cada mensaje va como JSON al principio de la lista `contacts` (el más nuevo primero). */
-export class RedisContactStore implements ContactStore {
+export const REDIS_WAITLIST_KEY = "waitlist";
+
+/** Cada registro va como JSON al principio de una lista (`contacts` por defecto), el más nuevo primero. */
+export class RedisContactStore<T = unknown> implements ContactStore<T> {
   constructor(
     private readonly redis: RedisList,
     private readonly key = REDIS_CONTACTS_KEY,
   ) {}
 
-  async save(message: StoredContact): Promise<void> {
-    await this.redis.lpush(this.key, JSON.stringify(message));
+  async save(record: T): Promise<void> {
+    await this.redis.lpush(this.key, JSON.stringify(record));
   }
 }
 
 /** En Vercel sin Redis: falla a propósito para que el mensaje no se pierda en silencio. */
-export class UnavailableContactStore implements ContactStore {
+export class UnavailableContactStore implements ContactStore<never> {
   async save(): Promise<void> {
     throw new Error(
       "No hay almacenamiento para los mensajes: conectá Upstash Redis (KV_REST_API_URL y KV_REST_API_TOKEN).",
@@ -69,10 +79,40 @@ export function redisCredentials(env: Env): RedisCredentials | undefined {
   return url && token ? { url, token } : undefined;
 }
 
-export function contactStoreFromEnv(env: Env, redis?: RedisList): ContactStore {
-  if (redis) return new RedisContactStore(redis);
+/** Qué lista de Redis y qué carpeta usa cada tipo de registro. */
+interface StoreTarget {
+  redisKey: string;
+  dirVar: string;
+  defaultDir: string;
+  limitPrefix: string;
+}
+
+const CONTACTS_TARGET: StoreTarget = {
+  redisKey: REDIS_CONTACTS_KEY,
+  dirVar: "CONTACTS_DIR",
+  defaultDir: "data/contacts",
+  limitPrefix: "enginex:contact",
+};
+
+const WAITLIST_TARGET: StoreTarget = {
+  redisKey: REDIS_WAITLIST_KEY,
+  dirVar: "WAITLIST_DIR",
+  defaultDir: "data/waitlist",
+  limitPrefix: "enginex:waitlist",
+};
+
+function storeFromEnv<T extends { receivedAt: string }>(
+  env: Env,
+  target: StoreTarget,
+  redis?: RedisList,
+): ContactStore<T> {
+  if (redis) return new RedisContactStore<T>(redis, target.redisKey);
   if (env.VERCEL) return new UnavailableContactStore();
-  return new FileContactStore(path.resolve(env.CONTACTS_DIR || "data/contacts"));
+  return new FileContactStore<T>(path.resolve(env[target.dirVar] || target.defaultDir));
+}
+
+export function contactStoreFromEnv(env: Env, redis?: RedisList): ContactStore {
+  return storeFromEnv<StoredContact>(env, CONTACTS_TARGET, redis);
 }
 
 export interface ContactRateLimiter {
@@ -82,11 +122,14 @@ export interface ContactRateLimiter {
 
 export const RATE_LIMIT = { messages: 5, window: "10 m" } as const;
 
-export function upstashRateLimiter(redis: Redis): ContactRateLimiter {
+export function upstashRateLimiter(
+  redis: Redis,
+  prefix = CONTACTS_TARGET.limitPrefix,
+): ContactRateLimiter {
   const ratelimit = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(RATE_LIMIT.messages, RATE_LIMIT.window),
-    prefix: "enginex:contact",
+    prefix,
   });
   return {
     async allow(ip) {
@@ -107,16 +150,26 @@ export function clientIp(request: Request): string | undefined {
 }
 
 /**
- * Store y límite según el entorno: con Redis los mensajes van a Redis; sin Redis, a archivos.
+ * Store y límite según el entorno: con Redis los registros van a Redis; sin Redis, a archivos.
  * El límite por IP solo se activa en Vercel con Redis, donde la IP es confiable.
  */
-export function contactBackendFromEnv(env: Env): {
-  store: ContactStore;
-  rateLimiter?: ContactRateLimiter;
-} {
+function backendFromEnv<T extends { receivedAt: string }>(
+  env: Env,
+  target: StoreTarget,
+): { store: ContactStore<T>; rateLimiter?: ContactRateLimiter } {
   const credentials = redisCredentials(env);
-  if (!credentials) return { store: contactStoreFromEnv(env) };
+  if (!credentials) return { store: storeFromEnv<T>(env, target) };
   const redis = new Redis(credentials);
-  const store = contactStoreFromEnv(env, redis);
-  return env.VERCEL ? { store, rateLimiter: upstashRateLimiter(redis) } : { store };
+  const store = storeFromEnv<T>(env, target, redis);
+  return env.VERCEL
+    ? { store, rateLimiter: upstashRateLimiter(redis, target.limitPrefix) }
+    : { store };
+}
+
+export function contactBackendFromEnv(env: Env) {
+  return backendFromEnv<StoredContact>(env, CONTACTS_TARGET);
+}
+
+export function waitlistBackendFromEnv(env: Env) {
+  return backendFromEnv<StoredWaitlist>(env, WAITLIST_TARGET);
 }
