@@ -1,0 +1,53 @@
+---
+import { howItWorks } from "../../lib/social-engine-content";
+---
+
+<section id="como-funciona" class="se-section" aria-labelledby="como-title">
+  <div class="container-x">
+    <div class="se-head se-reveal">
+      <h2 id="como-title" class="se-h2">Cómo funciona</h2>
+      <p class="se-lead">De conectar tus cuentas a saber qué funcionó, en cuatro pasos.</p>
+    </div>
+    <ol class="se-steps se-stagger m-0 list-none p-0">
+      {
+        howItWorks.map((step, i) => (
+          <li class="se-card se-card-hover se-step">
+            <span class="label se-step-n">{String(i + 1).padStart(2, "0")}</span>
+            <h3 class="heading-3 m-0">{step.title}</h3>
+            <p class="m-0 text-ink-muted">{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .se-steps {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 720px) {
+    .se-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1040px) {
+    .se-steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .se-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-6);
+  }
+  .se-step-n {
+    color: var(--accent-ink);
+  }
+  .se-step :global(.heading-3) {
+    font-size: 20px;
+    line-height: 26px;
+  }
+</style>

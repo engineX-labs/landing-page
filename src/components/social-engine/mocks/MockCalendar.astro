@@ -1,0 +1,50 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+// Semana de ejemplo de una marca ficticia: cada posteo lleva su red y su hora.
+const days = [
+  { name: "Lun", n: 3, posts: [{ net: "IG", title: "Receta de otoño", time: "18:30", tone: 1 }] },
+  { name: "Mar", n: 4, posts: [{ net: "LI", title: "Detrás de escena", time: "10:00", tone: 3 }] },
+  {
+    name: "Mié",
+    n: 5,
+    posts: [
+      { net: "TT", title: "Promo del finde", time: "12:15", tone: 2 },
+      { net: "IG", title: "Historia del día", time: "20:00", tone: 1 },
+    ],
+  },
+  { name: "Jue", n: 6, posts: [] },
+  { name: "Vie", n: 7, posts: [{ net: "FB", title: "Nueva carta", time: "19:00", tone: 3 }] },
+  { name: "Sáb", n: 8, posts: [{ net: "YT", title: "Tour del local", time: "11:30", tone: 2 }] },
+  { name: "Dom", n: 9, posts: [{ net: "IG", title: "Resumen semanal", time: "17:00", tone: 1 }] },
+];
+---
+
+<MockWindow title="Calendario · Noviembre">
+  <div class="mk-row mk-between">
+    <div class="mk-row">
+      <span class="mk-pill mk-pill-on">Semana</span>
+      <span class="mk-pill">Mes</span>
+    </div>
+    <span class="mk-pill">Últimos 30 días ▾</span>
+  </div>
+  <div class="mk-cal">
+    {
+      days.map((day) => (
+        <div class="mk-day">
+          <div class="mk-day-h">
+            <span>{day.name}</span>
+            <b>{day.n}</b>
+          </div>
+          {day.posts.map((post) => (
+            <div class={`mk-post mk-tone-${post.tone}`}>
+              <span class="mk-net">{post.net}</span>
+              <span class="mk-post-t">{post.title}</span>
+              <span class="mk-muted">{post.time}</span>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</MockWindow>

@@ -1,0 +1,30 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const imported = [
+  { net: "IG", title: "Receta de otoño", date: "28 oct" },
+  { net: "FB", title: "Horarios de feriado", date: "27 oct" },
+  { net: "TT", title: "Cómo preparamos el café", date: "25 oct" },
+  { net: "LI", title: "Sumamos una sucursal", date: "22 oct" },
+  { net: "YT", title: "Tour del local", date: "20 oct" },
+];
+---
+
+<MockWindow title="Cuentas conectadas">
+  <div class="mk-row mk-between">
+    <b>5 cuentas conectadas</b>
+    <span class="mk-ok">✓ Al día</span>
+  </div>
+  <ul class="mk-list">
+    {
+      imported.map((item) => (
+        <li class="mk-item">
+          <span class="mk-net">{item.net}</span>
+          <span class="mk-grow">{item.title}</span>
+          <span class="mk-muted">{item.date}</span>
+          <span class="mk-ok">Importado</span>
+        </li>
+      ))
+    }
+  </ul>
+</MockWindow>

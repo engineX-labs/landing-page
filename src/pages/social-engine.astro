@@ -1,0 +1,57 @@
+---
+import Faq from "../components/Faq.astro";
+import AnnouncementBar from "../components/social-engine/AnnouncementBar.astro";
+import Benefits from "../components/social-engine/Benefits.astro";
+import ClosingCta from "../components/social-engine/ClosingCta.astro";
+import Connector from "../components/social-engine/Connector.astro";
+import HowItWorks from "../components/social-engine/HowItWorks.astro";
+import Modules from "../components/social-engine/Modules.astro";
+import Networks from "../components/social-engine/Networks.astro";
+import Plans from "../components/social-engine/Plans.astro";
+import SeFooter from "../components/social-engine/SeFooter.astro";
+import SeHero from "../components/social-engine/SeHero.astro";
+import SeNav from "../components/social-engine/SeNav.astro";
+import Base from "../layouts/Base.astro";
+import { whatsapp } from "../lib/site";
+import { faqs, pageDescription, pageTitle, productName } from "../lib/social-engine-content";
+import { buildSocialEngineData } from "../lib/structured-data";
+import "../styles/social-engine.css";
+import "../styles/social-engine-motion.css";
+
+const structuredData = buildSocialEngineData({
+  site: Astro.site?.origin,
+  whatsappNumber: whatsapp.number,
+});
+---
+
+<Base
+  title={pageTitle}
+  description={pageDescription}
+  theme="papel"
+  siteName={productName}
+  structuredData={structuredData}
+>
+  <!-- Las animaciones de aparición solo ocultan contenido si hay JS: sin JS todo se ve. -->
+  <script is:inline slot="head">
+    document.documentElement.classList.add("js");
+  </script>
+
+  <AnnouncementBar />
+  <SeNav />
+  <main id="contenido" tabindex="-1">
+    <SeHero />
+    <Networks />
+    <Connector />
+    <Modules />
+    <HowItWorks />
+    <Benefits />
+    <Plans />
+    <Faq items={faqs} />
+    <ClosingCta />
+  </main>
+  <SeFooter />
+</Base>
+
+<script>
+  import "../scripts/social-engine";
+</script>

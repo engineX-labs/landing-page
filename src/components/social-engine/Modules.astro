@@ -1,0 +1,192 @@
+---
+import ChevronLeft from "@lucide/astro/icons/chevron-left";
+import ChevronRight from "@lucide/astro/icons/chevron-right";
+import { modules } from "../../lib/social-engine-content";
+import MockAnalytics from "./mocks/MockAnalytics.astro";
+import MockAssistant from "./mocks/MockAssistant.astro";
+import MockAutomations from "./mocks/MockAutomations.astro";
+import MockInbox from "./mocks/MockInbox.astro";
+import MockPlanning from "./mocks/MockPlanning.astro";
+import MockPublish from "./mocks/MockPublish.astro";
+import MockSync from "./mocks/MockSync.astro";
+
+const mocks = {
+  sync: MockSync,
+  planning: MockPlanning,
+  publish: MockPublish,
+  inbox: MockInbox,
+  automations: MockAutomations,
+  analytics: MockAnalytics,
+  assistant: MockAssistant,
+};
+---
+
+<section id="producto" class="se-section" aria-labelledby="producto-title">
+  <div class="container-x">
+    <div class="se-head se-reveal">
+      <h2 id="producto-title" class="se-h2">
+        Descubrí cómo <span class="se-grad">Social Engine</span> ordena tu marketing
+      </h2>
+      <p class="se-lead">Siete módulos que trabajan sobre la misma información.</p>
+    </div>
+
+    <div class="se-modules se-reveal" data-modules>
+      <div class="se-stage">
+        <div class="se-stage-panels">
+          {
+            modules.map((mod, i) => {
+              const Mock = mocks[mod.key];
+              return (
+                <div
+                  role="tabpanel"
+                  id={`panel-${mod.key}`}
+                  aria-labelledby={`tab-${mod.key}`}
+                  hidden={i !== 0}
+                  data-panel
+                >
+                  <Mock />
+                </div>
+              );
+            })
+          }
+        </div>
+        <div class="se-stage-nav">
+          <button type="button" class="se-arrow" data-prev aria-label="Módulo anterior">
+            <ChevronLeft size={20} aria-hidden="true" />
+          </button>
+          <div class="se-dots" aria-hidden="true">
+            {modules.map((_, i) => <span class="se-dot" data-active={i === 0 ? "" : undefined} />)}
+          </div>
+          <button type="button" class="se-arrow" data-next aria-label="Módulo siguiente">
+            <ChevronRight size={20} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
+      <div class="se-tabs" role="tablist" aria-label="Módulos de Social Engine" aria-orientation="vertical">
+        {
+          modules.map((mod, i) => (
+            <button
+              type="button"
+              role="tab"
+              class="se-tab"
+              id={`tab-${mod.key}`}
+              aria-controls={`panel-${mod.key}`}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              data-tab
+            >
+              <span class="se-tab-title">{mod.title}</span>
+              <span class="se-tab-text">{mod.text}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .se-modules {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .se-modules {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: var(--space-12);
+    }
+  }
+  .se-stage {
+    padding: var(--space-4);
+    background: var(--surface-inset);
+    border-radius: 28px;
+  }
+  .se-stage-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .se-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--ink);
+    background: var(--surface-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 140ms var(--ease-out);
+  }
+  .se-arrow:active {
+    transform: scale(0.95);
+  }
+  .se-dots {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .se-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line-strong);
+  }
+  .se-dot[data-active] {
+    background: var(--accent-ink);
+  }
+  .se-tabs {
+    display: flex;
+    flex-direction: column;
+  }
+  .se-tab {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    padding: var(--space-4) var(--space-6);
+    font: inherit;
+    color: var(--ink-muted);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+  .se-tab::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .se-tab[aria-selected="true"]::before {
+    background: linear-gradient(180deg, #ff5b2e, #e0307a 55%, #7c5cff);
+  }
+  .se-tab-title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+  .se-tab[aria-selected="true"] .se-tab-title {
+    color: var(--ink);
+  }
+  .se-tab-text {
+    display: none;
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .se-tab[aria-selected="true"] .se-tab-text {
+    display: block;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .se-tab:hover .se-tab-title {
+      color: var(--ink);
+    }
+  }
+</style>

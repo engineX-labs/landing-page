@@ -1,6 +1,13 @@
 ---
 import ChevronDown from "@lucide/astro/icons/chevron-down";
-import { faqs } from "../lib/content";
+import { faqs as defaultFaqs } from "../lib/content";
+
+interface Props {
+  /** Preguntas a mostrar; por defecto, las de la home. */
+  items?: { question: string; answer: string }[];
+}
+
+const { items = defaultFaqs } = Astro.props;
 ---
 
 <section id="preguntas" class="section border-t border-line" aria-labelledby="preguntas-title">
@@ -13,7 +20,7 @@ import { faqs } from "../lib/content";
     </div>
     <div class="faq-list">
       {
-        faqs.map((f) => (
+        items.map((f) => (
           <details class="faq">
             <summary class="faq-q">
               <span class="body-strong">{f.question}</span>

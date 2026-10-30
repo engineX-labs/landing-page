@@ -1,0 +1,70 @@
+---
+import Clock from "@lucide/astro/icons/clock";
+import Layers from "@lucide/astro/icons/layers";
+import Target from "@lucide/astro/icons/target";
+import { benefits, benefitsTitle } from "../../lib/social-engine-content";
+
+const icons = { time: Clock, all: Layers, focus: Target };
+---
+
+<section class="se-section" aria-labelledby="beneficios-title">
+  <div class="container-x">
+    <div class="se-head se-reveal">
+      <h2 id="beneficios-title" class="se-h2">{benefitsTitle}</h2>
+    </div>
+    <ul class="se-benefits se-stagger m-0 list-none p-0">
+      {
+        benefits.map((item) => {
+          const Icon = icons[item.key];
+          return (
+            <li class="se-card se-card-hover se-benefit">
+              <span class="se-benefit-icon">
+                <Icon size={24} aria-hidden="true" />
+              </span>
+              <h3 class="heading-3 m-0">{item.title}</h3>
+              <p class="m-0 text-ink-muted">{item.text}</p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .se-benefits {
+    position: relative;
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 840px) {
+    .se-benefits {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    /* Línea de degradé que une los íconos, detrás de las tarjetas. */
+    .se-benefits::before {
+      content: "";
+      position: absolute;
+      inset: 56px 16% auto;
+      height: 2px;
+      background: var(--se-gradient);
+    }
+  }
+  .se-benefit {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-8) var(--space-6);
+  }
+  .se-benefit-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    border-radius: var(--radius-lg);
+  }
+</style>

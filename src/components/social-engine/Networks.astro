@@ -1,0 +1,36 @@
+---
+import { assistants, networks } from "../../lib/social-engine-content";
+
+const groups = [false, true];
+---
+
+<section class="se-networks" aria-labelledby="redes-title">
+  <p id="redes-title" class="se-eyebrow">Conectá con tus redes y con tu asistente de IA</p>
+  <div class="se-marquee mt-6" data-pausable>
+    <ul class="se-marquee-track m-0 list-none p-0">
+      {
+        groups.map((hidden) => (
+          <li class="se-marquee-group" aria-hidden={hidden ? "true" : undefined}>
+            {networks.map((name) => (
+              <span class="ex-tag ex-tag-neutral">{name}</span>
+            ))}
+            {assistants.map((name) => (
+              <span class="ex-tag ex-tag-accent">{name} · MCP</span>
+            ))}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .se-networks {
+    padding-block: var(--space-8);
+  }
+  .se-networks :global(.ex-tag) {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+  }
+</style>

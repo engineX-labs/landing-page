@@ -1,0 +1,27 @@
+---
+import { closing } from "../../lib/social-engine-content";
+import WaitlistForm from "./WaitlistForm.astro";
+---
+
+<section id="lista" class="se-section" aria-labelledby="cierre-title">
+  <div class="container-x">
+    <div class="se-frame se-reveal">
+      <div class="se-closing">
+        <h2 id="cierre-title" class="se-h2">{closing.title}</h2>
+        <p class="se-lead">{closing.text}</p>
+        <WaitlistForm source="cierre" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .se-closing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    padding: clamp(32px, 6vw, 72px) var(--space-4);
+    background: var(--surface-raised);
+  }
+</style>

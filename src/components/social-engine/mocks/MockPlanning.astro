@@ -1,0 +1,43 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const columns = [
+  { name: "Ideas", cards: [{ t: "Reel de la nueva carta", who: "LM", tag: "Guion" }] },
+  {
+    name: "En revisión",
+    cards: [
+      { t: "Promo del finde", who: "JP", tag: "Texto" },
+      { t: "Carrusel de recetas", who: "LM", tag: "Diseño" },
+    ],
+  },
+  { name: "Aprobado", cards: [{ t: "Historia del día", who: "AR", tag: "Listo" }] },
+];
+---
+
+<MockWindow title="Planificación">
+  <div class="mk-board">
+    {
+      columns.map((col) => (
+        <div class="mk-col">
+          <div class="mk-col-h">
+            <b>{col.name}</b>
+            <span class="mk-muted">{col.cards.length}</span>
+          </div>
+          {col.cards.map((card) => (
+            <div class="mk-card">
+              <span>{card.t}</span>
+              <div class="mk-row mk-between">
+                <span class="mk-pill">{card.tag}</span>
+                <span class="mk-avatar">{card.who}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+  <div class="mk-card mk-row mk-between">
+    <span>Link de aprobación para el cliente</span>
+    <span class="mk-ok">Aprobado por 2 de 2</span>
+  </div>
+</MockWindow>

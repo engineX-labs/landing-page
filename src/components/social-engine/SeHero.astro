@@ -1,0 +1,51 @@
+---
+import CalendarClock from "@lucide/astro/icons/calendar-clock";
+import CircleCheck from "@lucide/astro/icons/circle-check";
+import {
+  heroEyebrow,
+  heroLead,
+  heroRest,
+  heroTitleText,
+  heroVerbs,
+} from "../../lib/social-engine-content";
+import Button from "../Button.astro";
+import MockCalendar from "./mocks/MockCalendar.astro";
+import WaitlistForm from "./WaitlistForm.astro";
+---
+
+<section id="inicio" class="se-hero" aria-labelledby="hero-title" data-pausable>
+  <!-- Fondo aurora: decorativo, se pausa fuera de pantalla y queda quieto con movimiento reducido. -->
+  <div class="se-aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <div class="container-x">
+    <div class="se-hero-copy">
+      <p class="se-eyebrow">{heroEyebrow}</p>
+      <h1 id="hero-title" class="se-h1">
+        <span class="sr-only">{heroTitleText}</span>
+        <span aria-hidden="true">
+          <span class="se-rotator">
+            {heroVerbs.map((verb, i) => <span class="se-grad" style={`--i: ${i}`}>{verb}</span>)}
+          </span>
+          {heroRest}
+        </span>
+      </h1>
+      <p class="se-lead">{heroLead}</p>
+      <WaitlistForm source="hero" />
+      <Button variant="ghost" href="#producto">Ver cómo funciona</Button>
+    </div>
+
+    <div class="se-hero-stage">
+      <div class="se-frame">
+        <MockCalendar />
+      </div>
+      <div class="se-card se-float se-float-a" aria-hidden="true">
+        <CalendarClock size={20} class="text-accent-ink" />
+        <span><b>Próximo posteo</b><br />Instagram · hoy 18:30</span>
+      </div>
+      <div class="se-card se-float se-float-b" aria-hidden="true">
+        <CircleCheck size={20} class="text-success" />
+        <span><b>12 comentarios</b><br />respondidos hoy</span>
+      </div>
+    </div>
+  </div>
+</section>

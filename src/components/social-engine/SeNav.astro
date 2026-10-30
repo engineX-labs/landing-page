@@ -1,0 +1,35 @@
+---
+import Button from "../Button.astro";
+import SocialEngineLogo from "./SocialEngineLogo.astro";
+
+const links = [
+  { href: "#producto", label: "Producto" },
+  { href: "#como-funciona", label: "Cómo funciona" },
+  { href: "#preguntas", label: "Preguntas" },
+];
+---
+
+<div class="se-nav-wrap">
+  <div class="se-nav">
+    <a href="#inicio" class="-m-2 rounded-md p-2" aria-label="Social Engine, ir al inicio">
+      <SocialEngineLogo />
+    </a>
+    <nav aria-label="Principal">
+      <ul class="se-nav-links">
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href} class="se-nav-link">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href="/" class="se-nav-link">engineX</a>
+        </li>
+      </ul>
+    </nav>
+    <Button variant="secondary" href="#lista">Sumarme</Button>
+  </div>
+</div>
