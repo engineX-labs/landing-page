@@ -83,13 +83,13 @@ describe("sitemap.xml", () => {
 
 describe("JSON-LD", () => {
   it("describe a engineX con dominio y WhatsApp, sin datos inventados", () => {
-    const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545460" });
+    const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545450" });
     const [org, website] = data["@graph"];
     expect(org).toMatchObject({
       name: "engineX",
       url: `${SITE}/`,
       logo: `${SITE}/brand/enginex-app-icon-512.png`,
-      contactPoint: { telephone: "+5493548545460", contactType: "sales" },
+      contactPoint: { telephone: "+5493548545450", contactType: "sales" },
     });
     expect(org).not.toHaveProperty("address");
     expect(org).not.toHaveProperty("sameAs");
@@ -98,7 +98,7 @@ describe("JSON-LD", () => {
   });
 
   it("sin dominio no publica URLs del sitio", () => {
-    const data = buildStructuredData({ whatsappNumber: "5493548545460" });
+    const data = buildStructuredData({ whatsappNumber: "5493548545450" });
     expect(data["@graph"].map((n) => n["@type"])).toEqual([
       ["Organization", "ProfessionalService"],
       "FAQPage",
@@ -110,7 +110,7 @@ describe("JSON-LD", () => {
   });
 
   it("publica las preguntas frecuentes de la página como FAQPage", () => {
-    const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545460" });
+    const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545450" });
     const faq = data["@graph"].find((n) => n["@type"] === "FAQPage");
     expect(faq).toMatchObject({ url: `${SITE}/#preguntas`, inLanguage: "es-AR" });
     const entities = faq?.mainEntity as { name: string; acceptedAnswer: { text: string } }[];
@@ -126,8 +126,10 @@ describe("JSON-LD", () => {
 
 describe("llms.txt", () => {
   const base = {
-    whatsappUrl: "https://wa.me/5493548545460",
-    whatsappDisplay: "+54 9 3548 54-5460",
+    whatsapp: [
+      { display: "+54 9 3548 54-5450", url: "https://wa.me/5493548545450" },
+      { display: "+54 9 3571 60-9047", url: "https://wa.me/5493571609047" },
+    ],
     projects: [
       {
         title: "Reservo",
@@ -148,7 +150,8 @@ describe("llms.txt", () => {
     expect(txt).toContain(`[Facturación electrónica ARCA](${SITE}/#servicios)`);
     expect(txt).toContain("[Reservo](https://www.mireservo.online)");
     expect(txt).toContain(`[Formulario de contacto](${SITE}/#contacto)`);
-    expect(txt).toContain("[WhatsApp +54 9 3548 54-5460](https://wa.me/5493548545460)");
+    expect(txt).toContain("[WhatsApp +54 9 3548 54-5450](https://wa.me/5493548545450)");
+    expect(txt).toContain("[WhatsApp +54 9 3571 60-9047](https://wa.me/5493571609047)");
   });
 
   it("sin dominio usa rutas relativas", () => {
@@ -157,7 +160,7 @@ describe("llms.txt", () => {
 });
 
 describe("Social Engine", () => {
-  const WHATSAPP = "5493548545460";
+  const WHATSAPP = "5493548545450";
 
   it("el sitemap incluye la home y /social-engine", () => {
     const xml = buildSitemapXml(SITE, sitePaths, new Date("2026-11-01T12:00:00Z"));
@@ -166,7 +169,7 @@ describe("Social Engine", () => {
   });
 
   it("llms.txt presenta el producto con link absoluto, o relativo sin dominio", () => {
-    const base = { whatsappUrl: "https://wa.me/1", whatsappDisplay: "+1", projects: [] };
+    const base = { whatsapp: [{ display: "+1", url: "https://wa.me/1" }], projects: [] };
     const conDominio = buildLlmsTxt({ ...base, site: SITE });
     expect(conDominio).toContain("## Social Engine");
     expect(conDominio).toContain(`[Social Engine](${SITE}/social-engine)`);

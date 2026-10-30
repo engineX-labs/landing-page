@@ -87,7 +87,7 @@ Ritmo: secciones con `space-24` vertical en escritorio y `space-16` en móvil, g
 - **Apertura de WhatsApp** (decidido): no se usa `window.open` después del `fetch`, porque Safari/iOS y otros navegadores lo bloquean (ya no hay gesto del usuario). El estado de éxito muestra el link "Seguir por WhatsApp" (`<a target="_blank" rel="noopener">` con `arrow`) a la URL que devuelve el endpoint.
 - Endpoint `POST /api/contact` (`src/pages/api/contact.ts`, `prerender = false`): acepta JSON; valida nombre (1–100), email (formato), mensaje (1–2000) y honeypot `company` (si viene lleno responde 200 sin guardar, para no avisarle al bot); limita el tamaño del body. Guarda un `.json` por mensaje en `data/contacts/` (`<timestamp>-<id>.json`, ignorado por git). Responde `{ ok: true, whatsappUrl }` con `https://wa.me/<WHATSAPP_NUMBER>?text=<encodeURIComponent(mensaje con nombre, email y consulta)>`, o `400 { ok: false, errors: { campo: mensaje } }`.
 - La lógica de validación y armado de la URL vive en `src/lib/contact.ts` (funciones puras), para testearla sin levantar el servidor.
-- `WHATSAPP_NUMBER` por variable de entorno, con `5493548545460` como default de desarrollo.
+- `WHATSAPP_NUMBER` por variable de entorno, con `5493548545450` como default de desarrollo.
 
 ### Metadata y accesibilidad
 

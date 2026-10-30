@@ -5,7 +5,7 @@ import { pageDescription, productName, faqs as socialEngineFaqs } from "./social
 interface StructuredDataInput {
   /** Origen del sitio, por ejemplo "https://enginex.com.ar". Sin dominio no hay URLs. */
   site?: string;
-  /** Número de WhatsApp solo con dígitos, por ejemplo "5493548545460". */
+  /** Número de WhatsApp solo con dígitos, por ejemplo "5493548545450". */
   whatsappNumber: string;
 }
 

@@ -1,7 +1,7 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildLlmsTxt } from "../lib/seo";
-import { whatsapp } from "../lib/site";
+import { whatsappLines } from "../lib/site";
 
 export const GET: APIRoute = async ({ site }) => {
   const projects = (
@@ -19,8 +19,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const body = buildLlmsTxt({
     site: site?.origin,
-    whatsappUrl: whatsapp.url,
-    whatsappDisplay: whatsapp.display,
+    whatsapp: whatsappLines,
     projects,
   });
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });

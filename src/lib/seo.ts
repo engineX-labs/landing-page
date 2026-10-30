@@ -63,13 +63,11 @@ export interface LlmsProject {
 
 export function buildLlmsTxt({
   site,
-  whatsappUrl,
-  whatsappDisplay,
+  whatsapp,
   projects,
 }: {
   site?: string;
-  whatsappUrl: string;
-  whatsappDisplay: string;
+  whatsapp: { display: string; url: string }[];
   projects: LlmsProject[];
 }): string {
   const link = (anchor: string) => (site ? `${site}/#${anchor}` : `/#${anchor}`);
@@ -105,7 +103,7 @@ export function buildLlmsTxt({
     "## Contacto",
     "",
     `- [Formulario de contacto](${link("contacto")})`,
-    `- [WhatsApp ${whatsappDisplay}](${whatsappUrl})`,
+    ...whatsapp.map((w) => `- [WhatsApp ${w.display}](${w.url})`),
   ];
   return `${out.join("\n")}\n`;
 }

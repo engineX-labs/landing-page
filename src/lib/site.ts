@@ -1,4 +1,9 @@
-import { buildWhatsappUrl, formatWhatsappNumber, normalizeWhatsappNumber } from "./contact";
+import {
+  buildWhatsappUrl,
+  formatWhatsappNumber,
+  normalizeWhatsappNumber,
+  SECONDARY_WHATSAPP_NUMBER,
+} from "./contact";
 import { whatsappGreeting } from "./content";
 
 // Se resuelve al prerenderizar la página: el número sale de la misma variable que usa el endpoint.
@@ -11,6 +16,13 @@ export const whatsapp = {
   /** Para los botones "Escribinos": abre el chat con un saludo ya escrito. */
   chatUrl: buildWhatsappUrl(number, whatsappGreeting),
 };
+
+/** Los dos números de WhatsApp para contacto y pie de página (el principal va primero). */
+export const whatsappLines = [number, SECONDARY_WHATSAPP_NUMBER].map((n) => ({
+  display: formatWhatsappNumber(n),
+  url: buildWhatsappUrl(n),
+  chatUrl: buildWhatsappUrl(n, whatsappGreeting),
+}));
 
 /** Página de la demo: con JS se abre en el modal (`DemoDialog`). */
 export const demoHref = "/demo/freggiaro";

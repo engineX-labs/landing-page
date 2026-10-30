@@ -85,7 +85,7 @@ Cierra el pendiente de la revisión anterior (sin límite de envíos), con `@ups
 | Variable | Valor |
 | --- | --- |
 | `SITE_URL` | Dominio con `https://` y sin barra final; mientras tanto, la URL `*.vercel.app` del proyecto |
-| `WHATSAPP_NUMBER` | `5493548545460` |
+| `WHATSAPP_NUMBER` | `5493548545450` |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Las carga sola la integración de Upstash |
 
 ### Configuración del proyecto en Vercel (va al README)

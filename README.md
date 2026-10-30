@@ -58,7 +58,7 @@ Todas están en [`.env.example`](.env.example).
 | Variable | Cuándo se usa | Para qué | Por defecto |
 | --- | --- | --- | --- |
 | `SITE_URL` | Build | Dominio público (ver arriba). | vacío, o `DEFAULT_SITE_URL` |
-| `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545460` |
+| `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545450` |
 | `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje cuando no hay Redis. | `data/contacts` |
 | `WAITLIST_DIR` | Runtime | Lo mismo para los emails de la lista de espera de Social Engine (con Redis van a la lista `waitlist`). | `data/waitlist` |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
@@ -196,7 +196,7 @@ El build elige solo el adapter: en Vercel (que define `VERCEL=1`) usa `@astrojs/
 2. **Conectar Upstash Redis**: en el proyecto, Storage → Marketplace → **Upstash for Redis** → crear la base (el plan gratuito alcanza) y conectarla al proyecto. Eso carga `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
 3. **Variables de entorno** (Settings → Environment Variables), para Production y Preview:
    - `SITE_URL`: el dominio con `https://` y sin barra final. Mientras no haya dominio propio, la URL `https://<proyecto>.vercel.app`.
-   - `WHATSAPP_NUMBER`: `5493548545460`.
+   - `WHATSAPP_NUMBER`: `5493548545450`.
 4. **Deploy**. Si en el log del build aparece `Build en Vercel sin Upstash Redis`, falta el paso 2: el sitio funciona, pero el formulario responde que no pudo guardar y ofrece WhatsApp directo.
 5. **Probar**: mandar un mensaje desde el formulario y verlo en la consola de Upstash (Data Browser → clave `contacts`, o `LRANGE contacts 0 -1`). El más nuevo queda primero.
 6. **Dominio propio**: agregarlo en Settings → Domains, actualizar `SITE_URL` y volver a deployar.

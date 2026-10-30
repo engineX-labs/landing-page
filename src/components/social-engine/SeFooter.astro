@@ -1,5 +1,5 @@
 ---
-import { whatsapp } from "../../lib/site";
+import { whatsappLines } from "../../lib/site";
 import SocialEngineLogo from "./SocialEngineLogo.astro";
 
 const year = new Date().getFullYear();
@@ -11,9 +11,15 @@ const year = new Date().getFullYear();
     <p class="small m-0 text-ink-muted">
       Un producto de <a href="/" class="footer-link">engineX</a>. © {year}
     </p>
-    <a href={whatsapp.url} class="footer-link small" target="_blank" rel="noopener">
-      WhatsApp {whatsapp.display}
-    </a>
+    <div class="flex flex-col">
+      {
+        whatsappLines.map((line) => (
+          <a href={line.url} class="footer-link small" target="_blank" rel="noopener">
+            WhatsApp {line.display}
+          </a>
+        ))
+      }
+    </div>
   </div>
 </footer>
 
