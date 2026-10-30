@@ -1,5 +1,9 @@
 // robots.txt, sitemap.xml y llms.txt, como funciones puras para poder testearlas.
 import { description, faqs, services, steps } from "./content";
+import { pageDescription, productName } from "./social-engine-content";
+
+/** Páginas indexables, para el sitemap. */
+export const sitePaths = ["/", "/social-engine"];
 
 /** Crawlers de motores con IA, permitidos todos (búsqueda y entrenamiento). */
 export const AI_CRAWLERS = [
@@ -86,6 +90,10 @@ export function buildLlmsTxt({
       const title = p.href ? `[${p.title}](${p.href})` : p.title;
       return `- ${title} (${p.client}): ${p.summary} Stack: ${p.tags.join(", ")}.`;
     }),
+    "",
+    `## ${productName}`,
+    "",
+    `- [${productName}](${site ? `${site}/social-engine` : "/social-engine"}): ${pageDescription}`,
     "",
     "## Cómo trabajamos",
     "",

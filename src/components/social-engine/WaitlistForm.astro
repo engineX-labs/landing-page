@@ -1,0 +1,115 @@
+---
+// Email con el botón adentro. El script (src/scripts/social-engine.ts) lo envía a /api/waitlist.
+import { WAITLIST_LIMITS, type WaitlistSource } from "../../lib/waitlist";
+import Button from "../Button.astro";
+
+interface Props {
+  source: WaitlistSource;
+}
+
+const { source } = Astro.props;
+const id = `waitlist-${source}`;
+---
+
+<form class="se-form-wrap" method="post" action="/api/waitlist" novalidate data-waitlist={source}>
+  <div class="se-form">
+    <label for={`${id}-email`} class="sr-only">Tu email</label>
+    <input
+      id={`${id}-email`}
+      name="email"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="Tu email"
+      maxlength={WAITLIST_LIMITS.email}
+      aria-describedby={`${id}-error`}
+    />
+    <!-- Honeypot: invisible para personas, los bots lo completan. -->
+    <div class="hp" aria-hidden="true">
+      <label for={`${id}-company`}>No completes este campo</label>
+      <input id={`${id}-company`} name="company" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+    <Button type="submit" data-submit>Sumarme a la lista</Button>
+  </div>
+  <!-- Dos regiones en vivo que ya existen en el DOM: así los lectores de pantalla anuncian el texto. -->
+  <p id={`${id}-error`} class="se-form-msg small" data-state="error" data-error role="alert" hidden></p>
+  <p id={`${id}-ok`} class="se-form-msg small" data-state="ok" data-ok role="status" hidden></p>
+  <p class="se-form-note small">Usamos tu email solo para avisarte cuando abramos lugares.</p>
+  <noscript>
+    <p class="se-form-msg small" data-state="error">
+      Para sumarte hace falta JavaScript. Si preferís, escribinos por WhatsApp.
+    </p>
+  </noscript>
+</form>
+
+<style>
+  .se-form-wrap {
+    width: 100%;
+    max-width: 520px;
+  }
+  .se-form {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px;
+    background: var(--surface-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+  }
+  .se-form:focus-within {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .se-form[data-invalid] {
+    border-color: var(--danger);
+  }
+  .se-form input[type="email"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0 var(--space-4);
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    outline: none;
+  }
+  .se-form input::placeholder {
+    color: var(--ink-muted);
+  }
+  .hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .se-form-msg {
+    margin: var(--space-3) var(--space-4) 0;
+    text-align: left;
+  }
+  .se-form-note {
+    margin: var(--space-3) var(--space-4) 0;
+    color: var(--ink-muted);
+    text-align: left;
+  }
+  .se-form-msg[data-state="error"] {
+    color: var(--danger);
+  }
+  .se-form-msg[data-state="ok"] {
+    color: var(--success);
+    font-weight: 600;
+  }
+  @media (max-width: 480px) {
+    .se-form {
+      flex-direction: column;
+      align-items: stretch;
+      border-radius: var(--radius-xl);
+      padding: var(--space-2);
+    }
+    .se-form input[type="email"] {
+      min-height: 44px;
+    }
+  }
+</style>

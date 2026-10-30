@@ -1,7 +1,8 @@
 # engineX · landing page
 
-Landing de engineX (agencia de software). Astro 7 prerenderizado; la única ruta server es
-`POST /api/contact`. Se deploya en Vercel (`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con
+Landing de engineX (agencia de software) y, en `/social-engine`, la de Social Engine (producto de
+engineX). Astro 7 prerenderizado; las únicas rutas server son `POST /api/contact` y
+`POST /api/waitlist`. Se deploya en Vercel (`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con
 `@astrojs/node` (dev, preview, e2e). El diseño sale del sistema de diseño de engineX
 (`docs/engineX-sistema-de-diseno.pdf` y el artifact del sistema), tema Carbón.
 
@@ -38,6 +39,8 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   devuelve `/api/contact`). Tiene que estar definido igual en los dos.
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los
   mensajes van a la lista `contacts`; en Vercel, además, hay límite de 5 envíos por IP cada 10 minutos.
+- `WAITLIST_DIR`: lo mismo que `CONTACTS_DIR` para la lista de espera de Social Engine (por defecto
+  `data/waitlist`; con Redis, lista `waitlist`).
 - `CONTACTS_DIR`: sin Redis, carpeta donde se guarda un `.json` por mensaje. Por defecto
   `data/contacts` (ignorada por git); necesita disco persistente. En Vercel no se usa: sin Redis el
   endpoint responde 500 en vez de perder el mensaje.
@@ -69,6 +72,11 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   sitemap); la home la muestra en un `<dialog>` con un `<iframe>` que carga recién al abrirlo
   (`?embed` oculta su barra). Usa los colores de Freggiaro acotados a `.demo`: es la única
   excepción a "solo tema Carbón".
+- `src/pages/social-engine.astro` + `src/components/social-engine/` + `src/styles/social-engine*.css`:
+  landing de Social Engine. Copy en `src/lib/social-engine-content.ts` (compartido con `/llms.txt` y
+  el JSON-LD). Cálculos de UI puros en `src/lib/social-engine-ui.ts`; interacciones en
+  `src/scripts/social-engine.ts`. Lista de espera: `src/lib/waitlist.ts` (validación) y
+  `src/lib/waitlist-server.ts` (handler); el almacenamiento y el límite son los de `contact-store.ts`.
 - `public/clientes/`: logos PNG transparentes de la barra "Confían en nosotros". Para sumar un
   cliente: copiar el logo acá y agregar una entrada a `clients` en `src/lib/content.ts` (`tone: "mono"` o `"color"`).
 - `src/components/DeviceShowcase.astro`: mockup de compu y celular. Lo usan el hero y las tarjetas
@@ -95,6 +103,23 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
 - Copy: voseo, primera persona del plural, sentence case, sin emojis ni exclamaciones en
   titulares. La marca se escribe siempre "engineX".
 - La flecha (`arrow`) solo en acciones que llevan a otro lugar, no en el submit.
+
+## Excepción: Social Engine (`html.se`)
+
+`/social-engine` es la única página con tema Papel (claro) y se aparta de las reglas de arriba, solo
+bajo `html.se` (la clase la pone `Base` con `theme="papel"`):
+
+- Tema Papel: los tokens semánticos se redefinen en `social-engine.css`; los componentes siguen
+  usando `var(--surface)`, `var(--ink)`, etc. Los botones son píldoras.
+- Degradé ignite → magenta → violeta: solo en el verbo que rota, bordes del mockup y de la caja de
+  cierre, línea conectora y brillo del plan recomendado. En texto se usan las paradas oscuras
+  (`--se-gradient-text`, ≥ 4,5:1). El degradé de texto va en cada verbo, nunca en el contenedor:
+  `background-clip: text` recorta según todos los hijos aunque tengan `opacity: 0`.
+- Sombras difusas solo en `.se-card`. Apariciones al scrollear (`.se-reveal`, `.se-stagger`, 0,8 s) y
+  bucles lentos (aurora, carrusel de redes, tarjetas que levitan), siempre solo `transform` y
+  `opacity`, pausados fuera de pantalla y quietos con `prefers-reduced-motion`.
+- Las apariciones solo ocultan contenido con `html.js`: sin JavaScript todo se ve.
+- Un solo botón `primary` por vista. Sin precios ni cifras de uso hasta tener datos reales.
 
 ## Git
 

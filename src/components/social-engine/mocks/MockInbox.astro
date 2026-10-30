@@ -1,0 +1,48 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const threads = [
+  {
+    who: "MC",
+    name: "Marina C.",
+    text: "¿Hasta qué hora abren el sábado?",
+    reply: "Los sábados abrimos de 9 a 21. ¡Te esperamos!",
+  },
+  {
+    who: "TB",
+    name: "Tomás B.",
+    text: "¿Tienen opciones sin TACC?",
+    reply: "Sí, tenemos tres. Te mandamos la carta por mensaje.",
+  },
+  { who: "LG", name: "Lucía G.", text: "Quiero hacer un pedido para un evento.", reply: "" },
+];
+---
+
+<MockWindow title="Bandeja · 3 sin responder">
+  <ul class="mk-list">
+    {
+      threads.map((thread) => (
+        <li class="mk-thread">
+          <div class="mk-row">
+            <span class="mk-avatar">{thread.who}</span>
+            <div class="mk-grow">
+              <b>{thread.name}</b>
+              <div>{thread.text}</div>
+            </div>
+          </div>
+          {thread.reply ? (
+            <div class="mk-reply">
+              <span class="mk-pill mk-pill-on">Asistente</span>
+              <span>{thread.reply}</span>
+            </div>
+          ) : (
+            <div class="mk-reply mk-reply-human">
+              <span class="mk-pill">Para una persona</span>
+              <span class="mk-muted">Necesita tu respuesta</span>
+            </div>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</MockWindow>

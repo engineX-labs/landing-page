@@ -1,5 +1,6 @@
 // Datos estructurados (JSON-LD) de engineX. Solo datos reales: sin dirección, redes ni reseñas.
 import { description, faqs, services } from "./content";
+import { pageDescription, productName, faqs as socialEngineFaqs } from "./social-engine-content";
 
 interface StructuredDataInput {
   /** Origen del sitio, por ejemplo "https://enginex.com.ar". Sin dominio no hay URLs. */
@@ -55,6 +56,36 @@ export function buildStructuredData({ site, whatsappNumber }: StructuredDataInpu
   });
 
   return { "@context": "https://schema.org", "@graph": graph };
+}
+
+/**
+ * Datos de /social-engine: la aplicación (sin `offers`, todavía no hay precios), la organización
+ * que la publica y las preguntas de la página.
+ */
+export function buildSocialEngineData({ site, whatsappNumber }: StructuredDataInput) {
+  const [organization] = buildStructuredData({ site, whatsappNumber })["@graph"];
+  const pageUrl = site ? `${site}/social-engine` : undefined;
+  const application: Record<string, unknown> = {
+    "@type": "SoftwareApplication",
+    name: productName,
+    description: pageDescription,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    inLanguage: "es-AR",
+    publisher: { "@id": organization["@id"] },
+    ...(pageUrl ? { url: pageUrl } : {}),
+  };
+  const faqPage = {
+    "@type": "FAQPage",
+    ...(pageUrl ? { "@id": `${pageUrl}#preguntas`, url: `${pageUrl}#preguntas` } : {}),
+    inLanguage: "es-AR",
+    mainEntity: socialEngineFaqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
+  return { "@context": "https://schema.org", "@graph": [organization, application, faqPage] };
 }
 
 /** JSON listo para un <script type="application/ld+json">, sin poder cerrar el tag. */

@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { parseSiteUrl, resolveSiteUrl } from "../../site.config.mjs";
 import { faqs } from "../../src/lib/content";
-import { AI_CRAWLERS, buildLlmsTxt, buildRobotsTxt, buildSitemapXml } from "../../src/lib/seo";
-import { buildStructuredData, serializeJsonLd } from "../../src/lib/structured-data";
+import {
+  AI_CRAWLERS,
+  buildLlmsTxt,
+  buildRobotsTxt,
+  buildSitemapXml,
+  sitePaths,
+} from "../../src/lib/seo";
+import { faqs as socialEngineFaqs } from "../../src/lib/social-engine-content";
+import {
+  buildSocialEngineData,
+  buildStructuredData,
+  serializeJsonLd,
+} from "../../src/lib/structured-data";
 
 const SITE = "https://enginex.com.ar";
 
@@ -142,5 +153,46 @@ describe("llms.txt", () => {
 
   it("sin dominio usa rutas relativas", () => {
     expect(buildLlmsTxt(base)).toContain("[Formulario de contacto](/#contacto)");
+  });
+});
+
+describe("Social Engine", () => {
+  const WHATSAPP = "5493548545460";
+
+  it("el sitemap incluye la home y /social-engine", () => {
+    const xml = buildSitemapXml(SITE, sitePaths, new Date("2026-11-01T12:00:00Z"));
+    expect(xml).toContain(`<loc>${SITE}/</loc>`);
+    expect(xml).toContain(`<loc>${SITE}/social-engine</loc>`);
+  });
+
+  it("llms.txt presenta el producto con link absoluto, o relativo sin dominio", () => {
+    const base = { whatsappUrl: "https://wa.me/1", whatsappDisplay: "+1", projects: [] };
+    const conDominio = buildLlmsTxt({ ...base, site: SITE });
+    expect(conDominio).toContain("## Social Engine");
+    expect(conDominio).toContain(`[Social Engine](${SITE}/social-engine)`);
+    expect(buildLlmsTxt(base)).toContain("[Social Engine](/social-engine)");
+  });
+
+  it("el JSON-LD es una SoftwareApplication sin precios y con las preguntas de la página", () => {
+    const data = buildSocialEngineData({ site: SITE, whatsappNumber: WHATSAPP });
+    const graph = data["@graph"];
+    const app = graph.find((node) => node["@type"] === "SoftwareApplication");
+    expect(app).toMatchObject({
+      name: "Social Engine",
+      applicationCategory: "BusinessApplication",
+      url: `${SITE}/social-engine`,
+      publisher: { "@id": `${SITE}/#organization` },
+    });
+    expect(app).not.toHaveProperty("offers");
+    const faq = graph.find((node) => node["@type"] === "FAQPage");
+    expect(faq?.mainEntity).toHaveLength(socialEngineFaqs.length);
+    expect(graph.some((node) => node["@id"] === `${SITE}/#organization`)).toBe(true);
+  });
+
+  it("sin dominio no inventa URLs", () => {
+    const data = buildSocialEngineData({ whatsappNumber: WHATSAPP });
+    const app = data["@graph"].find((node) => node["@type"] === "SoftwareApplication");
+    expect(app).not.toHaveProperty("url");
+    expect(JSON.stringify(data)).not.toContain("undefined");
   });
 });

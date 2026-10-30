@@ -1,0 +1,19 @@
+---
+// Marco de ventana de los mockups. Decorativo: el contenido real está en el texto de la página.
+import "../../../styles/social-engine-mocks.css";
+import "../../../styles/social-engine-mocks-views.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="mk-window" aria-hidden="true">
+  <div class="mk-bar">
+    <span class="mk-dot"></span><span class="mk-dot"></span><span class="mk-dot"></span>
+    <span class="mk-title">{title}</span>
+  </div>
+  <div class="mk-body"><slot /></div>
+</div>

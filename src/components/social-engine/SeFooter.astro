@@ -1,0 +1,29 @@
+---
+import { whatsapp } from "../../lib/site";
+import SocialEngineLogo from "./SocialEngineLogo.astro";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line">
+  <div class="container-x flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+    <SocialEngineLogo height={24} />
+    <p class="small m-0 text-ink-muted">
+      Un producto de <a href="/" class="footer-link">engineX</a>. © {year}
+    </p>
+    <a href={whatsapp.url} class="footer-link small" target="_blank" rel="noopener">
+      WhatsApp {whatsapp.display}
+    </a>
+  </div>
+</footer>
+
+<style>
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

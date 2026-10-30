@@ -1,0 +1,53 @@
+---
+// Línea de degradé que se dibuja mientras se scrollea, del hero a los módulos. Decorativa.
+// `pathLength="1"` evita medir el trazo: el script solo mueve el stroke-dashoffset entre 1 y 0.
+---
+
+<div class="se-connector" aria-hidden="true" data-connector>
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="se-connector-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff5b2e"></stop>
+        <stop offset="0.55" stop-color="#e0307a"></stop>
+        <stop offset="1" stop-color="#7c5cff"></stop>
+      </linearGradient>
+    </defs>
+    <path
+      class="se-connector-path"
+      pathLength="1"
+      d="M50 0 C50 40, 28 40, 28 80 L28 100"
+      stroke="url(#se-connector-grad)"></path>
+  </svg>
+</div>
+
+<style>
+  .se-connector {
+    display: none;
+  }
+  @media (min-width: 960px) {
+    .se-connector {
+      display: block;
+      height: 200px;
+      margin-block: calc(var(--space-12) * -1) calc(var(--space-12) * -1);
+      pointer-events: none;
+    }
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 1136px;
+    margin-inline: auto;
+    padding-inline: var(--space-8);
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  .se-connector-path {
+    fill: none;
+    stroke-width: 3.5px;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: var(--offset, 0);
+    vector-effect: non-scaling-stroke;
+  }
+</style>

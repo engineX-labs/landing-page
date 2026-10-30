@@ -1,0 +1,33 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const kpis = [
+  { label: "Seguidores", value: "12.480", delta: "+8,2%" },
+  { label: "Vistas", value: "96.300", delta: "+21%" },
+  { label: "Interacciones", value: "7.915", delta: "+14%" },
+];
+// Serie de ejemplo en ascenso, ya escalada al alto del gráfico (0 = arriba).
+const points = [78, 70, 72, 58, 60, 44, 48, 30, 34, 18];
+const line = points.map((y, i) => `${(i / (points.length - 1)) * 300},${y}`).join(" ");
+---
+
+<MockWindow title="Analítica · Últimos 30 días">
+  <div class="mk-kpis">
+    {
+      kpis.map((kpi) => (
+        <div class="mk-card">
+          <span class="mk-muted">{kpi.label}</span>
+          <b class="mk-kpi">{kpi.value}</b>
+          <span class="mk-ok">{kpi.delta}</span>
+        </div>
+      ))
+    }
+  </div>
+  <svg class="mk-chart" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points={line} fill="none" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  </svg>
+  <div class="mk-row mk-between">
+    <span class="mk-muted">Comparado con el período anterior</span>
+    <span class="mk-pill">Reporte mensual</span>
+  </div>
+</MockWindow>

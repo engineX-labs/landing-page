@@ -1,0 +1,29 @@
+---
+// Logo provisorio: el isotipo de engineX más "Social Engine". El definitivo lo diseña el equipo.
+import Logo from "../Logo.astro";
+
+interface Props {
+  height?: number;
+}
+
+const { height = 28 } = Astro.props;
+---
+
+<span class="se-logo">
+  <Logo variant="mark" height={height} decorative />
+  <span class="se-logo-word">Social Engine</span>
+</span>
+
+<style>
+  .se-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .se-logo-word {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+</style>

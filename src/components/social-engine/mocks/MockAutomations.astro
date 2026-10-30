@@ -1,0 +1,29 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const rules = [
+  { when: "Comentan «menú»", action: "Enviar la carta por mensaje", on: true },
+  { when: "Preguntan por precios", action: "Responder con el asistente", on: true },
+  { when: "Comentan «gracias»", action: "Responder con un corazón", on: false },
+];
+---
+
+<MockWindow title="Automatizaciones">
+  <ul class="mk-list">
+    {
+      rules.map((rule) => (
+        <li class="mk-item mk-rule">
+          <div class="mk-grow">
+            <span class="mk-muted">Si</span> <b>{rule.when}</b>
+            <div><span class="mk-muted">Entonces</span> {rule.action}</div>
+          </div>
+          <span class:list={["mk-switch", rule.on && "mk-switch-on"]}></span>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="mk-card mk-row mk-between">
+    <span>Esta semana</span>
+    <b class="mk-ok">48 respuestas automáticas</b>
+  </div>
+</MockWindow>
