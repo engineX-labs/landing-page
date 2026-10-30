@@ -34,7 +34,7 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   prioridad). Sin dominio no se genera `/sitemap.xml` ni hay URLs absolutas; mal formado, el build
   falla.
 
-- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545460`. Se usa
+- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545450`. Se usa
   en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
   devuelve `/api/contact`). Tiene que estar definido igual en los dos.
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los

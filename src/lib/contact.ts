@@ -1,7 +1,9 @@
 // Validación del formulario de contacto y armado del mensaje de WhatsApp.
 // Funciones puras: las usan el endpoint /api/contact y el script del formulario.
 
-export const DEFAULT_WHATSAPP_NUMBER = "5493548545460";
+export const DEFAULT_WHATSAPP_NUMBER = "5493548545450";
+/** Segundo número de WhatsApp de engineX, que se muestra junto al principal. */
+export const SECONDARY_WHATSAPP_NUMBER = "5493571609047";
 
 export const LIMITS = {
   name: 100,
@@ -94,7 +96,7 @@ export function buildWhatsappUrl(number: string, text?: string): string {
   return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
 
-/** "5493548545460" → "+54 9 3548 54-5460". Otros formatos quedan como "+<dígitos>". */
+/** "5493548545450" → "+54 9 3548 54-5450". Otros formatos quedan como "+<dígitos>". */
 export function formatWhatsappNumber(number: string): string {
   const d = normalizeWhatsappNumber(number);
   if (/^549\d{10}$/.test(d)) return `+54 9 ${d.slice(3, 7)} ${d.slice(7, 9)}-${d.slice(9)}`;

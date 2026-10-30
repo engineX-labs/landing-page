@@ -9,6 +9,7 @@ import {
   formatWhatsappNumber,
   LIMITS,
   normalizeWhatsappNumber,
+  SECONDARY_WHATSAPP_NUMBER,
   validateContact,
   validateField,
 } from "../../src/lib/contact";
@@ -75,8 +76,8 @@ describe("validateContact", () => {
 
 describe("WhatsApp", () => {
   it("codifica acentos, &, ? y saltos de línea", () => {
-    const url = buildWhatsappUrl("5493548545460", buildWhatsappText(valid));
-    expect(url.startsWith("https://wa.me/5493548545460?text=")).toBe(true);
+    const url = buildWhatsappUrl("5493548545450", buildWhatsappText(valid));
+    expect(url.startsWith("https://wa.me/5493548545450?text=")).toBe(true);
     const text = new URL(url).searchParams.get("text");
     expect(text).toBe(
       "Hola engineX, soy Ana Pérez (ana@tunegocio.com).\n\nQuiero un sistema de reservas & pagos.\n¿Cuánto sale?",
@@ -87,13 +88,14 @@ describe("WhatsApp", () => {
   });
 
   it("limpia el número y usa el de desarrollo si no hay uno válido", () => {
-    expect(normalizeWhatsappNumber("+54 9 3548 54-5460")).toBe("5493548545460");
+    expect(normalizeWhatsappNumber("+54 9 3548 54-5450")).toBe("5493548545450");
     expect(normalizeWhatsappNumber(undefined)).toBe(DEFAULT_WHATSAPP_NUMBER);
     expect(normalizeWhatsappNumber("abc")).toBe(DEFAULT_WHATSAPP_NUMBER);
   });
 
   it("formatea el número para mostrarlo", () => {
-    expect(formatWhatsappNumber("5493548545460")).toBe("+54 9 3548 54-5460");
+    expect(formatWhatsappNumber("5493548545450")).toBe("+54 9 3548 54-5450");
+    expect(formatWhatsappNumber(SECONDARY_WHATSAPP_NUMBER)).toBe("+54 9 3571 60-9047");
     expect(formatWhatsappNumber("14155550100")).toBe("+14155550100");
   });
 });
