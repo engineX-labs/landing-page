@@ -60,6 +60,9 @@ Todas están en [`.env.example`](.env.example).
 | `SITE_URL` | Build | Dominio público (ver arriba). | vacío, o `DEFAULT_SITE_URL` |
 | `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545450` |
 | `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje cuando no hay Redis. | `data/contacts` |
+| `GEMINI_API_KEY` | Runtime (solo servidor) | Key de Gemini para Fidel, el asistente de IA. Sin ella el widget no aparece. En Vercel además hace falta Redis: sin Redis el asistente se apaga. | — |
+| `GEMINI_MODEL` | Runtime | Modelo de Gemini que usa Fidel. | `gemini-2.5-flash-lite` |
+| `ASSISTANT_DAILY_LIMIT` | Runtime | Tope de mensajes por día en total (contador en Redis; en memoria si no hay Redis fuera de Vercel). Es el techo del gasto. | `300` |
 | `WAITLIST_DIR` | Runtime | Lo mismo para los emails de la lista de espera de Social Engine (con Redis van a la lista `waitlist`). | `data/waitlist` |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
 | `VERCEL` | Build y runtime | La define Vercel. Elige el adapter de Vercel y evita guardar en disco. No se configura a mano. | vacío |
@@ -106,6 +109,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **WhatsApp primero.** Es el canal que más usa una pyme: el botón primario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
 - **Social Engine.** `/social-engine` es la landing del producto, en el tema Papel (claro) y con la estructura y el movimiento de la landing de Xubio: verbo que rota en el título, aparición al scrollear, línea que se dibuja con el scroll, carrusel de redes y pestañas de módulos. Todo es CSS más un script chico sin librerías (`src/scripts/social-engine.ts`); sin JavaScript el contenido se ve igual. Los mockups son HTML y CSS con datos ficticios. No muestra precios: los emails de la lista de espera van a `POST /api/waitlist`. Las reglas distintas de la home (tema claro, degradé acotado, sombras, apariciones al scrollear) viven bajo `html.se`; ver `AGENTS.md`.
+- **Fidel, el asistente de IA.** Un chat flotante en las dos páginas (`src/components/Assistant.astro`) que llama a `POST /api/assistant`, que a su vez llama a Gemini. La key vive solo en el servidor y se verifica que no aparezca en `dist/`. El widget solo se muestra si `GET /api/assistant` dice que está habilitado (hay key y límites). Defensas, en este orden: forma y tamaño del pedido, honeypot, 12 mensajes cada 10 minutos por IP (solo en Vercel con Redis), tope global de 300 mensajes por día (Redis), 500 caracteres por mensaje, 6 turnos de historial y 400 tokens de salida. Si se agota algún límite o Gemini falla, el widget deriva a WhatsApp. El límite de gasto en Google se configura aparte, en la cuenta. El prompt sale de `content.ts`, `social-engine-content.ts` y los proyectos.
 - **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` y `POST /api/waitlist` corren en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
 - **SEO y GEO.** `robots.txt` permite todo menos `/api/`, también a los crawlers de IA (búsqueda y entrenamiento). El sitemap, el canonical, Open Graph, el JSON-LD (`Organization` + `WebSite`) y `llms.txt` salen del dominio configurado.
 
@@ -149,6 +153,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   │   ├── social-engine.astro # landing de Social Engine (tema Papel)
 │   │   ├── api/contact.ts   # POST /api/contact
 │   │   ├── api/waitlist.ts  # POST /api/waitlist (lista de espera de Social Engine)
+│   │   ├── api/assistant.ts # GET (¿habilitado?) y POST (chat) de Fidel
 │   │   ├── robots.txt.ts
 │   │   └── llms.txt.ts
 │   ├── routes/sitemap.xml.ts# se registra solo si hay dominio
