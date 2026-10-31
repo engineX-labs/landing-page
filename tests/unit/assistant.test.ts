@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ASSISTANT_LIMITS, validateAssistant } from "../../src/lib/assistant";
+import { ASSISTANT_LIMITS, splitAssistantText, validateAssistant } from "../../src/lib/assistant";
 import {
   assistantBackendFromEnv,
   MemoryDailyLimiter,
@@ -318,17 +318,60 @@ describe("límites", () => {
 });
 
 describe("prompt", () => {
-  it("engineX incluye servicios y proyectos, y no da cifras si PRICE_FROM está vacío", () => {
+  it("engineX: productos, proyectos reales, reglas y datos de la sección 11", () => {
     const prompt = buildSystemPrompt("enginex", projects);
-    expect(prompt).toContain("Facturación electrónica ARCA");
+    expect(prompt).toContain("Social Engine");
     expect(prompt).toContain("Reservo");
-    expect(prompt).toContain("No des cifras de precios");
+    expect(prompt).toContain("Facturación electrónica ARCA");
+    expect(prompt).toContain("engineX Facturas, engineX Reservas, engineX Carta, engineX Stock");
+    expect(prompt).toContain("de lunes a sábados, de 10 a 18 h");
+    expect(prompt).toContain("Prueba gratuita de 7 días");
+    expect(prompt).toContain("Nunca des cifras");
+    expect(prompt).toContain("proyectos a medida");
+    expect(prompt).toContain("[[whatsapp]]");
+    expect(prompt).toContain("página principal de engineX");
   });
 
-  it("Social Engine habla del producto y no de precios", () => {
+  it("no deja marcadores {{...}} sin completar ni nombres mal escritos", () => {
+    for (const page of ["enginex", "social-engine"] as const) {
+      const prompt = buildSystemPrompt(page, projects);
+      expect(prompt).not.toMatch(/\{\{|\}\}/);
+      // La única mención de las grafías incorrectas es la regla que las prohíbe.
+      const rest = prompt.replace(/Nunca "Enginex"[^\n]*/, "");
+      expect(rest).not.toMatch(/Enginex|EngineX|engine X/);
+    }
+  });
+
+  it("dice dónde está la persona", () => {
+    expect(buildSystemPrompt("social-engine", projects)).toContain("página de Social Engine");
+  });
+
+  it("deja claro el alcance del MVP", () => {
     const prompt = buildSystemPrompt("social-engine", projects);
-    expect(prompt).toContain("Social Engine");
-    expect(prompt).toContain("No des precios ni cifras de uso");
-    expect(prompt).not.toContain("Reservo");
+    expect(prompt).toContain("Instagram y Facebook");
+    expect(prompt).toContain("Fuera del alcance inicial");
+    expect(prompt).toContain("no son de Social Engine");
+  });
+});
+
+describe("splitAssistantText", () => {
+  it("convierte solo [[whatsapp]] y [[lista]] en links", () => {
+    expect(splitAssistantText("Escribinos por [[whatsapp]] o mirá [[lista]].")).toEqual([
+      { type: "text", text: "Escribinos por " },
+      { type: "link", token: "whatsapp" },
+      { type: "text", text: " o mirá " },
+      { type: "link", token: "lista" },
+      { type: "text", text: "." },
+    ]);
+  });
+
+  it("descarta marcadores desconocidos y deja intactas las URLs y el HTML como texto", () => {
+    const parts = splitAssistantText(
+      'Mirá [[https://malo.test]] <a href="x">y</a> https://otro.test',
+    );
+    expect(parts.every((p) => p.type === "text")).toBe(true);
+    expect(parts.map((p) => (p.type === "text" ? p.text : "")).join("")).toBe(
+      'Mirá  <a href="x">y</a> https://otro.test',
+    );
   });
 });

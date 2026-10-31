@@ -89,16 +89,40 @@ export function validateAssistant(raw: unknown): AssistantValidation {
 export const ASSISTANT_INTRO: Record<AssistantPage, { greeting: string; suggestions: string[] }> = {
   enginex: {
     greeting:
-      "Hola, soy Fidel, el asistente de IA de engineX. Puedo contarte qué hacemos y cómo trabajamos.",
-    suggestions: ["¿Qué servicios ofrecen?", "¿Cómo trabajan?", "¿Cuánto cuesta un sistema?"],
+      "Soy Fidel, el asistente de IA de engineX. Contame qué negocio tenés y te cuento si Social Engine te sirve.",
+    suggestions: ["¿Qué es Social Engine?", "¿Cuánto cuesta?", "¿Hacen sistemas a medida?"],
   },
   "social-engine": {
     greeting:
-      "Hola, soy Fidel, el asistente de IA de engineX. Puedo contarte cómo funciona Social Engine.",
+      "Soy Fidel, el asistente de IA de engineX. Contame qué negocio tenés y te cuento si Social Engine te sirve.",
     suggestions: [
-      "¿Qué es Social Engine?",
-      "¿Con qué redes funciona?",
+      "¿Qué hace Social Engine?",
+      "¿Hay prueba gratuita?",
       "¿Cómo me sumo a la lista de espera?",
     ],
   },
 };
+
+/** Un tramo de la respuesta de Fidel: texto o un link a uno de los destinos permitidos. */
+export type AssistantPart =
+  | { type: "text"; text: string }
+  | { type: "link"; token: "whatsapp" | "lista" };
+
+/**
+ * Fidel escribe `[[whatsapp]]` o `[[lista]]` donde va un link; el widget arma el link con el destino
+ * real. Cualquier otro `[[...]]` se descarta, así el modelo no puede mandar a otro lado.
+ */
+export function splitAssistantText(text: string): AssistantPart[] {
+  const parts: AssistantPart[] = [];
+  let last = 0;
+  for (const match of text.matchAll(/\[\[([^\]]{0,30})\]\]/g)) {
+    const before = text.slice(last, match.index);
+    if (before) parts.push({ type: "text", text: before });
+    const token = match[1].trim().toLowerCase();
+    if (token === "whatsapp" || token === "lista") parts.push({ type: "link", token });
+    last = (match.index ?? 0) + match[0].length;
+  }
+  const rest = text.slice(last);
+  if (rest) parts.push({ type: "text", text: rest });
+  return parts;
+}

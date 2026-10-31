@@ -1,8 +1,8 @@
 # engineX · landing page
 
-Landing de **engineX**, agencia de software: diseñamos y desarrollamos sistemas a medida (gestión, facturación electrónica ARCA, reservas, pagos, webs) para negocios que quieren crecer.
+Landing de **engineX**: creamos productos de software para negocios que quieren crecer. El producto principal es **Social Engine** (en desarrollo, con su propia landing en `/social-engine`); también tomamos proyectos a medida (gestión, facturación electrónica ARCA, reservas, pagos, webs).
 
-Es una sola página con hero, clientes, servicios, proyectos, cómo trabajamos, preguntas frecuentes y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño. La única animación de entrada, la del hero, es CSS: la home no carga JavaScript para animar.
+Es una sola página con hero, productos, clientes, servicios a medida, proyectos, cómo trabajamos, preguntas frecuentes y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño. La única animación de entrada, la del hero, es CSS: la home no carga JavaScript para animar.
 
 ## Requisitos
 
@@ -104,9 +104,9 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 - **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Reservo linkea a su sitio. Freggiaro abre una demo interactiva en un modal.
 - **Demos que no pesan.** La demo de Freggiaro es una página propia (`/demo/freggiaro`, `noindex`, fuera del sitemap). La home la muestra en un `<dialog>` con un `<iframe>` que se carga recién al abrirlo, así que la landing no paga su peso. Replica la interfaz real del sistema (sus colores y su tipografía, acotados a la demo) con datos ficticios y facturación simulada: no hay backend ni conexión con ARCA. `/#demo-freggiaro` abre el modal y `/demo/freggiaro` sirve como link para compartir.
 - **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero, con `@keyframes ex-rise` en CSS); `prefers-reduced-motion` quita escalas y desplazamientos. La barra de WhatsApp en móvil aparece al pasar el hero: es un control que cambia de estado, no contenido que se revela al scrollear.
-- **Una agencia, no un producto.** El hero presenta a engineX ("Software a medida para negocios que quieren crecer") con un mockup de sistemas que hicimos y chips de vidrio con los tipos de trabajo. Cada proyecto se muestra en compu y en celular (`DeviceShowcase`).
+- **Productos primero.** El hero presenta a engineX ("Productos de software para negocios que quieren crecer") con Social Engine como producto principal y, como botón `primary`, el link a `/social-engine`; WhatsApp es el secundario. El mockup sigue mostrando proyectos que hicimos (todavía no hay capturas de Social Engine) y los chips de vidrio dicen lo que hará el producto. Los servicios y proyectos a medida quedan más abajo. Cada proyecto se muestra en compu y en celular (`DeviceShowcase`).
 - **Vidrio y brillo, con medida.** El vidrio va solo donde flota sobre algo con color y los brillos son de fondo; las animaciones de fondo son lentas, se pausan fuera de pantalla y respetan el movimiento reducido.
-- **WhatsApp primero.** Es el canal que más usa una pyme: el botón primario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
+- **WhatsApp a mano.** Es el canal que más usa una pyme: el botón secundario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
 - **Social Engine.** `/social-engine` es la landing del producto, en el tema Papel (claro) y con la estructura y el movimiento de la landing de Xubio: verbo que rota en el título, aparición al scrollear, línea que se dibuja con el scroll, carrusel de redes y pestañas de módulos. Todo es CSS más un script chico sin librerías (`src/scripts/social-engine.ts`); sin JavaScript el contenido se ve igual. Los mockups son HTML y CSS con datos ficticios. No muestra precios: los emails de la lista de espera van a `POST /api/waitlist`. Las reglas distintas de la home (tema claro, degradé acotado, sombras, apariciones al scrollear) viven bajo `html.se`; ver `AGENTS.md`.
 - **Fidel, el asistente de IA.** Un chat flotante en las dos páginas (`src/components/Assistant.astro`) que llama a `POST /api/assistant`, que a su vez llama a Gemini. La key vive solo en el servidor y se verifica que no aparezca en `dist/`. El widget solo se muestra si `GET /api/assistant` dice que está habilitado (hay key y límites). Defensas, en este orden: forma y tamaño del pedido, honeypot, 12 mensajes cada 10 minutos por IP (solo en Vercel con Redis), tope global de 300 mensajes por día (Redis), 500 caracteres por mensaje, 6 turnos de historial y 400 tokens de salida. Si se agota algún límite o Gemini falla, el widget deriva a WhatsApp. El límite de gasto en Google se configura aparte, en la cuenta. El prompt sale de `content.ts`, `social-engine-content.ts` y los proyectos.
@@ -130,7 +130,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   ├── assets/freggiaro/    # emblema de Freggiaro para la demo
 │   ├── components/
 │   │   ├── Logo, Button, Tag, ProjectCard, TextField, Arrow   # componentes del sistema
-│   │   ├── Header, Hero, Clients, Services, Projects, Process, Faq, ContactForm, Footer  # secciones
+│   │   ├── Header, Hero, Products, Clients, Services, Projects, Process, Faq, ContactForm, Footer  # secciones
 │   │   ├── MobileWhatsappBar.astro # botón fijo de WhatsApp en móvil
 │   │   ├── DemoDialog.astro # modal que abre una demo en un iframe
 │   │   ├── FreggiaroDemo.astro # la demo de Freggiaro (réplica de su interfaz)
@@ -139,7 +139,7 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 │   ├── content.config.ts    # esquema de la colección de proyectos
 │   ├── layouts/Base.astro   # <head>: meta, Open Graph, JSON-LD, fuentes
 │   ├── lib/
-│   │   ├── content.ts       # copy de servicios y del proceso (página y llms.txt)
+│   │   ├── content.ts       # copy de productos, servicios, proceso y FAQ (página, llms.txt y Fidel)
 │   │   ├── contact.ts       # validación y URL de WhatsApp (cliente y servidor)
 │   │   ├── contact-server.ts# lectura del request, límite y respuesta
 │   │   ├── contact-store.ts # dónde se guardan los mensajes (archivos o Redis) y límite por IP

@@ -99,10 +99,7 @@ describe("JSON-LD", () => {
 
   it("sin dominio no publica URLs del sitio", () => {
     const data = buildStructuredData({ whatsappNumber: "5493548545450" });
-    expect(data["@graph"].map((n) => n["@type"])).toEqual([
-      ["Organization", "ProfessionalService"],
-      "FAQPage",
-    ]);
+    expect(data["@graph"].map((n) => n["@type"])).toEqual(["Organization", "FAQPage"]);
     for (const node of data["@graph"]) {
       expect(node).not.toHaveProperty("url");
       expect(node).not.toHaveProperty("logo");

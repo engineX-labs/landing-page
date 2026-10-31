@@ -2,6 +2,7 @@
 import CircleAlert from "@lucide/astro/icons/circle-alert";
 import CircleCheck from "@lucide/astro/icons/circle-check";
 import MessageCircle from "@lucide/astro/icons/message-circle";
+import { supportHours } from "../lib/content";
 import { whatsapp, whatsappLines } from "../lib/site";
 import Arrow from "./Arrow.astro";
 import Button from "./Button.astro";
@@ -11,9 +12,10 @@ import TextField from "./TextField.astro";
 <section id="contacto" class="section border-t border-line" aria-labelledby="contacto-title">
   <div class="container-x grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
     <div class="flex max-w-[520px] flex-col gap-6">
-      <h2 id="contacto-title" class="heading-2 m-0">Contanos tu proyecto</h2>
+      <h2 id="contacto-title" class="heading-2 m-0">Hablá con el equipo</h2>
       <p class="body-lg m-0 text-ink-muted">
-        Contanos qué querés resolver. La propuesta y el presupuesto son sin cargo.
+        Consultas sobre Social Engine o un proyecto a medida. Atendemos {supportHours}. Para
+        proyectos a medida, la propuesta y el presupuesto son sin cargo.
       </p>
       {
         whatsappLines.map((line) => (

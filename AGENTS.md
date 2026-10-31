@@ -1,6 +1,6 @@
 # engineX · landing page
 
-Landing de engineX (agencia de software) y, en `/social-engine`, la de Social Engine (producto de
+Landing de engineX (productos de software; el principal es Social Engine, y también proyectos a medida) y, en `/social-engine`, la de Social Engine (producto de
 engineX). Astro 7 prerenderizado; las únicas rutas server son `POST /api/contact` y
 `POST /api/waitlist`. Se deploya en Vercel (`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con
 `@astrojs/node` (dev, preview, e2e). El diseño sale del sistema de diseño de engineX
@@ -64,7 +64,7 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   `src/lib/contact-store.ts`: almacenamiento (`FileContactStore`, `RedisContactStore`) y límite por IP.
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
-- `src/lib/content.ts`: copy del hero, servicios, proceso y preguntas frecuentes, compartido con
+- `src/lib/content.ts`: copy del hero, productos, servicios, proceso y preguntas frecuentes, compartido con
   `/llms.txt` y el JSON-LD (`FAQPage`). `PRICE_FROM` es el precio "desde" de la pregunta del precio:
   vacío, la respuesta no da cifra.
 - `src/content/projects/*.md`: proyectos del portfolio (Reservo y Freggiaro). `draft: true` se ve
@@ -82,10 +82,12 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   `src/lib/waitlist-server.ts` (handler); el almacenamiento y el límite son los de `contact-store.ts`.
 - `src/components/Assistant.astro` + `src/pages/api/assistant.ts` + `src/lib/assistant*.ts`: Fidel, el
   asistente de IA (Gemini por REST, sin SDK). `assistant.ts` valida (puro, compartido con el widget),
-  `assistant-prompt.ts` arma las instrucciones por página con el copy existente,
+  `assistant-prompt.ts` arma las instrucciones desde el documento de contexto de Fidel (productos,
+  voz, reglas de derivación) y `assistant-config.ts` guarda sus datos (horario, prueba, precio vacío =
+  "no confirmado"); Fidel escribe `[[whatsapp]]` o `[[lista]]` y el widget arma el link (nunca URLs),
   `assistant-limits.ts` tiene el límite por IP y el tope diario global, `assistant-server.ts` orquesta
   y llama a Gemini. Es un chat flotante, `secondary` (no suma un `primary`), que renderiza con
-  `textContent`. En móvil queda por encima de la barra de WhatsApp. En Social Engine no da precios.
+  `textContent`. En móvil queda por encima de la barra de WhatsApp. No da precios ni cifras de uso.
 - `public/clientes/`: logos PNG transparentes de la barra "Confían en nosotros". Para sumar un
   cliente: copiar el logo acá y agregar una entrada a `clients` en `src/lib/content.ts` (`tone: "mono"` o `"color"`).
 - `src/components/DeviceShowcase.astro`: mockup de compu y celular. Lo usan el hero y las tarjetas

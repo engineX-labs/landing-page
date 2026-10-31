@@ -119,6 +119,38 @@ for (const [name, path] of [
       expect(calls[1].messages).toHaveLength(1);
     });
 
+    test("los marcadores [[whatsapp]] y [[lista]] son links; las URLs sueltas no", async ({
+      page,
+    }) => {
+      await stubAssistant(page, () => ({
+        status: 200,
+        body: {
+          ok: true,
+          reply: "Escribinos por [[whatsapp]] o sumate a [[lista]]. https://malo.test [[otro]]",
+        },
+      }));
+      await page.goto(path);
+      await page.getByRole("button", { name: "Preguntale a Fidel" }).click();
+      const input = page.getByLabel("Tu pregunta para Fidel");
+      await input.fill("hola");
+      await input.press("Enter");
+
+      const reply = page.locator('.assistant-msg[data-role="assistant"]').last();
+      const whatsapp = reply.getByRole("link", { name: /WhatsApp/ });
+      await expect(whatsapp).toHaveAttribute("target", "_blank");
+      await expect(whatsapp).toHaveAttribute("rel", "noopener");
+      const url = new URL((await whatsapp.getAttribute("href")) ?? "");
+      expect(url.pathname).toBe(`/${E2E_WHATSAPP_NUMBER}`);
+      await expect(reply.getByRole("link", { name: "la lista de espera" })).toHaveAttribute(
+        "href",
+        "/social-engine#lista",
+      );
+      // Solo esos dos son links: la URL suelta y el marcador desconocido quedan como texto o se descartan.
+      await expect(reply.getByRole("link")).toHaveCount(2);
+      await expect(reply).toContainText("https://malo.test");
+      await expect(reply).not.toContainText("[[otro]]");
+    });
+
     test("el texto de la respuesta nunca se interpreta como HTML", async ({ page }) => {
       await stubAssistant(page, () => ({
         status: 200,

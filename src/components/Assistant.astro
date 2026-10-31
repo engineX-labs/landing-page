@@ -8,7 +8,9 @@ import {
   ASSISTANT_NAME,
   type AssistantPage,
 } from "../lib/assistant";
-import { whatsappLines } from "../lib/site";
+import { WAITLIST_HREF } from "../lib/assistant-config";
+import { buildWhatsappUrl } from "../lib/contact";
+import { whatsapp } from "../lib/site";
 
 interface Props {
   page: AssistantPage;
@@ -16,7 +18,7 @@ interface Props {
 
 const { page } = Astro.props;
 const intro = ASSISTANT_INTRO[page];
-const whatsappUrl = page === "social-engine" ? whatsappLines[0].url : whatsappLines[0].chatUrl;
+const whatsappUrl = buildWhatsappUrl(whatsapp.number, "Hola, vengo de la web de engineX.");
 const titleId = `assistant-title-${page}`;
 ---
 
@@ -30,6 +32,7 @@ const titleId = `assistant-title-${page}`;
   data-assistant
   data-page={page}
   data-whatsapp={whatsappUrl}
+  data-lista={WAITLIST_HREF}
   data-greeting={intro.greeting}
   data-suggestions={JSON.stringify(intro.suggestions)}
   data-max={ASSISTANT_LIMITS.userChars}
@@ -345,7 +348,9 @@ const titleId = `assistant-title-${page}`;
     ASSISTANT_LIMITS,
     type AssistantMessage,
     type AssistantResponseBody,
+    splitAssistantText,
   } from "../lib/assistant";
+  import { LINK_TOKENS } from "../lib/assistant-config";
 
   const root = document.querySelector<HTMLElement>("[data-assistant]");
 
@@ -377,6 +382,7 @@ const titleId = `assistant-title-${page}`;
     const page = root.dataset.page ?? "enginex";
     const storageKey = `fidel:${page}`;
     const whatsapp = root.dataset.whatsapp ?? "";
+    const waitlist = root.dataset.lista ?? "";
     const greeting = root.dataset.greeting ?? "";
     const suggestions = JSON.parse(root.dataset.suggestions ?? "[]") as string[];
     const max = ASSISTANT_LIMITS.userChars;
@@ -399,12 +405,37 @@ const titleId = `assistant-title-${page}`;
       }
     };
 
+    const appendParts = (el: HTMLElement, text: string) => {
+      for (const part of splitAssistantText(text)) {
+        if (part.type === "text") {
+          el.append(document.createTextNode(part.text));
+          continue;
+        }
+        const { label, external } = LINK_TOKENS[part.token];
+        const link = document.createElement("a");
+        link.textContent = label;
+        link.href = part.token === "whatsapp" ? whatsapp : waitlist;
+        if (external) {
+          link.target = "_blank";
+          link.rel = "noopener";
+        }
+        el.append(link);
+        if (external) {
+          const hint = document.createElement("span");
+          hint.className = "sr-only";
+          hint.textContent = " (se abre en otra pestaña)";
+          el.append(hint);
+        }
+      }
+    };
+
     const add = (role: "user" | "assistant" | "error", text: string) => {
       const el = document.createElement("p");
       el.className = "assistant-msg";
       el.dataset.role = role;
-      // textContent: la respuesta del modelo nunca se interpreta como HTML.
-      el.textContent = text;
+      // Nunca HTML: el texto va como nodo de texto y solo los marcadores permitidos son links.
+      if (role === "assistant") appendParts(el, text);
+      else el.textContent = text;
       log.append(el);
       log.scrollTop = log.scrollHeight;
       return el;
