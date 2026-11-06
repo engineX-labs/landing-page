@@ -1,34 +1,54 @@
-// Copy compartido entre las secciones de la página y /llms.txt.
+// Copy compartido entre las secciones de la página, /llms.txt, el JSON-LD y Fidel.
 
-export const tagline = "Software a medida para negocios que quieren crecer";
+export const tagline = "Productos de software para negocios que quieren crecer";
 
-/** Lo que somos, arriba del titular: el hero presenta a la agencia, no un producto. */
-export const heroEyebrow = "Agencia de desarrollo de software";
+/** Lo que somos, arriba del titular. */
+export const heroEyebrow = "Productos de software";
 
 /** Bajada del hero: el "empuja" de la marca vive acá. */
 export const heroLead =
-  "Somos engineX. Diseñamos y desarrollamos sistemas de gestión, webs, reservas online y facturación ARCA, y los dejamos funcionando en tu negocio.";
+  "Somos engineX. Creamos productos listos para usar que resuelven un problema puntual de tu negocio. El primero es Social Engine: te dice qué publicaciones funcionan en tus redes y qué repetir.";
 
-/** Tipos de trabajo que flotan sobre el mockup del hero. */
-export const heroChips = [
-  "Sistemas de gestión",
-  "Webs y landings",
-  "Reservas online",
-  "Facturación ARCA",
-] as const;
+/** Lo que hace Social Engine, flotando sobre el mockup del hero. */
+export const heroChips = ["Informe semanal", "Ideas de posteo", "Chat con tus métricas"] as const;
 
 /** Lo que saca objeciones justo debajo de los botones del hero. */
 export const trustSignals = [
-  "Propuesta y presupuesto sin cargo",
-  "Respuesta en menos de 24 h hábiles",
-  "Te acompañamos después de la entrega",
+  "Prueba gratuita de 7 días",
+  "Precio en pesos",
+  "Pagás con Mercado Pago",
 ] as const;
 
 /** Texto prearmado de los botones de WhatsApp (el formulario arma el suyo con los datos). */
-export const whatsappGreeting = "Hola engineX, quiero consultar por un sistema para mi negocio.";
+export const whatsappGreeting = "Hola engineX, vengo de la web y quiero hacer una consulta.";
+
+/** Atención humana por WhatsApp. */
+export const supportHours = "de lunes a sábados, de 10 a 18 h";
 
 export const description =
-  "Diseñamos y desarrollamos el software exacto que tu negocio necesita: gestión, facturación ARCA, reservas, pagos y webs.";
+  "engineX crea productos de software para negocios que quieren crecer. Primero, Social Engine: qué publicaciones funcionan en tus redes. También hacemos proyectos a medida.";
+
+/** Producto principal. El detalle completo vive en /social-engine. */
+export const mainProduct = {
+  name: "Social Engine",
+  status: "En desarrollo",
+  href: "/social-engine",
+  text: "Conectás Instagram y Facebook y te decimos qué publicación rindió, cuál no y por qué. Cada semana, un informe y tres ideas para la próxima.",
+  features: [
+    "Conexión con Instagram y Facebook",
+    "Informe semanal por correo o WhatsApp",
+    "Chat para preguntar por tus métricas",
+    "Tres ideas de posteo por semana",
+  ],
+} as const;
+
+/** Líneas de producto que estamos evaluando: sin fecha, precio ni funciones confirmadas. */
+export const evaluatingProducts = [
+  "engineX Facturas",
+  "engineX Reservas",
+  "engineX Carta",
+  "engineX Stock",
+] as const;
 
 export const services = [
   {
@@ -113,42 +133,51 @@ export const clients: {
 ];
 
 /**
- * Precio orientativo "desde" de un proyecto, ya formateado (por ejemplo "$ 450.000").
- * Lo define el equipo. Vacío, la pregunta del precio responde sin cifra.
+ * Precio "desde" de Social Engine, ya formateado (por ejemplo "$ 15.000 por mes").
+ * Lo define el equipo. Vacío, la pregunta del precio y Fidel responden sin cifra.
  */
 export const PRICE_FROM = "";
 
 /** Preguntas frecuentes: la sección de la página, el JSON-LD `FAQPage` y `/llms.txt`. */
 export const faqs: { question: string; answer: string }[] = [
   {
-    question: "¿Cuánto cuesta un sistema a medida?",
+    question: "¿Qué es engineX?",
+    answer:
+      "engineX crea productos de software para negocios que quieren crecer. Cada producto resuelve un problema puntual, se contrata por suscripción y funciona desde el primer día. El primero es Social Engine. Somos un equipo de dos fundadores.",
+  },
+  {
+    question: "¿Qué es Social Engine y para quién es?",
+    answer:
+      "Es un agente que conecta las redes de tu negocio, lee las métricas y te explica en palabras simples qué publicación rindió, cuál no y qué repetir. Está pensado para dueños de comercios, community managers y emprendedores de Argentina.",
+  },
+  {
+    question: "¿Cuándo abre Social Engine?",
+    answer:
+      "Lo estamos desarrollando y está en beta privada. Si te sumás a la lista de espera, te avisamos apenas haya lugar.",
+  },
+  {
+    question: "¿Hay prueba gratuita?",
+    answer: "Sí. Social Engine va a tener una prueba gratuita de 7 días.",
+  },
+  {
+    question: "¿Cuánto cuesta?",
     answer: PRICE_FROM
-      ? `Los proyectos arrancan desde ${PRICE_FROM}. El precio final depende de qué tiene que hacer el sistema: te pasamos la propuesta y el presupuesto sin cargo, con el precio cerrado antes de empezar.`
-      : "Depende de qué tiene que hacer el sistema. Te pasamos la propuesta y el presupuesto sin cargo, con el precio cerrado antes de empezar.",
+      ? `Social Engine arranca desde ${PRICE_FROM}. Será en pesos y con pago por Mercado Pago.`
+      : "Todavía no tenemos el precio definido. Va a ser en pesos y con pago por Mercado Pago. Sumate a la lista de espera y te avisamos antes de cobrar.",
   },
   {
-    question: "¿Cuánto tarda?",
+    question: "¿Hacen sistemas a medida?",
     answer:
-      "Depende del alcance. Construimos por etapas y en la propuesta te pasamos el plazo de cada una, así ves avances reales desde el principio.",
+      "Sí, además de nuestros productos tomamos proyectos puntuales: sistemas de gestión, webs, reservas online y facturación ARCA. Escribinos por WhatsApp y lo vemos. Para ver cómo trabajamos, probá la demo de Freggiaro, con datos de prueba.",
   },
   {
-    question: "¿Tengo que saber de tecnología?",
+    question: "¿Qué otros productos van a tener?",
     answer:
-      "No. Vos nos contás qué querés resolver y la tecnología la elegimos nosotros. Cuando está listo te enseñamos a usarlo.",
+      "Estamos evaluando engineX Facturas, Reservas, Carta y Stock. Todavía no tienen fecha, precio ni funciones confirmadas.",
   },
   {
-    question: "¿Se conecta con ARCA y Mercado Pago?",
+    question: "¿Es seguro conectar mi Instagram?",
     answer:
-      "Sí. Facturás desde tu sistema, sin entrar a la web de ARCA ni cargar los datos dos veces, y cada cobro de Mercado Pago queda registrado solo.",
-  },
-  {
-    question: "¿Qué pasa si después necesito cambios?",
-    answer:
-      "Seguimos cerca después de la entrega: ajustamos lo que haga falta y sumamos funciones cuando tu negocio las necesite.",
-  },
-  {
-    question: "¿Puedo ver un sistema funcionando antes?",
-    answer:
-      "Sí. Probá la demo de Freggiaro, un sistema de gestión con stock, clientes, ventas y facturación, con datos de prueba.",
+      "Conectás con la autorización oficial de la red y leemos solo las métricas de las cuentas que elijas. Si necesitás detalles legales o de tratamiento de datos, escribinos por WhatsApp.",
   },
 ];

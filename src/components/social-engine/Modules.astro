@@ -2,22 +2,16 @@
 import ChevronLeft from "@lucide/astro/icons/chevron-left";
 import ChevronRight from "@lucide/astro/icons/chevron-right";
 import { modules } from "../../lib/social-engine-content";
-import MockAnalytics from "./mocks/MockAnalytics.astro";
-import MockAssistant from "./mocks/MockAssistant.astro";
-import MockAutomations from "./mocks/MockAutomations.astro";
-import MockInbox from "./mocks/MockInbox.astro";
-import MockPlanning from "./mocks/MockPlanning.astro";
-import MockPublish from "./mocks/MockPublish.astro";
-import MockSync from "./mocks/MockSync.astro";
+import MockChat from "./mocks/MockChat.astro";
+import MockConnect from "./mocks/MockConnect.astro";
+import MockIdeas from "./mocks/MockIdeas.astro";
+import MockReport from "./mocks/MockReport.astro";
 
 const mocks = {
-  sync: MockSync,
-  planning: MockPlanning,
-  publish: MockPublish,
-  inbox: MockInbox,
-  automations: MockAutomations,
-  analytics: MockAnalytics,
-  assistant: MockAssistant,
+  connect: MockConnect,
+  report: MockReport,
+  chat: MockChat,
+  ideas: MockIdeas,
 };
 ---
 
@@ -25,9 +19,9 @@ const mocks = {
   <div class="container-x">
     <div class="se-head se-reveal">
       <h2 id="producto-title" class="se-h2">
-        Descubrí cómo <span class="se-grad">Social Engine</span> ordena tu marketing
+        Descubrí cómo <span class="se-grad">Social Engine</span> te muestra qué funciona
       </h2>
-      <p class="se-lead">Siete módulos que trabajan sobre la misma información.</p>
+      <p class="se-lead">Cuatro herramientas que trabajan sobre las métricas de tus cuentas.</p>
     </div>
 
     <div class="se-modules se-reveal" data-modules>

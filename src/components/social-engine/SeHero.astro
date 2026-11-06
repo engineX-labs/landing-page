@@ -1,6 +1,6 @@
 ---
-import CalendarClock from "@lucide/astro/icons/calendar-clock";
 import CircleCheck from "@lucide/astro/icons/circle-check";
+import MessageSquare from "@lucide/astro/icons/message-square";
 import {
   heroEyebrow,
   heroLead,
@@ -9,7 +9,7 @@ import {
   heroVerbs,
 } from "../../lib/social-engine-content";
 import Button from "../Button.astro";
-import MockCalendar from "./mocks/MockCalendar.astro";
+import MockReport from "./mocks/MockReport.astro";
 import WaitlistForm from "./WaitlistForm.astro";
 ---
 
@@ -36,15 +36,15 @@ import WaitlistForm from "./WaitlistForm.astro";
 
     <div class="se-hero-stage">
       <div class="se-frame">
-        <MockCalendar />
+        <MockReport />
       </div>
       <div class="se-card se-float se-float-a" aria-hidden="true">
-        <CalendarClock size={20} class="text-accent-ink" />
-        <span><b>Próximo posteo</b><br />Instagram · hoy 18:30</span>
+        <MessageSquare size={20} class="text-accent-ink" />
+        <span><b>Preguntale a tus métricas</b><br />“¿Qué día me conviene publicar?”</span>
       </div>
       <div class="se-card se-float se-float-b" aria-hidden="true">
         <CircleCheck size={20} class="text-success" />
-        <span><b>12 comentarios</b><br />respondidos hoy</span>
+        <span><b>Informe listo</b><br />llega cada semana</span>
       </div>
     </div>
   </div>

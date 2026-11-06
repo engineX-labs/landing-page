@@ -1,0 +1,25 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const ideas = [
+  { n: 1, title: "Receta de otoño en 30 segundos", why: "Las recetas son lo que más guardan" },
+  { n: 2, title: "Un día en la cocina", why: "El detrás de escena se compartió más" },
+  { n: 3, title: "Pregunta a tu comunidad", why: "Los comentarios subieron en Facebook" },
+];
+---
+
+<MockWindow title="Ideas de la semana">
+  <div class="mk-stack">
+    {
+      ideas.map((idea) => (
+        <div class="mk-card mk-row">
+          <b class="mk-idea-n">{idea.n}</b>
+          <span class="mk-stack">
+            <b>{idea.title}</b>
+            <span class="mk-muted">{idea.why}</span>
+          </span>
+        </div>
+      ))
+    }
+  </div>
+</MockWindow>

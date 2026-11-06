@@ -1,4 +1,5 @@
 ---
+import Assistant from "../components/Assistant.astro";
 import Faq from "../components/Faq.astro";
 import AnnouncementBar from "../components/social-engine/AnnouncementBar.astro";
 import Benefits from "../components/social-engine/Benefits.astro";
@@ -7,10 +8,10 @@ import Connector from "../components/social-engine/Connector.astro";
 import HowItWorks from "../components/social-engine/HowItWorks.astro";
 import Modules from "../components/social-engine/Modules.astro";
 import Networks from "../components/social-engine/Networks.astro";
-import Plans from "../components/social-engine/Plans.astro";
 import SeFooter from "../components/social-engine/SeFooter.astro";
 import SeHero from "../components/social-engine/SeHero.astro";
 import SeNav from "../components/social-engine/SeNav.astro";
+import Trial from "../components/social-engine/Trial.astro";
 import Base from "../layouts/Base.astro";
 import { whatsapp } from "../lib/site";
 import { faqs, pageDescription, pageTitle, productName } from "../lib/social-engine-content";
@@ -45,11 +46,12 @@ const structuredData = buildSocialEngineData({
     <Modules />
     <HowItWorks />
     <Benefits />
-    <Plans />
+    <Trial />
     <Faq items={faqs} />
     <ClosingCta />
   </main>
   <SeFooter />
+  <Assistant page="social-engine" />
 </Base>
 
 <script>

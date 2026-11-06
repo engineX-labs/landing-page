@@ -5,32 +5,41 @@ import {
   heroTitleText,
   howItWorks,
   modules,
-  planGuarantees,
-  plans,
+  networks,
+  pageDescription,
+  trial,
 } from "../../src/lib/social-engine-content";
 
 describe("contenido de Social Engine", () => {
   it("el título para lectores de pantalla lista los cuatro verbos, solo el primero con mayúscula", () => {
     expect(heroTitleText).toBe(
-      "Planificá, publicá, respondé y medí tus redes sin saltar de app en app",
+      "Entendé, compará, decidí y mejorá lo que funciona en tus redes sin descifrar métricas",
     );
   });
 
-  it("hay siete módulos con claves únicas y cuatro pasos", () => {
-    expect(modules).toHaveLength(7);
-    expect(new Set(modules.map((m) => m.key)).size).toBe(7);
+  it("describe el MVP: cuatro módulos con claves únicas, cuatro pasos y solo Instagram y Facebook", () => {
+    expect(modules.map((m) => m.key)).toEqual(["connect", "report", "chat", "ideas"]);
     expect(howItWorks).toHaveLength(4);
     expect(benefits).toHaveLength(3);
+    expect([...networks]).toEqual(["Instagram", "Facebook"]);
   });
 
-  it("no publica precios ni cifras de uso inventadas", () => {
-    const text = JSON.stringify({ plans, faqs, planGuarantees, modules });
+  it("no promete lo que el MVP no tiene: programar, bandeja, automatizaciones ni otras redes", () => {
+    const text = JSON.stringify({ modules, howItWorks, benefits, faqs, trial, pageDescription });
+    expect(text).not.toMatch(
+      /TikTok|LinkedIn|YouTube|MCP|ChatGPT|Claude|calendario|bandeja|automatizacion/i,
+    );
+  });
+
+  it("no publica precios ni cifras de uso inventadas; la prueba es de 7 días", () => {
+    const text = JSON.stringify({ faqs, trial, modules });
     expect(text).not.toMatch(/US\$|USD|\$\s?\d|\d+\s?%|\d+\.\d{3}\s+(empresas|clientes)/i);
+    expect(trial.points).toContain("Prueba gratuita de 7 días");
+    expect(faqs.some((f) => f.question === "¿Hay prueba gratuita?")).toBe(true);
   });
 
-  it("un solo plan es el recomendado y el copy no usa tuteo", () => {
-    expect(plans.filter((p) => p.featured)).toHaveLength(1);
-    const text = JSON.stringify({ plans, faqs, modules, howItWorks, benefits });
+  it("el copy no usa tuteo", () => {
+    const text = JSON.stringify({ faqs, modules, howItWorks, benefits, trial });
     expect(text).not.toMatch(/\b(tienes|puedes|quieres|tu equipo puede)\b/i);
   });
 });

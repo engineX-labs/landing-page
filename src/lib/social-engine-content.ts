@@ -2,20 +2,20 @@
 
 export const productName = "Social Engine";
 
-export const pageTitle = "Social Engine · Organizá el marketing de tus redes en un solo lugar";
+export const pageTitle = "Social Engine · Entendé qué funciona en tus redes";
 
 export const pageDescription =
-  "Social Engine es la herramienta de engineX para planificar, publicar, responder y medir tus redes sociales con tu equipo y un asistente con IA. Sumate a la lista de espera.";
+  "Social Engine es la herramienta de engineX que lee las métricas de tu Instagram y tu Facebook y te dice qué publicaciones funcionan y qué repetir. Prueba gratuita de 7 días. Sumate a la lista de espera.";
 
 export const announcement = "Social Engine está en beta privada";
 export const announcementLink = "Sumate a la lista";
 
-export const heroEyebrow = "Marketing en redes, en un solo lugar";
+export const heroEyebrow = "Métricas de Instagram y Facebook, sin vueltas";
 
 /** Los verbos que rotan en el título; el primero es el que se ve con movimiento reducido. */
-export const heroVerbs = ["Planificá", "Publicá", "Respondé", "Medí"] as const;
+export const heroVerbs = ["Entendé", "Compará", "Decidí", "Mejorá"] as const;
 
-export const heroRest = "tus redes sin saltar de app en app";
+export const heroRest = "lo que funciona en tus redes sin descifrar métricas";
 
 /** Texto fijo del título para lectores de pantalla y buscadores. */
 export const heroTitleText = `${heroVerbs[0]}, ${heroVerbs
@@ -24,171 +24,122 @@ export const heroTitleText = `${heroVerbs[0]}, ${heroVerbs
   .join(", ")} y ${heroVerbs.at(-1)?.toLowerCase()} ${heroRest}`;
 
 export const heroLead =
-  "Calendario compartido, publicación programada, bandeja de comentarios y mensajes, y analítica. Todo con un asistente que escribe con la voz de tu marca.";
+  "Conectás tu Instagram y tu Facebook y cada semana recibís un informe claro: qué publicaciones funcionaron, cuál no y qué hacer la próxima. Además, le preguntás a tus métricas y te damos 3 ideas de posteo.";
 
 export const whatsappGreeting = "Hola engineX, quiero saber más sobre Social Engine.";
 
 /** Las redes con las que conecta, para el carrusel. */
-export const networks = ["Instagram", "Facebook", "TikTok", "LinkedIn", "YouTube"] as const;
-export const assistants = ["Claude", "ChatGPT"] as const;
+export const networks = ["Instagram", "Facebook"] as const;
 
-export type ModuleKey =
-  | "sync"
-  | "planning"
-  | "publish"
-  | "inbox"
-  | "automations"
-  | "analytics"
-  | "assistant";
+export type ModuleKey = "connect" | "report" | "chat" | "ideas";
 
 export const modules: { key: ModuleKey; title: string; text: string }[] = [
   {
-    key: "sync",
-    title: "Sincronización",
-    text: "Conectás tus cuentas y traemos todo lo que ya publicaste a un calendario. Lo que subas directo a cada red también aparece solo.",
+    key: "connect",
+    title: "Conexión con Instagram y Facebook",
+    text: "Conectás tus cuentas con la autorización oficial de cada red. Solo leemos las métricas: no publicamos ni respondemos por vos.",
   },
   {
-    key: "planning",
-    title: "Planificación en equipo",
-    text: "Ideas, guiones, textos, responsables y etiquetas viven junto a cada posteo. Tu equipo comenta, sube versiones y aprueba desde un link.",
+    key: "report",
+    title: "Informe semanal",
+    text: "Una vez por semana te llegan tus 3 mejores publicaciones, la que peor funcionó y una recomendación concreta. Por correo o por WhatsApp.",
   },
   {
-    key: "publish",
-    title: "Publicación programada",
-    text: "Programás cada posteo para su red, con los límites de la plataforma a la vista antes de publicar. Duplicás el mismo contenido en varias redes.",
+    key: "chat",
+    title: "Chat con tus métricas",
+    text: "Preguntás con tus palabras, por ejemplo qué día te conviene publicar, y te contestamos con los datos de tus cuentas.",
   },
   {
-    key: "inbox",
-    title: "Bandeja de entrada",
-    text: "Comentarios y mensajes de todas las redes en una sola lista. Respondés vos, o dejás que el asistente conteste y te pase lo que necesita a una persona.",
-  },
-  {
-    key: "automations",
-    title: "Automatizaciones",
-    text: "Respuestas automáticas a comentarios, reglas por palabra clave (por ejemplo, mandar el menú por mensaje directo) y mensajes con IA.",
-  },
-  {
-    key: "analytics",
-    title: "Analítica y reportes",
-    text: "Seguidores, vistas e interacciones de todas tus redes juntas, con comparación entre períodos y un reporte mensual listo para compartir.",
-  },
-  {
-    key: "assistant",
-    title: "Asistente con IA",
-    text: "Redacta textos y respuestas con la voz de tu marca, contesta con la información de tu negocio y deja borradores para que apruebes. Funciona también con Claude y ChatGPT.",
+    key: "ideas",
+    title: "3 ideas de posteo por semana",
+    text: "Cada semana te proponemos tres ideas basadas en lo que ya funcionó en tus redes. Vos decidís cuáles usar.",
   },
 ];
 
 export const howItWorks = [
   {
     title: "Conectá tus cuentas",
-    text: "Traemos tus publicaciones anteriores y las ordenamos en un calendario.",
+    text: "Autorizás tu Instagram y tu Facebook. Solo leemos las métricas.",
   },
   {
-    title: "Planificá con tu equipo",
-    text: "Cada posteo reúne la idea, el texto, las versiones y las aprobaciones.",
+    title: "Recibí el informe",
+    text: "Cada semana: tus 3 mejores publicaciones, la peor y qué hacer.",
   },
   {
-    title: "Publicá y respondé",
-    text: "Programás las publicaciones y atendés comentarios y mensajes desde la misma bandeja.",
+    title: "Preguntale a tus métricas",
+    text: "Consultás en el chat lo que quieras saber de tus resultados.",
   },
   {
-    title: "Medí y ajustá",
-    text: "Mirás cómo te fue en todas las redes y seguís con lo que funciona.",
+    title: "Mejorá la semana que viene",
+    text: "Usás las 3 ideas de posteo y repetís lo que funciona.",
   },
 ] as const;
 
-export const benefitsTitle = "Menos pestañas, más tiempo para tu marca";
+export const benefitsTitle = "Decisiones con datos, sin planillas";
 
 export const benefits = [
   {
     key: "time",
     title: "Ahorro de tiempo",
-    text: "Planificás y publicás una vez. No saltás entre apps ni copiás el mismo texto en cada red.",
+    text: "No entrás a cada red a comparar números: el informe llega solo, cada semana.",
   },
   {
     key: "all",
-    title: "Todo en un solo lugar",
-    text: "Calendario, bandeja, automatizaciones y analítica comparten la misma información.",
+    title: "Todo en un solo informe",
+    text: "Instagram y Facebook juntos, con lo mejor, lo peor y qué hacer.",
   },
   {
     key: "focus",
-    title: "Foco en lo importante",
-    text: "El asistente se encarga de lo repetitivo y vos decidís qué se publica y qué se responde.",
+    title: "Foco en lo que funciona",
+    text: "Sabés qué repetir y qué cambiar, sin ser experto en métricas.",
   },
 ] as const;
 
-export const plans = [
-  {
-    key: "creator",
-    name: "Creador",
-    audience: "Para una marca y una persona",
-    features: [
-      "Calendario y publicación",
-      "Bandeja de comentarios",
-      "Asistente con IA",
-      "Analítica",
-    ],
-    featured: false,
-  },
-  {
-    key: "team",
-    name: "Equipo",
-    audience: "Para empresas con varias marcas",
-    features: [
-      "Todo lo de Creador",
-      "Varias marcas y personas",
-      "Acceso por área: contenido, bandeja y analítica",
-      "Links de aprobación",
-    ],
-    featured: true,
-  },
-  {
-    key: "agency",
-    name: "Agencia",
-    audience: "Para equipos grandes y agencias",
-    features: [
-      "Todo lo de Equipo",
-      "Marcas y equipo sin tope",
-      "Roles avanzados",
-      "Atención directa",
-    ],
-    featured: false,
-  },
-] as const;
-
-export const planGuarantees = ["Sin tarjeta para sumarte", "Te avisamos antes de cobrar"] as const;
+export const trial = {
+  title: "Probalo 7 días sin costo",
+  text: "Cuando abramos lugares vas a poder probar Social Engine una semana completa. Todavía no definimos el precio: cuando esté, lo publicamos acá y te avisamos.",
+  points: ["Prueba gratuita de 7 días", "Precio en pesos, a definir", "Te avisamos cuando abramos"],
+} as const;
 
 export const faqs: { question: string; answer: string }[] = [
   {
     question: "¿Qué es Social Engine?",
     answer:
-      "Es una herramienta para organizar el marketing en redes: calendario compartido, publicación programada, bandeja de comentarios y mensajes, automatizaciones, analítica y un asistente con IA. Es un producto de engineX.",
+      "Es la herramienta de engineX que lee las métricas de tu Instagram y tu Facebook y te dice qué publicaciones funcionan y qué repetir. Incluye un informe semanal, un chat para preguntarle a tus métricas y 3 ideas de posteo por semana.",
   },
   {
     question: "¿Con qué redes funciona?",
-    answer:
-      "Con Instagram, Facebook, TikTok, LinkedIn y YouTube. Además, tu asistente favorito (Claude o ChatGPT) puede trabajar con tu marca mediante una conexión MCP.",
+    answer: "Por ahora con Instagram y Facebook. No hay fecha confirmada para otras redes.",
   },
   {
     question: "¿Cuándo abre?",
     answer:
-      "Estamos en beta privada. Si te sumás a la lista de espera, te escribimos apenas haya lugar.",
+      "Estamos en desarrollo, en beta privada. Si te sumás a la lista de espera, te escribimos apenas haya lugar.",
+  },
+  {
+    question: "¿Hay prueba gratuita?",
+    answer:
+      "Sí, de 7 días. Cuando abramos lugares te avisamos por la lista de espera cómo acceder.",
   },
   {
     question: "¿Cuánto cuesta?",
     answer:
-      "Estamos definiendo los planes: uno para una marca, otro para equipos con varias marcas y uno a medida para agencias. Cuando estén listos, te avisamos por email.",
+      "Todavía no está definido. Va a ser en pesos y lo vamos a publicar antes del lanzamiento.",
   },
   {
-    question: "¿El asistente publica solo?",
+    question: "¿Publica por mí?",
     answer:
-      "No. Escribe borradores con la voz de tu marca y vos los aprobás antes de publicar. Las respuestas automáticas son opcionales y las configurás vos.",
+      "No. Social Engine no programa ni publica posteos: te dice qué funciona y te propone ideas. Vos decidís qué subir.",
   },
   {
-    question: "¿Puedo usarlo con mi equipo?",
+    question: "¿Es seguro conectar mi Instagram?",
     answer:
-      "Sí. Cada persona tiene su acceso y sus permisos, y podés compartir un link para que alguien apruebe un posteo sin crear una cuenta.",
+      "La conexión usa la autorización oficial de la red y solo se leen métricas. No publicamos ni respondemos mensajes en tu nombre.",
+  },
+  {
+    question: "¿Sirve para agencias?",
+    answer:
+      "Hoy está pensado para negocios que manejan sus propias cuentas. Si manejás varias marcas, escribinos por WhatsApp y lo conversamos.",
   },
 ];
 

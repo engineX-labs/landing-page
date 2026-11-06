@@ -1,0 +1,31 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+const accounts = [
+  { net: "IG", name: "Instagram", handle: "@mi.negocio" },
+  { net: "FB", name: "Facebook", handle: "Mi negocio" },
+];
+---
+
+<MockWindow title="Conexión · Tus cuentas">
+  <div class="mk-stack">
+    {
+      accounts.map((account) => (
+        <div class="mk-card mk-row mk-between">
+          <span class="mk-row">
+            <span class="mk-net">{account.net}</span>
+            <span class="mk-stack">
+              <b>{account.name}</b>
+              <span class="mk-muted">{account.handle}</span>
+            </span>
+          </span>
+          <span class="mk-pill mk-pill-on">Conectada</span>
+        </div>
+      ))
+    }
+  </div>
+  <div class="mk-row">
+    <span class="mk-pill">Autorización oficial</span>
+    <span class="mk-pill">Solo lectura de métricas</span>
+  </div>
+</MockWindow>

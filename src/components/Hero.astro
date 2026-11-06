@@ -1,17 +1,16 @@
 ---
-import CalendarCheck from "@lucide/astro/icons/calendar-check";
 import CircleCheck from "@lucide/astro/icons/circle-check";
-import Globe from "@lucide/astro/icons/globe";
-import LayoutDashboard from "@lucide/astro/icons/layout-dashboard";
-import ReceiptText from "@lucide/astro/icons/receipt-text";
+import FileChartColumn from "@lucide/astro/icons/file-chart-column";
+import Lightbulb from "@lucide/astro/icons/lightbulb";
+import MessageCircle from "@lucide/astro/icons/message-circle";
 import dashboardDesktop from "../assets/projects/freggiaro-desktop.jpg";
-import reservoMobile from "../assets/projects/reservo-mobile.jpg";
+import dashboardMobile from "../assets/projects/freggiaro-mobile.jpg";
 import { heroChips, heroEyebrow, heroLead, tagline, trustSignals } from "../lib/content";
 import { whatsapp } from "../lib/site";
 import Button from "./Button.astro";
 import DeviceShowcase from "./DeviceShowcase.astro";
 
-const chipIcons = [LayoutDashboard, Globe, CalendarCheck, ReceiptText];
+const chipIcons = [FileChartColumn, Lightbulb, MessageCircle];
 ---
 
 <section id="inicio" class="hero section" aria-labelledby="hero-title">
@@ -31,10 +30,10 @@ const chipIcons = [LayoutDashboard, Globe, CalendarCheck, ReceiptText];
       <h1 id="hero-title" class="display hero-title m-0" data-hero style="--i: 1">{tagline}</h1>
       <p class="body-lg m-0 max-w-[56ch] text-ink-muted" data-hero style="--i: 2">{heroLead}</p>
       <div class="mt-2 flex flex-wrap gap-4" data-hero style="--i: 3">
-        <Button size="lg" href={whatsapp.chatUrl} target="_blank" rel="noopener" arrow>
+        <Button size="lg" href="/social-engine" arrow>Conocé Social Engine</Button>
+        <Button size="lg" variant="secondary" href={whatsapp.chatUrl} target="_blank" rel="noopener">
           Escribinos por WhatsApp<span class="sr-only"> (se abre en otra pestaña)</span>
         </Button>
-        <Button size="lg" variant="secondary" href="#proyectos">Ver proyectos</Button>
       </div>
       <ul class="hero-trust" data-hero style="--i: 4">
         {
@@ -49,12 +48,12 @@ const chipIcons = [LayoutDashboard, Globe, CalendarCheck, ReceiptText];
     </div>
 
     <!--
-      Mostrar, no prometer: un sistema que hicimos en la compu y otro en el celular, con los tipos
-      de trabajo alrededor. Es decorativo: el protagonista es engineX, no un producto.
+      Mostrar, no prometer: un sistema que hicimos en la compu y otro en el celular, con lo que hará
+      Social Engine alrededor. Es decorativo.
     -->
     <div class="hero-visual" aria-hidden="true">
       <div data-hero style="--i: 5">
-        <DeviceShowcase desktop={dashboardDesktop} mobile={reservoMobile} size="hero" />
+        <DeviceShowcase desktop={dashboardDesktop} mobile={dashboardMobile} size="hero" />
       </div>
       {
         heroChips.map((chip, i) => {

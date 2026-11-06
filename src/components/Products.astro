@@ -1,0 +1,83 @@
+---
+import CircleCheck from "@lucide/astro/icons/circle-check";
+import { evaluatingProducts, mainProduct } from "../lib/content";
+import Button from "./Button.astro";
+import Tag from "./Tag.astro";
+---
+
+<section id="productos" class="section border-t border-line" aria-labelledby="productos-title">
+  <div class="container-x flex flex-col gap-12">
+    <div class="flex max-w-[720px] flex-col gap-4">
+      <h2 id="productos-title" class="heading-2 m-0">Nuestros productos</h2>
+      <p class="body-lg m-0 max-w-[60ch] text-ink-muted">
+        Cada producto resuelve un problema puntual y se contrata por suscripción.
+      </p>
+    </div>
+
+    <div class="products">
+      <article class="product-main" aria-labelledby="producto-principal">
+        <div class="flex flex-wrap items-center gap-3">
+          <h3 id="producto-principal" class="heading-3 m-0">{mainProduct.name}</h3>
+          <Tag text={mainProduct.status} tone="accent" />
+        </div>
+        <p class="m-0 max-w-[52ch] text-ink-muted">{mainProduct.text}</p>
+        <ul class="m-0 flex list-none flex-col gap-2 p-0">
+          {
+            mainProduct.features.map((feature) => (
+              <li class="flex items-start gap-2">
+                <CircleCheck size={18} aria-hidden="true" class="mt-0.5 shrink-0 text-success" />
+                <span>{feature}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <div>
+          <Button variant="secondary" href={mainProduct.href} arrow>
+            Ver cómo funciona<span class="sr-only"> Social Engine</span>
+          </Button>
+        </div>
+      </article>
+
+      <div class="product-next">
+        <h3 class="heading-3 m-0">Estamos evaluando</h3>
+        <ul class="m-0 flex list-none flex-col p-0">
+          {evaluatingProducts.map((name) => <li class="product-next-item">{name}</li>)}
+        </ul>
+        <p class="small m-0 text-ink-muted">Sin fecha, precio ni funciones confirmadas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .products {
+    display: grid;
+    gap: var(--space-6);
+  }
+  .product-main,
+  .product-next {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    background: var(--surface-raised);
+  }
+  .product-next-item {
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .product-next-item:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  @media (min-width: 1024px) {
+    .products {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+    .product-main {
+      padding: var(--space-8);
+    }
+  }
+</style>

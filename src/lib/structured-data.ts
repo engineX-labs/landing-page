@@ -12,7 +12,7 @@ interface StructuredDataInput {
 export function buildStructuredData({ site, whatsappNumber }: StructuredDataInput) {
   const orgId = site ? `${site}/#organization` : "#organization";
   const organization: Record<string, unknown> = {
-    "@type": ["Organization", "ProfessionalService"],
+    "@type": "Organization",
     "@id": orgId,
     name: "engineX",
     description,

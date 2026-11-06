@@ -84,7 +84,7 @@ test("teclado: el foco se ve con el anillo de 2px en todo lo clickeable", async 
   expect(await outlineOf(page)).toMatchObject({ style: "solid", width: "2px", offset: "2px" });
 
   const seen = new Set<string>();
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 10; i++) {
     await page.keyboard.press("Tab");
     const info = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement;
@@ -96,7 +96,7 @@ test("teclado: el foco se ve con el anillo de 2px en todo lo clickeable", async 
       width: "2px",
     });
   }
-  expect([...seen]).toEqual(expect.arrayContaining(["Servicios", "Demo", "Ver proyectos"]));
+  expect([...seen]).toEqual(expect.arrayContaining(["Productos", "Demo", "Conocé Social Engine"]));
 });
 
 test("un solo h1, como máximo un display-xl y un solo primary en el hero", async ({ page }) => {
@@ -108,22 +108,20 @@ test("un solo h1, como máximo un display-xl y un solo primary en el hero", asyn
 });
 
 test.describe("hero", () => {
-  test("el primario abre WhatsApp con un saludo y el secundario lleva a proyectos", async ({
+  test("el primario lleva a Social Engine y el secundario abre WhatsApp con un saludo", async ({
     page,
   }) => {
     await page.goto("/");
     const hero = page.locator("#inicio");
     const primary = hero.locator(".ex-btn-primary");
-    await expect(primary).toHaveAccessibleName(/Escribinos por WhatsApp/);
-    await expect(primary).toHaveAttribute("target", "_blank");
-    const url = new URL((await primary.getAttribute("href")) ?? "");
+    await expect(primary).toHaveAccessibleName("Conocé Social Engine");
+    await expect(primary).toHaveAttribute("href", "/social-engine");
+
+    const whatsapp = hero.getByRole("link", { name: /Escribinos por WhatsApp/ });
+    await expect(whatsapp).toHaveAttribute("target", "_blank");
+    const url = new URL((await whatsapp.getAttribute("href")) ?? "");
     expect(url.origin + url.pathname).toBe(`https://wa.me/${E2E_WHATSAPP_NUMBER}`);
     expect(url.searchParams.get("text")).toContain("Hola engineX");
-
-    await expect(hero.getByRole("link", { name: "Ver proyectos" })).toHaveAttribute(
-      "href",
-      "#proyectos",
-    );
   });
 
   test("las capturas del hero son decorativas: no promocionan la demo", async ({ page }) => {
@@ -135,14 +133,16 @@ test.describe("hero", () => {
     await expect(page.locator("#inicio")).not.toContainText("Probala");
   });
 
-  test("presenta a la agencia: etiqueta, titular y tipos de trabajo", async ({ page }) => {
+  test("presenta los productos: etiqueta, titular y lo que hace Social Engine", async ({
+    page,
+  }) => {
     await page.goto("/");
     const hero = page.locator("#inicio");
-    await expect(hero.locator(".hero-eyebrow")).toHaveText("Agencia de desarrollo de software");
+    await expect(hero.locator(".hero-eyebrow")).toHaveText("Productos de software");
     await expect(page.locator("#hero-title")).toHaveText(
-      "Software a medida para negocios que quieren crecer",
+      "Productos de software para negocios que quieren crecer",
     );
-    await expect(hero.locator(".hero-chip")).toHaveCount(4);
+    await expect(hero.locator(".hero-chip")).toHaveCount(3);
     await expect(hero.locator(".hero-visual .device-browser img")).toHaveCount(1);
     await expect(hero.locator(".hero-visual .device-phone img")).toHaveCount(1);
   });
@@ -168,7 +168,7 @@ test.describe("hero", () => {
     await page.goto("/");
     const trust = page.locator("#inicio .hero-trust li");
     await expect(trust).toHaveCount(3);
-    await expect(trust.first()).toHaveText("Propuesta y presupuesto sin cargo");
+    await expect(trust.first()).toHaveText("Prueba gratuita de 7 días");
   });
 });
 
@@ -178,7 +178,7 @@ test.describe("sin JavaScript", () => {
   test("el titular se ve igual: la animación es CSS", async ({ page }) => {
     await page.goto("/");
     const title = page.locator("#hero-title");
-    await expect(title).toHaveText("Software a medida para negocios que quieren crecer");
+    await expect(title).toHaveText("Productos de software para negocios que quieren crecer");
     await expect(title).toHaveCSS("opacity", "1");
     await expect(title).toHaveCSS("transform", "none");
   });
@@ -197,7 +197,7 @@ test("preguntas frecuentes: se abren con teclado y están en el JSON-LD", async 
   await page.goto("/#preguntas");
   const first = page.locator("#preguntas details").first();
   const summary = first.locator("summary");
-  await expect(page.locator("#preguntas details")).toHaveCount(6);
+  await expect(page.locator("#preguntas details")).toHaveCount(8);
   await summary.focus();
   await page.keyboard.press("Enter");
   await expect(first).toHaveAttribute("open", "");
@@ -209,7 +209,7 @@ test("preguntas frecuentes: se abren con teclado y están en el JSON-LD", async 
   const faq = JSON.parse(raw ?? "")["@graph"].find(
     (n: { "@type": string }) => n["@type"] === "FAQPage",
   );
-  expect(faq.mainEntity).toHaveLength(6);
+  expect(faq.mainEntity).toHaveLength(8);
   expect(faq.mainEntity[0].name).toBe(await summary.textContent().then((t) => t?.trim()));
 });
 
@@ -266,13 +266,14 @@ test("la granja: tarjeta con link al sitio en punycode y logo en la barra de cli
   await expect(clientes.getByRole("img", { name: "Freggiaro Frenos y Embragues" })).toBeVisible();
   await expect(clientes.getByRole("listitem")).toHaveCount(2);
   await expect(clientes.getByRole("link")).toHaveCount(0);
-  // La barra va justo debajo del hero.
-  const [hero, barra, servicios] = await Promise.all(
-    ["#inicio", "#clientes-title", "#servicios"].map((sel) =>
+  // Orden: hero, productos, barra de clientes y servicios.
+  const [hero, productos, barra, servicios] = await Promise.all(
+    ["#inicio", "#productos", "#clientes-title", "#servicios"].map((sel) =>
       page.locator(sel).evaluate((el) => el.getBoundingClientRect().top + window.scrollY),
     ),
   );
-  expect(hero).toBeLessThan(barra);
+  expect(hero).toBeLessThan(productos);
+  expect(productos).toBeLessThan(barra);
   expect(barra).toBeLessThan(servicios);
 });
 

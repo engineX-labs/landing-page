@@ -1,5 +1,13 @@
 // robots.txt, sitemap.xml y llms.txt, como funciones puras para poder testearlas.
-import { description, faqs, services, steps } from "./content";
+import {
+  description,
+  evaluatingProducts,
+  faqs,
+  mainProduct,
+  services,
+  steps,
+  supportHours,
+} from "./content";
 import { pageDescription, productName } from "./social-engine-content";
 
 /** Páginas indexables, para el sitemap. */
@@ -74,11 +82,16 @@ export function buildLlmsTxt({
   const out: string[] = [
     "# engineX",
     "",
-    `> Agencia de software de Argentina. ${description}`,
+    `> Empresa de software de Argentina. ${description}`,
     "",
-    "engineX diseña y desarrolla sistemas a medida para negocios que quieren crecer. Trabaja en español, con propuesta y presupuesto sin cargo, y responde las consultas en 24 h.",
+    `engineX crea productos de software listos para usar para negocios que quieren crecer, con suscripción y prueba gratuita de 7 días. Además toma proyectos a medida. Trabaja en español y atiende ${supportHours}, hora de Argentina.`,
     "",
-    "## Servicios",
+    "## Productos",
+    "",
+    `- [${mainProduct.name}](${site ? `${site}${mainProduct.href}` : mainProduct.href}) (${mainProduct.status.toLowerCase()}): ${mainProduct.text}`,
+    `- En evaluación, sin fecha, precio ni funciones confirmadas: ${evaluatingProducts.join(", ")}.`,
+    "",
+    "## Servicios a medida",
     "",
     ...services.map((s) => `- [${s.title}](${link("servicios")}): ${s.text}`),
     "",

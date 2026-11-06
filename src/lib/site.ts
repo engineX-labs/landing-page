@@ -28,6 +28,7 @@ export const whatsappLines = [number, SECONDARY_WHATSAPP_NUMBER].map((n) => ({
 export const demoHref = "/demo/freggiaro";
 
 export const nav = [
+  { href: "#productos", label: "Productos" },
   { href: "#servicios", label: "Servicios" },
   { href: "#proyectos", label: "Proyectos" },
   { href: "#como-trabajamos", label: "Cómo trabajamos" },

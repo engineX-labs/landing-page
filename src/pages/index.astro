@@ -1,4 +1,5 @@
 ---
+import Assistant from "../components/Assistant.astro";
 import Clients from "../components/Clients.astro";
 import ContactForm from "../components/ContactForm.astro";
 import DemoDialog from "../components/DemoDialog.astro";
@@ -8,18 +9,21 @@ import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
 import MobileWhatsappBar from "../components/MobileWhatsappBar.astro";
 import Process from "../components/Process.astro";
+import Products from "../components/Products.astro";
 import Projects from "../components/Projects.astro";
 import Services from "../components/Services.astro";
 import Base from "../layouts/Base.astro";
+import { description } from "../lib/content";
 ---
 
 <Base
-  title="engineX · Software a medida para tu negocio"
-  description="Diseñamos y desarrollamos sistemas de gestión, facturación electrónica ARCA, reservas online, pagos y webs para negocios que quieren crecer."
+  title="engineX · Productos de software para negocios"
+  description={description}
 >
   <Header />
   <main id="contenido" tabindex="-1">
     <Hero />
+    <Products />
     <Clients />
     <Services />
     <Projects />
@@ -29,5 +33,6 @@ import Base from "../layouts/Base.astro";
   </main>
   <Footer />
   <MobileWhatsappBar />
+  <Assistant page="enginex" />
   <DemoDialog src="/demo/freggiaro" title="Demo de Freggiaro" />
 </Base>

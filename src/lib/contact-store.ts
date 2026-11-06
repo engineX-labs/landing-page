@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { Ratelimit } from "@upstash/ratelimit";
+import { type Duration, Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { ContactInput } from "./contact";
 import type { WaitlistInput } from "./waitlist";
@@ -125,10 +125,11 @@ export const RATE_LIMIT = { messages: 5, window: "10 m" } as const;
 export function upstashRateLimiter(
   redis: Redis,
   prefix = CONTACTS_TARGET.limitPrefix,
+  { messages, window } = RATE_LIMIT as { messages: number; window: Duration },
 ): ContactRateLimiter {
   const ratelimit = new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(RATE_LIMIT.messages, RATE_LIMIT.window),
+    limiter: Ratelimit.slidingWindow(messages, window),
     prefix,
   });
   return {

@@ -87,6 +87,7 @@ Cierra el pendiente de la revisión anterior (sin límite de envíos), con `@ups
 | `SITE_URL` | Dominio con `https://` y sin barra final; mientras tanto, la URL `*.vercel.app` del proyecto |
 | `WHATSAPP_NUMBER` | `5493548545450` |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Las carga sola la integración de Upstash |
+| `GEMINI_API_KEY` | Key de Gemini para Fidel (opcional; sin ella el widget no aparece). Necesita Redis |
 
 ### Configuración del proyecto en Vercel (va al README)
 

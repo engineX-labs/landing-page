@@ -1,0 +1,55 @@
+---
+import CircleCheck from "@lucide/astro/icons/circle-check";
+import { buildWhatsappUrl } from "../../lib/contact";
+import { whatsapp } from "../../lib/site";
+import { trial, whatsappGreeting } from "../../lib/social-engine-content";
+import Button from "../Button.astro";
+
+const talkUrl = buildWhatsappUrl(whatsapp.number, whatsappGreeting);
+---
+
+<section id="prueba" class="se-section" aria-labelledby="prueba-title">
+  <div class="container-x">
+    <div class="se-head se-reveal">
+      <h2 id="prueba-title" class="se-h2">{trial.title}</h2>
+      <p class="se-lead">{trial.text}</p>
+      <ul class="se-guarantees m-0 list-none p-0">
+        {
+          trial.points.map((text) => (
+            <li>
+              <CircleCheck size={18} aria-hidden="true" class="text-success" />
+              {text}
+            </li>
+          ))
+        }
+      </ul>
+      <div class="se-trial-actions">
+        <Button variant="secondary" href="#lista">Sumarme a la lista</Button>
+        <Button variant="ghost" href={talkUrl} target="_blank" rel="noopener">
+          Consultar por WhatsApp<span class="sr-only"> (se abre en otra pestaña)</span>
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .se-guarantees {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-6);
+    font-size: 14px;
+  }
+  .se-guarantees li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .se-trial-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+</style>

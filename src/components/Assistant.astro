@@ -1,0 +1,604 @@
+---
+import MessageCircle from "@lucide/astro/icons/message-circle";
+import Send from "@lucide/astro/icons/send";
+import X from "@lucide/astro/icons/x";
+import {
+  ASSISTANT_INTRO,
+  ASSISTANT_LIMITS,
+  ASSISTANT_NAME,
+  type AssistantPage,
+} from "../lib/assistant";
+import { WAITLIST_HREF } from "../lib/assistant-config";
+import { buildWhatsappUrl } from "../lib/contact";
+import { whatsapp } from "../lib/site";
+
+interface Props {
+  page: AssistantPage;
+}
+
+const { page } = Astro.props;
+const intro = ASSISTANT_INTRO[page];
+const whatsappUrl = buildWhatsappUrl(whatsapp.number, "Hola, vengo de la web de engineX.");
+const titleId = `assistant-title-${page}`;
+---
+
+<!--
+  Fidel, el asistente de IA. Arranca oculto: el script pregunta a /api/assistant si está habilitado
+  (hay key y límites) y recién entonces lo muestra. Sin JavaScript no se ve.
+-->
+<div
+  class:list={["assistant", page === "enginex" && "assistant-home"]}
+  hidden
+  data-assistant
+  data-page={page}
+  data-whatsapp={whatsappUrl}
+  data-lista={WAITLIST_HREF}
+  data-greeting={intro.greeting}
+  data-suggestions={JSON.stringify(intro.suggestions)}
+  data-max={ASSISTANT_LIMITS.userChars}
+>
+  <div
+    class:list={["assistant-panel", page === "social-engine" && "se-card"]}
+    role="dialog"
+    aria-labelledby={titleId}
+    data-assistant-panel
+    data-open="false"
+    hidden
+  >
+    <header class="assistant-header">
+      <div class="flex min-w-0 flex-col">
+        <h2 id={titleId} class="body-strong m-0">{ASSISTANT_NAME}</h2>
+        <p class="small m-0 text-ink-muted">Asistente de IA de engineX</p>
+      </div>
+      <div class="flex shrink-0 items-center gap-1">
+        <button type="button" class="assistant-icon-btn small" data-assistant-reset>
+          Empezar de nuevo
+        </button>
+        <button type="button" class="assistant-icon-btn" data-assistant-close>
+          <X size={20} aria-hidden="true" />
+          <span class="sr-only">Cerrar a {ASSISTANT_NAME}</span>
+        </button>
+      </div>
+    </header>
+
+    <div
+      class="assistant-log"
+      role="log"
+      aria-live="polite"
+      aria-label={`Conversación con ${ASSISTANT_NAME}`}
+      data-assistant-log
+      tabindex="0"
+    >
+    </div>
+
+    <div class="assistant-suggestions" data-assistant-suggestions></div>
+
+    <form class="assistant-form" data-assistant-form novalidate>
+      <label class="sr-only" for={`assistant-input-${page}`}>Tu pregunta para {ASSISTANT_NAME}</label>
+      <div class="assistant-field">
+        <textarea
+          id={`assistant-input-${page}`}
+          class="assistant-input"
+          rows="1"
+          maxlength={ASSISTANT_LIMITS.userChars}
+          placeholder="Escribí tu pregunta"
+          autocomplete="off"
+          data-assistant-input></textarea>
+        <button type="submit" class="assistant-send" data-assistant-send>
+          <Send size={18} aria-hidden="true" />
+          <span class="sr-only">Enviar</span>
+        </button>
+      </div>
+      <p class="assistant-counter small m-0" data-assistant-counter hidden></p>
+      <p class="assistant-note small m-0 text-ink-muted">
+        {ASSISTANT_NAME} es un asistente de IA y puede equivocarse. Para presupuestos, escribinos por WhatsApp.
+      </p>
+    </form>
+  </div>
+
+  <button
+    type="button"
+    class="ex-btn ex-btn-secondary ex-btn-md assistant-toggle"
+    aria-expanded="false"
+    data-assistant-toggle
+  >
+    <MessageCircle size={20} aria-hidden="true" />
+    <span>Preguntale a {ASSISTANT_NAME}</span>
+  </button>
+</div>
+
+<style>
+  .assistant {
+    position: fixed;
+    right: var(--space-4);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-3);
+  }
+  .assistant[hidden] {
+    display: none;
+  }
+  /* La barra de WhatsApp (solo móvil, home) ocupa el borde de abajo: el botón queda arriba. */
+  @media (max-width: 767px) {
+    .assistant-home {
+      bottom: calc(72px + var(--space-3) + env(safe-area-inset-bottom));
+    }
+  }
+
+  .assistant-toggle {
+    background: var(--surface-raised);
+    border-color: var(--line-strong);
+  }
+  :global(html.se) .assistant-toggle {
+    border-radius: var(--radius-pill);
+  }
+
+  .assistant-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(400px, calc(100vw - 2 * var(--space-4)));
+    max-height: min(560px, calc(100dvh - 140px));
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    /* Cerrado: sale rápido y recién después deja de ser visible. */
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: hidden;
+    transition:
+      transform 150ms var(--ease-out),
+      opacity 150ms var(--ease-out),
+      visibility 0s linear 150ms;
+  }
+  .assistant-panel[hidden] {
+    display: flex;
+  }
+  .assistant-panel[data-open="true"] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      opacity var(--duration-base) var(--ease-out),
+      visibility 0s;
+  }
+  @media (max-width: 767px) {
+    .assistant-panel {
+      max-height: calc(100dvh - 180px);
+    }
+  }
+
+  .assistant-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--line);
+  }
+  .assistant-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 var(--space-2);
+    background: transparent;
+    color: var(--ink-muted);
+    border: 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .assistant-log {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-height: 140px;
+    padding: var(--space-4);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  :global(.assistant-msg) {
+    max-width: 88%;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    line-height: 22px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  :global(.assistant-msg[data-role="assistant"]) {
+    align-self: flex-start;
+    background: var(--surface-inset);
+    color: var(--ink);
+  }
+  :global(.assistant-msg[data-role="user"]) {
+    align-self: flex-end;
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  :global(.assistant-msg[data-role="error"]) {
+    align-self: flex-start;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+  }
+  :global(.assistant-msg a) {
+    color: var(--accent-ink);
+    text-decoration: underline;
+  }
+
+  .assistant-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: 0 var(--space-4) var(--space-3);
+  }
+  .assistant-suggestions:empty {
+    display: none;
+  }
+  :global(.assistant-chip) {
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .assistant-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border-top: 1px solid var(--line);
+  }
+  .assistant-field {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+  .assistant-input {
+    flex: 1;
+    min-height: 44px;
+    max-height: 120px;
+    padding: var(--space-3);
+    box-sizing: border-box;
+    background: var(--surface-inset);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    font: inherit;
+    /* 16px: en iOS menos de eso hace zoom al enfocar. */
+    font-size: 16px;
+    line-height: 20px;
+    resize: none;
+  }
+  .assistant-input::placeholder {
+    color: var(--ink-muted);
+  }
+  .assistant-send {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--accent-ink);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+  .assistant-send:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  :global(html.se) .assistant-send,
+  :global(html.se) .assistant-input {
+    border-radius: var(--radius-pill);
+  }
+  .assistant-counter {
+    color: var(--ink-muted);
+    text-align: right;
+  }
+
+  .assistant-toggle:focus-visible,
+  .assistant-icon-btn:focus-visible,
+  .assistant-send:focus-visible,
+  .assistant-input:focus-visible,
+  .assistant-log:focus-visible,
+  :global(.assistant-chip:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .assistant-toggle:hover,
+    :global(.assistant-chip:hover),
+    .assistant-send:hover:not(:disabled) {
+      border-color: var(--ink);
+    }
+    .assistant-icon-btn:hover {
+      color: var(--ink);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .assistant-panel,
+    .assistant-panel[data-open="true"] {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import {
+    ASSISTANT_FALLBACK,
+    ASSISTANT_LIMITS,
+    type AssistantMessage,
+    type AssistantResponseBody,
+    splitAssistantText,
+  } from "../lib/assistant";
+  import { LINK_TOKENS } from "../lib/assistant-config";
+
+  const root = document.querySelector<HTMLElement>("[data-assistant]");
+
+  async function init(root: HTMLElement) {
+    const q = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector);
+    const panel = q<HTMLElement>("[data-assistant-panel]");
+    const toggle = q<HTMLButtonElement>("[data-assistant-toggle]");
+    const closeBtn = q<HTMLButtonElement>("[data-assistant-close]");
+    const resetBtn = q<HTMLButtonElement>("[data-assistant-reset]");
+    const log = q<HTMLElement>("[data-assistant-log]");
+    const suggestionsEl = q<HTMLElement>("[data-assistant-suggestions]");
+    const form = q<HTMLFormElement>("[data-assistant-form]");
+    const input = q<HTMLTextAreaElement>("[data-assistant-input]");
+    const send = q<HTMLButtonElement>("[data-assistant-send]");
+    const counter = q<HTMLElement>("[data-assistant-counter]");
+    if (!panel || !toggle || !closeBtn || !resetBtn || !log || !suggestionsEl) return;
+    if (!form || !input || !send || !counter) return;
+
+    // Solo se muestra si el servidor tiene la key y los límites listos.
+    try {
+      const status = await fetch("/api/assistant", { headers: { Accept: "application/json" } });
+      const body = (await status.json()) as { enabled?: boolean };
+      if (!status.ok || !body.enabled) return;
+    } catch {
+      return;
+    }
+    root.hidden = false;
+
+    const page = root.dataset.page ?? "enginex";
+    const storageKey = `fidel:${page}`;
+    const whatsapp = root.dataset.whatsapp ?? "";
+    const waitlist = root.dataset.lista ?? "";
+    const greeting = root.dataset.greeting ?? "";
+    const suggestions = JSON.parse(root.dataset.suggestions ?? "[]") as string[];
+    const max = ASSISTANT_LIMITS.userChars;
+
+    let messages: AssistantMessage[] = [];
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(storageKey) ?? "[]");
+      if (Array.isArray(saved)) messages = saved;
+    } catch {
+      messages = [];
+    }
+    let busy = false;
+    let typing: HTMLElement | null = null;
+
+    const save = () => {
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(messages));
+      } catch {
+        // Sin sessionStorage la conversación vive solo mientras la página esté abierta.
+      }
+    };
+
+    const appendParts = (el: HTMLElement, text: string) => {
+      for (const part of splitAssistantText(text)) {
+        if (part.type === "text") {
+          el.append(document.createTextNode(part.text));
+          continue;
+        }
+        const { label, external } = LINK_TOKENS[part.token];
+        const link = document.createElement("a");
+        link.textContent = label;
+        link.href = part.token === "whatsapp" ? whatsapp : waitlist;
+        if (external) {
+          link.target = "_blank";
+          link.rel = "noopener";
+        }
+        el.append(link);
+        if (external) {
+          const hint = document.createElement("span");
+          hint.className = "sr-only";
+          hint.textContent = " (se abre en otra pestaña)";
+          el.append(hint);
+        }
+      }
+    };
+
+    const add = (role: "user" | "assistant" | "error", text: string) => {
+      const el = document.createElement("p");
+      el.className = "assistant-msg";
+      el.dataset.role = role;
+      // Nunca HTML: el texto va como nodo de texto y solo los marcadores permitidos son links.
+      if (role === "assistant") appendParts(el, text);
+      else el.textContent = text;
+      log.append(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    };
+
+    const addFallback = (text: string) => {
+      const el = add("error", `${text} `);
+      const link = document.createElement("a");
+      link.href = whatsapp;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "Escribinos por WhatsApp";
+      const hint = document.createElement("span");
+      hint.className = "sr-only";
+      hint.textContent = " (se abre en otra pestaña)";
+      el.append(link, hint);
+    };
+
+    const renderSuggestions = () => {
+      suggestionsEl.replaceChildren();
+      if (messages.length > 0) return;
+      for (const text of suggestions) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "assistant-chip";
+        chip.textContent = text;
+        chip.addEventListener("click", () => void submit(text));
+        suggestionsEl.append(chip);
+      }
+    };
+
+    const render = () => {
+      log.replaceChildren();
+      add("assistant", greeting);
+      for (const m of messages) add(m.role, m.content);
+      renderSuggestions();
+    };
+
+    const updateCounter = () => {
+      const left = max - input.value.length;
+      counter.hidden = left > 100;
+      counter.textContent = `${input.value.length}/${max}`;
+    };
+
+    const setBusy = (value: boolean) => {
+      busy = value;
+      send.disabled = value;
+      log.setAttribute("aria-busy", String(value));
+    };
+
+    const resize = () => {
+      input.style.height = "auto";
+      input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+    };
+
+    const open = () => {
+      panel.hidden = false;
+      // El panel recién visible necesita un cuadro antes de animar.
+      requestAnimationFrame(() => {
+        panel.dataset.open = "true";
+        // Con el panel todavía invisible el navegador no deja enfocar el campo.
+        input.focus();
+      });
+      toggle.setAttribute("aria-expanded", "true");
+    };
+
+    const close = (returnFocus = true) => {
+      panel.dataset.open = "false";
+      toggle.setAttribute("aria-expanded", "false");
+      window.setTimeout(() => {
+        if (panel.dataset.open === "false") panel.hidden = true;
+      }, 160);
+      if (returnFocus) toggle.focus();
+    };
+
+    const submit = async (raw: string) => {
+      const text = raw.trim();
+      if (!text || busy) return;
+      if (text.length > max) return;
+      messages.push({ role: "user", content: text });
+      add("user", text);
+      suggestionsEl.replaceChildren();
+      input.value = "";
+      resize();
+      updateCounter();
+      setBusy(true);
+      typing = add("assistant", "Fidel está escribiendo…");
+
+      const fail = (message: string) => {
+        // El mensaje no llegó a responderse: se saca del historial y vuelve al campo.
+        messages.pop();
+        log.lastElementChild?.remove();
+        input.value = text;
+        resize();
+        updateCounter();
+        addFallback(message);
+      };
+
+      try {
+        const response = await fetch("/api/assistant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page, messages, company: "" }),
+        });
+        const body = (await response.json()) as AssistantResponseBody;
+        typing?.remove();
+        typing = null;
+        if (response.ok && body.ok) {
+          messages.push({ role: "assistant", content: body.reply });
+          add("assistant", body.reply);
+          save();
+        } else {
+          fail(body.ok ? ASSISTANT_FALLBACK : body.code === "invalid" ? body.error : fallbackFor(body));
+        }
+      } catch {
+        typing?.remove();
+        typing = null;
+        fail(ASSISTANT_FALLBACK);
+      } finally {
+        setBusy(false);
+        if (panel.dataset.open === "true") input.focus();
+      }
+    };
+
+    function fallbackFor(body: Extract<AssistantResponseBody, { ok: false }>) {
+      return body.code === "rate_limited" ? body.error : ASSISTANT_FALLBACK;
+    }
+
+    toggle.addEventListener("click", () => {
+      if (panel.dataset.open === "true") close();
+      else open();
+    });
+    closeBtn.addEventListener("click", () => close());
+    resetBtn.addEventListener("click", () => {
+      messages = [];
+      save();
+      render();
+      input.focus();
+    });
+    root.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && panel.dataset.open === "true") {
+        event.stopPropagation();
+        close();
+      }
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void submit(input.value);
+    });
+    input.addEventListener("keydown", (event) => {
+      // Enter envía; Shift+Enter hace un salto de línea (y no mientras se compone con un IME).
+      if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        void submit(input.value);
+      }
+    });
+    input.addEventListener("input", () => {
+      resize();
+      updateCounter();
+    });
+
+    render();
+  }
+
+  if (root) void init(root);
+</script>
