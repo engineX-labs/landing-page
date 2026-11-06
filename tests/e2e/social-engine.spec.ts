@@ -3,7 +3,7 @@ import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { E2E_SITE_URL, E2E_WAITLIST_DIR } from "../../playwright.config";
 
-const VERBS = ["Planificá", "Publicá", "Respondé", "Medí"];
+const VERBS = ["Entendé", "Compará", "Decidí", "Mejorá"];
 
 async function outlineOf(page: Page) {
   return page.evaluate(() => {
@@ -21,7 +21,7 @@ test.describe("portada", () => {
     await page.goto("/social-engine");
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1 .sr-only")).toHaveText(
-      "Planificá, publicá, respondé y medí tus redes sin saltar de app en app",
+      "Entendé, compará, decidí y mejorá lo que funciona en tus redes sin descifrar métricas",
     );
     await expect(page.locator("h1 .se-rotator > span")).toHaveText(VERBS);
     await expect(page.locator("h1 [aria-hidden='true']")).toHaveCount(1);
@@ -143,21 +143,21 @@ test.describe("módulos", () => {
   test("las flechas cambian la pestaña activa y su panel", async ({ page }) => {
     await page.goto("/social-engine");
     const tabs = page.getByRole("tab");
-    await expect(tabs).toHaveCount(7);
+    await expect(tabs).toHaveCount(4);
     await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#panel-sync")).toBeVisible();
+    await expect(page.locator("#panel-connect")).toBeVisible();
 
     await tabs.first().focus();
     await page.keyboard.press("ArrowDown");
     await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
     await expect(tabs.nth(1)).toBeFocused();
-    await expect(page.locator("#panel-planning")).toBeVisible();
-    await expect(page.locator("#panel-sync")).toBeHidden();
+    await expect(page.locator("#panel-report")).toBeVisible();
+    await expect(page.locator("#panel-connect")).toBeHidden();
 
     await page.keyboard.press("End");
-    await expect(page.locator("#panel-assistant")).toBeVisible();
+    await expect(page.locator("#panel-ideas")).toBeVisible();
     await page.keyboard.press("ArrowDown");
-    await expect(page.locator("#panel-sync")).toBeVisible();
+    await expect(page.locator("#panel-connect")).toBeVisible();
   });
 
   test("los botones anterior y siguiente recorren los módulos y mueven los puntos", async ({
@@ -165,11 +165,11 @@ test.describe("módulos", () => {
   }) => {
     await page.goto("/social-engine");
     await page.getByRole("button", { name: "Módulo siguiente" }).click();
-    await expect(page.locator("#panel-planning")).toBeVisible();
+    await expect(page.locator("#panel-report")).toBeVisible();
     await expect(page.locator(".se-dot[data-active]")).toHaveCount(1);
     await page.getByRole("button", { name: "Módulo anterior" }).click();
     await page.getByRole("button", { name: "Módulo anterior" }).click();
-    await expect(page.locator("#panel-assistant")).toBeVisible();
+    await expect(page.locator("#panel-ideas")).toBeVisible();
   });
 });
 
@@ -241,7 +241,7 @@ test.describe("movimiento", () => {
     );
     expect(hidden).toBe(0);
     await expect(page.getByRole("heading", { name: /Cómo funciona/ })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Un plan para cada forma/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Probalo 7 días sin costo/ })).toBeVisible();
     await context.close();
   });
 });

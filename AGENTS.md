@@ -131,6 +131,9 @@ bajo `html.se` (la clase la pone `Base` con `theme="papel"`):
   `opacity`, pausados fuera de pantalla y quietos con `prefers-reduced-motion`.
 - Las apariciones solo ocultan contenido con `html.js`: sin JavaScript todo se ve.
 - Un solo botón `primary` por vista. Sin precios ni cifras de uso hasta tener datos reales.
+- Alcance del copy: el MVP (Instagram y Facebook; informe semanal, chat con métricas, 3 ideas por
+  semana; prueba de 7 días). No prometer programación, bandeja, automatizaciones, otras redes ni
+  planes hasta que existan.
 
 ## Git
 

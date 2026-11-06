@@ -1,0 +1,38 @@
+---
+import MockWindow from "./MockWindow.astro";
+
+// Informe de ejemplo de una marca ficticia. Los números son ilustrativos.
+const best = [
+  { net: "IG", title: "Receta de otoño", note: "Más guardados", tone: 1 },
+  { net: "IG", title: "Detrás de escena", note: "Más compartidos", tone: 2 },
+  { net: "FB", title: "Nueva carta", note: "Más comentarios", tone: 3 },
+];
+---
+
+<MockWindow title="Informe semanal · Del 3 al 9 de noviembre">
+  <div class="mk-stack">
+    <span class="mk-muted">Tus 3 mejores publicaciones</span>
+    {
+      best.map((post, i) => (
+        <div class={`mk-post mk-tone-${post.tone}`}>
+          <div class="mk-row mk-between">
+            <span class="mk-row">
+              <b>{i + 1}</b>
+              <span class="mk-net">{post.net}</span>
+              <span class="mk-post-t">{post.title}</span>
+            </span>
+            <span class="mk-ok">{post.note}</span>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+  <div class="mk-card">
+    <span class="mk-muted">La que peor funcionó</span>
+    <span><span class="mk-net">FB</span> <b>Promo del finde</b> · poco alcance</span>
+  </div>
+  <div class="mk-card mk-reco">
+    <span class="mk-muted">Qué hacer esta semana</span>
+    <b>Repetí el formato de receta: es lo que más guardan.</b>
+  </div>
+</MockWindow>

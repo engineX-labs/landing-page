@@ -4,7 +4,7 @@ import FileChartColumn from "@lucide/astro/icons/file-chart-column";
 import Lightbulb from "@lucide/astro/icons/lightbulb";
 import MessageCircle from "@lucide/astro/icons/message-circle";
 import dashboardDesktop from "../assets/projects/freggiaro-desktop.jpg";
-import reservoMobile from "../assets/projects/reservo-mobile.jpg";
+import dashboardMobile from "../assets/projects/freggiaro-mobile.jpg";
 import { heroChips, heroEyebrow, heroLead, tagline, trustSignals } from "../lib/content";
 import { whatsapp } from "../lib/site";
 import Button from "./Button.astro";
@@ -53,7 +53,7 @@ const chipIcons = [FileChartColumn, Lightbulb, MessageCircle];
     -->
     <div class="hero-visual" aria-hidden="true">
       <div data-hero style="--i: 5">
-        <DeviceShowcase desktop={dashboardDesktop} mobile={reservoMobile} size="hero" />
+        <DeviceShowcase desktop={dashboardDesktop} mobile={dashboardMobile} size="hero" />
       </div>
       {
         heroChips.map((chip, i) => {
