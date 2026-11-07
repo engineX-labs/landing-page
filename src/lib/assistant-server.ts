@@ -6,7 +6,7 @@ import {
   validateAssistant,
 } from "./assistant";
 import { type AssistantBackend, assistantBackendFromEnv } from "./assistant-limits";
-import { type AssistantProject, buildSystemPrompt } from "./assistant-prompt";
+import { buildSystemPrompt } from "./assistant-prompt";
 import { GEMINI_DEFAULTS, type GeminiSettings, geminiSettingsFromEnv } from "./assistant-settings";
 import { readJsonBody } from "./contact-server";
 import { clientIp } from "./contact-store";
@@ -18,21 +18,16 @@ export interface AssistantConfig extends AssistantBackend {
   model: string;
   /** Ajustes de la llamada a Gemini; sin ellos, los valores por defecto. */
   gemini?: GeminiSettings;
-  projects: AssistantProject[];
   fetch?: typeof fetch;
 }
 
 /** Se lee en runtime desde process.env: en Astro 7 import.meta.env queda fijo en el build. */
-export function assistantConfigFromEnv(
-  projects: AssistantProject[],
-  env: NodeJS.ProcessEnv = process.env,
-): AssistantConfig {
+export function assistantConfigFromEnv(env: NodeJS.ProcessEnv = process.env): AssistantConfig {
   return {
     ...assistantBackendFromEnv(env),
     apiKey: env.GEMINI_API_KEY,
     model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
     gemini: geminiSettingsFromEnv(env),
-    projects,
   };
 }
 
@@ -68,7 +63,6 @@ export function extractReply(data: unknown): string | undefined {
 
 async function askGemini(
   config: AssistantConfig,
-  page: Parameters<typeof buildSystemPrompt>[0],
   messages: AssistantMessage[],
 ): Promise<string | undefined> {
   const doFetch = config.fetch ?? fetch;
@@ -77,7 +71,7 @@ async function askGemini(
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": config.apiKey ?? "" },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: buildSystemPrompt(page, config.projects) }] },
+      systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
       contents: messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
@@ -142,7 +136,7 @@ export async function handleAssistant(
   }
 
   try {
-    const reply = await askGemini(config, result.data.page, result.data.messages);
+    const reply = await askGemini(config, result.data.messages);
     if (!reply) throw new Error("Gemini no devolvió texto");
     return respond({ ok: true, reply }, 200);
   } catch (error) {

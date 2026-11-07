@@ -1,6 +1,14 @@
 // Datos que Fidel puede decir de engineX (sección 11 de su documento de contexto).
 // Un dato vacío se le pasa al modelo como "no confirmado": nunca llegan marcadores sin completar.
-import { evaluatingProducts, PRICE_FROM, supportHours } from "./content";
+
+/** Atención humana por WhatsApp. */
+export const supportHours = "de lunes a sábados, de 10 a 18 h";
+
+/**
+ * Precio "desde" de Social Engine, ya formateado (por ejemplo "$ 15.000 por mes").
+ * Lo define el equipo. Vacío, las preguntas del precio y Fidel responden sin cifra.
+ */
+export const PRICE_FROM = "";
 
 export const assistantFacts = {
   /** Atención humana por WhatsApp. */
@@ -9,8 +17,6 @@ export const assistantFacts = {
   trial: "7 días",
   /** Precio de Social Engine; vacío = todavía no está definido. */
   price: PRICE_FROM,
-  /** Líneas de producto en evaluación. */
-  evaluating: evaluatingProducts,
   instagram: "@enginex.labs",
 } as const;
 
@@ -22,4 +28,4 @@ export const LINK_TOKENS = {
 export type LinkToken = keyof typeof LINK_TOKENS;
 
 /** Lista de espera de Social Engine. */
-export const WAITLIST_HREF = "/social-engine#lista";
+export const WAITLIST_HREF = "/#lista";

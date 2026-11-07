@@ -1,38 +1,59 @@
 ---
 import Assistant from "../components/Assistant.astro";
-import Clients from "../components/Clients.astro";
-import ContactForm from "../components/ContactForm.astro";
-import DemoDialog from "../components/DemoDialog.astro";
 import Faq from "../components/Faq.astro";
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
-import Hero from "../components/Hero.astro";
-import MobileWhatsappBar from "../components/MobileWhatsappBar.astro";
-import Process from "../components/Process.astro";
-import Products from "../components/Products.astro";
-import Projects from "../components/Projects.astro";
-import Services from "../components/Services.astro";
+import AnnouncementBar from "../components/social-engine/AnnouncementBar.astro";
+import Benefits from "../components/social-engine/Benefits.astro";
+import ClosingCta from "../components/social-engine/ClosingCta.astro";
+import Connector from "../components/social-engine/Connector.astro";
+import HowItWorks from "../components/social-engine/HowItWorks.astro";
+import Modules from "../components/social-engine/Modules.astro";
+import Networks from "../components/social-engine/Networks.astro";
+import SeFooter from "../components/social-engine/SeFooter.astro";
+import SeHero from "../components/social-engine/SeHero.astro";
+import SeNav from "../components/social-engine/SeNav.astro";
+import Trial from "../components/social-engine/Trial.astro";
 import Base from "../layouts/Base.astro";
-import { description } from "../lib/content";
+import { whatsapp } from "../lib/site";
+import { faqs, pageDescription, pageTitle, productName } from "../lib/social-engine-content";
+import { buildStructuredData } from "../lib/structured-data";
+import "../styles/social-engine.css";
+import "../styles/social-engine-motion.css";
+
+const structuredData = buildStructuredData({
+  site: Astro.site?.origin,
+  whatsappNumber: whatsapp.number,
+});
 ---
 
 <Base
-  title="engineX · Productos de software para negocios"
-  description={description}
+  title={pageTitle}
+  description={pageDescription}
+  theme="papel"
+  siteName={productName}
+  structuredData={structuredData}
 >
-  <Header />
+  <!-- Las animaciones de aparición solo ocultan contenido si hay JS: sin JS todo se ve. -->
+  <script is:inline slot="head">
+    document.documentElement.classList.add("js");
+  </script>
+
+  <AnnouncementBar />
+  <SeNav />
   <main id="contenido" tabindex="-1">
-    <Hero />
-    <Products />
-    <Clients />
-    <Services />
-    <Projects />
-    <Process />
-    <Faq />
-    <ContactForm />
+    <SeHero />
+    <Networks />
+    <Connector />
+    <Modules />
+    <HowItWorks />
+    <Benefits />
+    <Trial />
+    <Faq items={faqs} />
+    <ClosingCta />
   </main>
-  <Footer />
-  <MobileWhatsappBar />
-  <Assistant page="enginex" />
-  <DemoDialog src="/demo/freggiaro" title="Demo de Freggiaro" />
+  <SeFooter />
+  <Assistant />
 </Base>
+
+<script>
+  import "../scripts/social-engine";
+</script>

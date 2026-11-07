@@ -7,6 +7,10 @@ export const pageTitle = "Social Engine · Entendé qué funciona en tus redes";
 export const pageDescription =
   "Social Engine es la herramienta de engineX que lee las métricas de tu Instagram y tu Facebook y te dice qué publicaciones funcionan y qué repetir. Prueba gratuita de 7 días. Sumate a la lista de espera.";
 
+/** Qué es engineX, para el JSON-LD y /llms.txt. */
+export const companyDescription =
+  "engineX crea productos de software para negocios que quieren crecer. Hoy se dedica a Social Engine.";
+
 export const announcement = "Social Engine está en beta privada";
 export const announcementLink = "Sumate a la lista";
 
