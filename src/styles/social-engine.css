@@ -1,10 +1,21 @@
 /*
- * Social Engine · tema Papel del sistema de engineX, con el movimiento de la landing de Xubio.
- * Todo vive bajo html.se: es la excepción acotada a "solo tema Carbón" (como la demo de Freggiaro).
+ * Social Engine · dos temas del sistema de engineX: Carbón (oscuro, el de `tokens.css`) y Papel
+ * (claro, `html[data-theme="light"]`), con el movimiento de la landing de Xubio.
  * Solo se animan transform y opacity. Sin JS (html:not(.js)) todo el contenido se ve.
  */
 
-html.se {
+:root {
+  /* Degradé acotado: ignite → magenta → violeta. Para bordes, líneas y brillos. */
+  --se-gradient: linear-gradient(90deg, #ff5b2e, #e0307a 55%, #7c5cff);
+  /* Para texto sobre Carbón: las mismas tres paradas, aclaradas para pasar 4,5:1. */
+  --se-gradient-text: linear-gradient(90deg, #ff7a52, #ff6fae 55%, #a78bff);
+  /* Carbón separa con bordes, sin sombras. */
+  --se-shadow-card: none;
+  --se-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --se-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-theme="light"] {
   color-scheme: light;
   --surface: #f4f4f2;
   --surface-raised: #ffffff;
@@ -24,16 +35,13 @@ html.se {
   --glass-bg: rgb(255 255 255 / 0.74);
   --glass-border: rgb(14 17 22 / 0.1);
 
-  /* Degradé acotado: ignite → magenta → violeta. Para bordes, líneas y brillos. */
-  --se-gradient: linear-gradient(90deg, #ff5b2e, #e0307a 55%, #7c5cff);
-  /* Para texto: las mismas tres paradas, oscurecidas para pasar 4,5:1 sobre Papel. */
+  /* Para texto sobre Papel: las mismas tres paradas, oscurecidas para pasar 4,5:1. */
   --se-gradient-text: linear-gradient(90deg, #b83510, #a1124f 55%, #5a3bd6);
+  /* Papel sí lleva sombras difusas, solo en `.se-card`. */
   --se-shadow-card: 0 10px 30px rgb(14 17 22 / 0.08);
-  --se-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --se-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-html.se .ex-btn {
+.ex-btn {
   border-radius: var(--radius-pill);
 }
 
@@ -158,6 +166,11 @@ html.se .ex-btn {
     background: var(--glass-bg);
     backdrop-filter: blur(16px) saturate(140%);
   }
+}
+.se-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 .se-nav-links {
   display: none;

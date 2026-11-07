@@ -10,7 +10,7 @@ node_modules/
 .env.*
 !.env.example
 
-# mensajes de contacto guardados en runtime
+# emails de la lista de espera guardados en runtime
 data/
 
 # tests

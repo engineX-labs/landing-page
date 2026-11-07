@@ -1,5 +1,13 @@
-// Interacciones de /social-engine. Sin librerías: IntersectionObserver, scroll con rAF y fetch.
+// Interacciones de la landing. Sin librerías: IntersectionObserver, scroll con rAF y fetch.
 import { connectorOffset, nextTabIndex } from "../lib/social-engine-ui";
+import {
+  isTheme,
+  otherTheme,
+  resolveTheme,
+  THEME_COLORS,
+  THEME_STORAGE_KEY,
+  type Theme,
+} from "../lib/theme";
 import { validateWaitlistEmail, type WaitlistResponseBody } from "../lib/waitlist";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -158,6 +166,51 @@ function setupWaitlist() {
   }
 }
 
+/** Tema actual: el que ya fijó el script del <head>. */
+function currentTheme(): Theme {
+  const value = document.documentElement.dataset.theme;
+  return isTheme(value) ? value : "dark";
+}
+
+function storedTheme(): string | null {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function applyTheme(theme: Theme) {
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", THEME_COLORS[theme]);
+  for (const button of document.querySelectorAll<HTMLElement>("[data-theme-toggle]")) {
+    button.setAttribute("aria-pressed", String(theme === "dark"));
+  }
+}
+
+/** Botón de tema: alterna, recuerda la elección y, sin elección, sigue al dispositivo. */
+function setupTheme() {
+  applyTheme(currentTheme());
+  for (const button of document.querySelectorAll<HTMLElement>("[data-theme-toggle]")) {
+    button.addEventListener("click", () => {
+      const next = otherTheme(currentTheme());
+      applyTheme(next);
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch {
+        // Modo privado o almacenamiento bloqueado: el cambio vale solo para esta visita.
+      }
+    });
+  }
+  const query = window.matchMedia("(prefers-color-scheme: light)");
+  query.addEventListener("change", (event) => {
+    if (!isTheme(storedTheme())) applyTheme(resolveTheme(null, event.matches));
+  });
+}
+
+setupTheme();
 setupReveal();
 setupPause();
 setupConnector();

@@ -30,7 +30,7 @@ const hasRedis = Boolean(
 );
 if (onVercel && !hasRedis) {
   console.warn(
-    "\n[engineX] Build en Vercel sin Upstash Redis: el formulario no va a poder guardar mensajes. Conectalo desde Storage.\n",
+    "\n[engineX] Build en Vercel sin Upstash Redis: la lista de espera no va a poder guardar emails y Fidel queda apagado. Conectalo desde Storage.\n",
   );
 }
 
@@ -53,11 +53,11 @@ function sitemapWhenSite() {
   };
 }
 
-// Sitio prerenderizado; solo /api/contact corre en el servidor (prerender = false).
+// Sitio prerenderizado; solo /api/waitlist y /api/assistant corren en el servidor (prerender = false).
 export default defineConfig({
   site,
   output: "static",
-  // Con Node, el único endpoint recibe un JSON chico: el default del adapter es 1 GB.
+  // Con Node, los endpoints reciben un JSON chico: el default del adapter es 1 GB.
   adapter: onVercel ? vercel() : node({ mode: "standalone", bodySizeLimit: 64 * 1024 }),
   // Astro 7 usa 'jsx' por defecto y se come los espacios entre elementos inline.
   compressHTML: true,

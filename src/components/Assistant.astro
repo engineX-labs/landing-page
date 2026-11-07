@@ -80,7 +80,7 @@ const titleId = "assistant-title";
       </div>
       <p class="assistant-counter small m-0" data-assistant-counter hidden></p>
       <p class="assistant-note small m-0 text-ink-muted">
-        {ASSISTANT_NAME} es un asistente de IA y puede equivocarse. Para presupuestos, escribinos por WhatsApp.
+        {ASSISTANT_NAME} es un asistente de IA y puede equivocarse. Para consultas del equipo, escribinos por WhatsApp.
       </p>
     </form>
   </div>
@@ -110,18 +110,9 @@ const titleId = "assistant-title";
   .assistant[hidden] {
     display: none;
   }
-  /* La barra de WhatsApp (solo móvil, home) ocupa el borde de abajo: el botón queda arriba. */
-  @media (max-width: 767px) {
-    .assistant-home {
-      bottom: calc(72px + var(--space-3) + env(safe-area-inset-bottom));
-    }
-  }
-
   .assistant-toggle {
     background: var(--surface-raised);
     border-color: var(--line-strong);
-  }
-  :global(html.se) .assistant-toggle {
     border-radius: var(--radius-pill);
   }
 
@@ -266,7 +257,7 @@ const titleId = "assistant-title";
     background: var(--surface-inset);
     color: var(--ink);
     border: 1px solid var(--line);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     font: inherit;
     /* 16px: en iOS menos de eso hace zoom al enfocar. */
     font-size: 16px;
@@ -286,16 +277,12 @@ const titleId = "assistant-title";
     background: transparent;
     color: var(--accent-ink);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     cursor: pointer;
   }
   .assistant-send:disabled {
     cursor: not-allowed;
     opacity: 0.5;
-  }
-  :global(html.se) .assistant-send,
-  :global(html.se) .assistant-input {
-    border-radius: var(--radius-pill);
   }
   .assistant-counter {
     color: var(--ink-muted);
