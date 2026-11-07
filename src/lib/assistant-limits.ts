@@ -1,9 +1,7 @@
 // Límites del asistente: por IP (ventana deslizante) y un tope global por día, que es el techo del gasto.
 import { Redis } from "@upstash/redis";
+import { assistantRateLimitFromEnv } from "./assistant-settings";
 import { type ContactRateLimiter, redisCredentials, upstashRateLimiter } from "./contact-store";
-
-/** Mensajes por IP en una ventana. */
-export const ASSISTANT_RATE_LIMIT = { messages: 12, window: "10 m" } as const;
 
 /** Mensajes por día en total, entre todas las visitas. Se cambia con ASSISTANT_DAILY_LIMIT. */
 export const DEFAULT_DAILY_LIMIT = 300;
@@ -90,7 +88,7 @@ export function assistantBackendFromEnv(env: Env): AssistantBackend {
       enabled: true,
       dailyLimiter: new RedisDailyLimiter(redis, limit),
       rateLimiter: env.VERCEL
-        ? upstashRateLimiter(redis, "enginex:assistant", ASSISTANT_RATE_LIMIT)
+        ? upstashRateLimiter(redis, "enginex:assistant", assistantRateLimitFromEnv(env))
         : undefined,
     };
   }

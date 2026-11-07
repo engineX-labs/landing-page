@@ -7,16 +7,17 @@ import {
 } from "./assistant";
 import { type AssistantBackend, assistantBackendFromEnv } from "./assistant-limits";
 import { type AssistantProject, buildSystemPrompt } from "./assistant-prompt";
+import { GEMINI_DEFAULTS, type GeminiSettings, geminiSettingsFromEnv } from "./assistant-settings";
 import { readJsonBody } from "./contact-server";
 import { clientIp } from "./contact-store";
 
 export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
-const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
-const GEMINI_TIMEOUT_MS = 15_000;
 
 export interface AssistantConfig extends AssistantBackend {
   apiKey?: string;
   model: string;
+  /** Ajustes de la llamada a Gemini; sin ellos, los valores por defecto. */
+  gemini?: GeminiSettings;
   projects: AssistantProject[];
   fetch?: typeof fetch;
 }
@@ -30,6 +31,7 @@ export function assistantConfigFromEnv(
     ...assistantBackendFromEnv(env),
     apiKey: env.GEMINI_API_KEY,
     model: env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL,
+    gemini: geminiSettingsFromEnv(env),
     projects,
   };
 }
@@ -70,7 +72,8 @@ async function askGemini(
   messages: AssistantMessage[],
 ): Promise<string | undefined> {
   const doFetch = config.fetch ?? fetch;
-  const response = await doFetch(`${GEMINI_BASE}/models/${config.model}:generateContent`, {
+  const gemini = config.gemini ?? GEMINI_DEFAULTS;
+  const response = await doFetch(`${gemini.baseUrl}/models/${config.model}:generateContent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": config.apiKey ?? "" },
     body: JSON.stringify({
@@ -79,9 +82,12 @@ async function askGemini(
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       })),
-      generationConfig: { maxOutputTokens: ASSISTANT_LIMITS.outputTokens, temperature: 0.4 },
+      generationConfig: {
+        maxOutputTokens: gemini.maxOutputTokens,
+        temperature: gemini.temperature,
+      },
     }),
-    signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+    signal: AbortSignal.timeout(gemini.timeoutMs),
   });
   if (!response.ok) {
     // Sin el detalle de Google en el log: puede traer datos de la cuenta.

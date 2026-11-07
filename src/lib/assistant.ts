@@ -12,7 +12,7 @@ export const ASSISTANT_LIMITS = {
   assistantChars: 2_000,
   /** Mensajes de historial (6 turnos de ida y vuelta); lo más viejo se descarta. */
   history: 12,
-  /** Tope de tokens de cada respuesta. */
+  /** Tope de tokens de cada respuesta (por defecto; ASSISTANT_MAX_OUTPUT_TOKENS lo cambia). */
   outputTokens: 400,
   /** Tamaño máximo del body del request, en bytes. */
   body: 20_000,
