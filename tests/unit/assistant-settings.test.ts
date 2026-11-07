@@ -80,7 +80,7 @@ describe("variables de entorno del asistente", () => {
   });
 
   it("assistantConfigFromEnv junta modelo, key y ajustes de Gemini", () => {
-    const config = assistantConfigFromEnv([], {
+    const config = assistantConfigFromEnv({
       GEMINI_API_KEY: "k",
       GEMINI_MODEL: "gemini-otro",
       GEMINI_TIMEOUT_MS: "9000",
@@ -88,7 +88,7 @@ describe("variables de entorno del asistente", () => {
     expect(config.apiKey).toBe("k");
     expect(config.model).toBe("gemini-otro");
     expect(config.gemini).toMatchObject({ timeoutMs: 9000, temperature: 0.4 });
-    expect(assistantConfigFromEnv([], {}).model).toBe(DEFAULT_GEMINI_MODEL);
+    expect(assistantConfigFromEnv({}).model).toBe(DEFAULT_GEMINI_MODEL);
   });
 });
 
@@ -103,13 +103,12 @@ describe("handleAssistant usa los ajustes de la config", () => {
     new Request("http://x.test/api/assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page: "enginex", messages: [{ role: "user", content: "Hola" }] }),
+      body: JSON.stringify({ messages: [{ role: "user", content: "Hola" }] }),
     });
   const makeConfig = (overrides: Partial<AssistantConfig> = {}): AssistantConfig => ({
     enabled: true,
     apiKey: "SECRET",
     model: "gemini-test",
-    projects: [],
     dailyLimiter: new MemoryDailyLimiter(10),
     fetch: vi.fn(async () => ok()) as unknown as typeof fetch,
     ...overrides,

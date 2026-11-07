@@ -2,7 +2,6 @@ import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 4330;
-export const E2E_CONTACTS_DIR = path.resolve("test-results/e2e-contacts");
 export const E2E_WAITLIST_DIR = path.resolve("test-results/e2e-waitlist");
 export const E2E_WHATSAPP_NUMBER = "5491100000000";
 export const E2E_SITE_URL = "https://enginex.test";
@@ -27,7 +26,6 @@ export default defineConfig({
     env: {
       HOST: "127.0.0.1",
       PORT: String(PORT),
-      CONTACTS_DIR: E2E_CONTACTS_DIR,
       WAITLIST_DIR: E2E_WAITLIST_DIR,
       WHATSAPP_NUMBER: E2E_WHATSAPP_NUMBER,
       SITE_URL: E2E_SITE_URL,

@@ -1,10 +1,10 @@
 # engineX · landing page
 
-Landing de engineX (productos de software; el principal es Social Engine, y también proyectos a medida) y, en `/social-engine`, la de Social Engine (producto de
-engineX). Astro 7 prerenderizado; las únicas rutas server son `POST /api/contact` y
-`POST /api/waitlist`. Se deploya en Vercel (`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con
-`@astrojs/node` (dev, preview, e2e). El diseño sale del sistema de diseño de engineX
-(`docs/engineX-sistema-de-diseno.pdf` y el artifact del sistema), tema Carbón.
+Landing de Social Engine, el producto de engineX, en `/` (única página). Astro 7 prerenderizado; las
+únicas rutas server son `POST /api/waitlist` y `/api/assistant` (Fidel). Se deploya en Vercel
+(`@astrojs/vercel` cuando `VERCEL=1`) y en local corre con `@astrojs/node` (dev, preview, e2e). El
+diseño sale del sistema de diseño de engineX (`docs/engineX-sistema-de-diseno.pdf` y el artifact del
+sistema), con dos temas: Carbón (oscuro) y Papel (claro).
 
 El detalle de cómo correrla, configurar el dominio, la estructura y el contenido está en
 `README.md`. Esta es la guía corta.
@@ -13,12 +13,12 @@ El detalle de cómo correrla, configurar el dominio, la estructura y el contenid
 
 | Comando | Qué hace |
 | --- | --- |
-| `npm run dev` | Servidor de desarrollo en `http://localhost:4321` (muestra también los proyectos `draft`). |
+| `npm run dev` | Servidor de desarrollo en `http://localhost:4321`. |
 | `npm run build` | `astro check` (tipos) + `astro build` en `dist/`. |
-| `npm run preview` | Sirve el build con Node (`dist/server/entry.mjs`) y el `.env`. Usa `HOST`, `PORT`, `WHATSAPP_NUMBER`, `CONTACTS_DIR`. |
+| `npm run preview` | Sirve el build con Node (`dist/server/entry.mjs`) y el `.env`. Usa `HOST`, `PORT`, `WHATSAPP_NUMBER`, `WAITLIST_DIR`. |
 | `npm run lint` | Biome: lint y formato, sin escribir. |
 | `npm run format` | Biome con `--write`. |
-| `npm test` | Vitest: validación y endpoint de contacto (`tests/unit`). |
+| `npm test` | Vitest: lógica pura, lista de espera, Fidel, SEO y tema (`tests/unit`). |
 | `npm run test:e2e` | Playwright contra el build de producción (`tests/e2e`). Usa el Google Chrome instalado (`channel: "chrome"`). |
 
 Antes de dar algo por terminado: `npm run lint`, `npm test`, `npm run build` y `npm run test:e2e`.
@@ -34,9 +34,8 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   prioridad). Sin dominio no se genera `/sitemap.xml` ni hay URLs absolutas; mal formado, el build
   falla.
 
-- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545450`. Se usa
-  en dos momentos: al hacer el build (links de la página, que es estática) y en runtime (URL que
-  devuelve `/api/contact`). Tiene que estar definido igual en los dos.
+- `WHATSAPP_NUMBER`: número de engineX sin `+` ni espacios. Por defecto `5493548545450`. Se usa al
+  hacer el build (links de WhatsApp de la página y de Fidel, que es estática).
 - `GEMINI_API_KEY`: key de Gemini para Fidel (solo servidor, nunca `PUBLIC_`). Sin ella el widget no
   aparece; en Vercel además hace falta Redis. `GEMINI_MODEL` (por defecto `gemini-2.5-flash-lite`) y
   `ASSISTANT_DAILY_LIMIT` (por defecto 300 mensajes por día en total) son opcionales, igual que los
@@ -46,12 +45,11 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   vuelve al default). Toda variable nueva que lea el código tiene que figurar en `.env.example` y en
   la tabla del README: `tests/unit/env-docs.test.ts` lo verifica.
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los
-  mensajes van a la lista `contacts`; en Vercel, además, hay límite de 5 envíos por IP cada 10 minutos.
-- `WAITLIST_DIR`: lo mismo que `CONTACTS_DIR` para la lista de espera de Social Engine (por defecto
-  `data/waitlist`; con Redis, lista `waitlist`).
-- `CONTACTS_DIR`: sin Redis, carpeta donde se guarda un `.json` por mensaje. Por defecto
-  `data/contacts` (ignorada por git); necesita disco persistente. En Vercel no se usa: sin Redis el
-  endpoint responde 500 en vez de perder el mensaje.
+  emails de la lista de espera van a la lista `waitlist`; en Vercel, además, hay límite de 5 envíos
+  por IP cada 10 minutos.
+- `WAITLIST_DIR`: sin Redis, carpeta donde se guarda un `.json` por email. Por defecto
+  `data/waitlist` (ignorada por git); necesita disco persistente. En Vercel no se usa: sin Redis el
+  endpoint responde 500 en vez de perder el email.
 
 ## Estructura
 
@@ -61,30 +59,22 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   está deshabilitada.
 - `src/styles/global.css`: escala tipográfica (`.display-xl` … `.code`, con la escala móvil) y las
   clases `ex-*` portadas de `components/bundle.css` del sistema.
-- `src/components/`: `Logo`, `Button`, `Tag`, `ProjectCard`, `TextField` (componentes del sistema,
-  mismas props que su `index.d.ts`) y las secciones de la página.
+- `src/components/`: `Logo` (con `gradientId` opcional: degradé en la flecha solo en claro),
+  `Button`, `Arrow` (componentes del sistema, mismas props que su `index.d.ts`), `Faq` y
+  `social-engine/` (secciones de la página, `ThemeToggle` y mockups).
 - `src/components/logo-paths.ts`: paths oficiales del logo. No redibujar.
-- `src/lib/contact.ts`: validación y URL de WhatsApp (puro, compartido con el cliente).
-  `src/lib/contact-server.ts`: lectura del request, límite y respuesta.
+- `src/lib/contact.ts`: normalización y links del número de WhatsApp (puro).
+  `src/lib/contact-server.ts`: lectura del request con límite, respuesta JSON y límite por IP.
   `src/lib/contact-store.ts`: almacenamiento (`FileContactStore`, `RedisContactStore`) y límite por IP.
 - `src/lib/seo.ts` y `src/lib/structured-data.ts`: `robots.txt`, `sitemap.xml`, `llms.txt` y JSON-LD
   (funciones puras, testeadas). `src/routes/sitemap.xml.ts` se registra solo con dominio.
-- `src/lib/content.ts`: copy del hero, productos, servicios, proceso y preguntas frecuentes, compartido con
-  `/llms.txt` y el JSON-LD (`FAQPage`). `PRICE_FROM` es el precio "desde" de la pregunta del precio:
-  vacío, la respuesta no da cifra.
-- `src/content/projects/*.md`: proyectos del portfolio (Reservo y Freggiaro). `draft: true` se ve
-  en dev y no sale en producción. `demo: /demo/<slug>` hace que la tarjeta abra esa página en el
-  modal (`DemoDialog`) en lugar de linkear afuera.
-- `src/pages/demo/freggiaro.astro` + `src/components/FreggiaroDemo.astro` + `src/lib/freggiaro-demo.ts`:
-  demo interactiva de Freggiaro con datos ficticios. Es una página propia (`noindex`, fuera del
-  sitemap); la home la muestra en un `<dialog>` con un `<iframe>` que carga recién al abrirlo
-  (`?embed` oculta su barra). Usa los colores de Freggiaro acotados a `.demo`: es la única
-  excepción a "solo tema Carbón".
-- `src/pages/social-engine.astro` + `src/components/social-engine/` + `src/styles/social-engine*.css`:
-  landing de Social Engine. Copy en `src/lib/social-engine-content.ts` (compartido con `/llms.txt` y
+- `src/pages/index.astro` + `src/components/social-engine/` + `src/styles/social-engine*.css`:
+  la landing de Social Engine. Copy en `src/lib/social-engine-content.ts` (compartido con `/llms.txt` y
   el JSON-LD). Cálculos de UI puros en `src/lib/social-engine-ui.ts`; interacciones en
   `src/scripts/social-engine.ts`. Lista de espera: `src/lib/waitlist.ts` (validación) y
   `src/lib/waitlist-server.ts` (handler); el almacenamiento y el límite son los de `contact-store.ts`.
+- `src/lib/theme.ts`: tema claro/oscuro (lógica pura y el script inline del `<head>` que lo fija antes
+  de pintar). El botón vive en `ThemeToggle.astro`; `setupTheme` en `social-engine.ts`.
 - `src/components/Assistant.astro` + `src/pages/api/assistant.ts` + `src/lib/assistant*.ts`: Fidel, el
   asistente de IA (Gemini por REST, sin SDK). `assistant.ts` valida (puro, compartido con el widget),
   `assistant-prompt.ts` arma las instrucciones desde el documento de contexto de Fidel (productos,
@@ -92,50 +82,36 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   "no confirmado"); Fidel escribe `[[whatsapp]]` o `[[lista]]` y el widget arma el link (nunca URLs),
   `assistant-limits.ts` tiene el límite por IP y el tope diario global, `assistant-server.ts` orquesta
   y llama a Gemini. Es un chat flotante, `secondary` (no suma un `primary`), que renderiza con
-  `textContent`. En móvil queda por encima de la barra de WhatsApp. No da precios ni cifras de uso.
-- `public/clientes/`: logos PNG transparentes de la barra "Confían en nosotros". Para sumar un
-  cliente: copiar el logo acá y agregar una entrada a `clients` en `src/lib/content.ts` (`tone: "mono"` o `"color"`).
-- `src/components/DeviceShowcase.astro`: mockup de compu y celular. Lo usan el hero y las tarjetas
-  de proyecto (`image` + `mobileImage` en el `.md`). Las capturas van en `src/assets/projects/`:
-  `<slug>-desktop.jpg` (1440×900) y `<slug>-mobile.jpg` (390×844 a 2x).
+  `textContent`. Habla solo de Social Engine (ante otros temas deriva a WhatsApp). No da precios ni cifras de uso.
 - `public/brand/`: los 11 logos oficiales. `public/fonts/`: Plus Jakarta Sans y JetBrains Mono.
 
 ## Convenciones del sistema de diseño
 
-- Tema Carbón únicamente. Usar tokens semánticos, nunca hex.
-- Un solo `display-xl` por página y un solo botón `primary` por vista.
-- Separar con bordes `line`, sin sombras. **Vidrio y brillos, acotados:** el vidrio (`.glass`,
-  `--glass-*`) va solo en superficies que flotan sobre algo con color (header, chips del hero,
-  barra de WhatsApp); los brillos radiales (`--glow-*`) solo de fondo, en el hero y en el medio de
-  las tarjetas de proyecto. Nada de degradados en texto, botones ni tarjetas.
-- Movimiento: solo `transform` y `opacity`, nada de UI por encima de 300ms, nunca `ease-in`, hover
-  solo con `(hover: hover) and (pointer: fine)`, sin animaciones de entrada al hacer scroll. El
-  único momento es el hero (CSS, `@keyframes ex-rise`; no hay librería de animación). El fondo del
-  hero tiene dos brillos que derivan muy lento (22 y 28 s, solo `transform`), pausados fuera de
-  pantalla y quietos con movimiento reducido.
-  `prefers-reduced-motion` quita escalas y desplazamientos. Excepción aprobada: la barra de WhatsApp
-  en móvil (`MobileWhatsappBar`) aparece al pasar el hero, porque es un control y no contenido.
+Dos temas: **Carbón** (oscuro, los tokens de `tokens.css`) y **Papel** (claro,
+`html[data-theme="light"]` en `social-engine.css`). Un script inline en `Base` pone `data-theme`
+antes de pintar: el guardado en `localStorage` o, sin elección, el del dispositivo. Sin JavaScript
+queda oscuro y el botón de tema se oculta. Los componentes usan siempre tokens semánticos
+(`var(--surface)`, `var(--ink)`…), nunca hex, para seguir al tema.
+
+- Un solo botón `primary` por vista; un solo `h1`. Botones en píldora.
 - Foco: 2px sólido `focus-ring` con 2px de separación en todo lo clickeable.
+- Movimiento: solo `transform` y `opacity`, nada de UI por encima de 300ms, nunca `ease-in`, hover
+  solo con `(hover: hover) and (pointer: fine)`. Apariciones al scrollear (`.se-reveal`,
+  `.se-stagger`, 0,8 s) y bucles lentos (aurora, carrusel de redes, tarjetas que levitan), pausados
+  fuera de pantalla y quietos con `prefers-reduced-motion`. Las apariciones solo ocultan contenido
+  con `html.js`: sin JavaScript todo se ve.
+- Degradé ignite → magenta → violeta: solo en el verbo que rota, el logo (en claro), bordes del
+  mockup y de la caja de cierre, línea conectora. En texto se usan las paradas del tema
+  (`--se-gradient-text`: oscuras en claro, claras en oscuro; ≥ 4,5:1 en los dos). El degradé de texto
+  va en cada verbo, nunca en el contenedor: `background-clip: text` recorta según todos los hijos
+  aunque tengan `opacity: 0`.
+- Separación: en claro, sombras difusas solo en `.se-card`; en oscuro, bordes `line` sin sombras.
+  Vidrio solo en superficies que flotan sobre algo con color (la barra de navegación).
+- Logo: la flecha y la palabra "Social" llevan degradé solo en claro; en oscuro, flecha ignite y
+  texto en tinta.
 - Copy: voseo, primera persona del plural, sentence case, sin emojis ni exclamaciones en
-  titulares. La marca se escribe siempre "engineX".
-- La flecha (`arrow`) solo en acciones que llevan a otro lugar, no en el submit.
-
-## Excepción: Social Engine (`html.se`)
-
-`/social-engine` es la única página con tema Papel (claro) y se aparta de las reglas de arriba, solo
-bajo `html.se` (la clase la pone `Base` con `theme="papel"`):
-
-- Tema Papel: los tokens semánticos se redefinen en `social-engine.css`; los componentes siguen
-  usando `var(--surface)`, `var(--ink)`, etc. Los botones son píldoras.
-- Degradé ignite → magenta → violeta: solo en el verbo que rota, bordes del mockup y de la caja de
-  cierre, línea conectora y brillo del plan recomendado. En texto se usan las paradas oscuras
-  (`--se-gradient-text`, ≥ 4,5:1). El degradé de texto va en cada verbo, nunca en el contenedor:
-  `background-clip: text` recorta según todos los hijos aunque tengan `opacity: 0`.
-- Sombras difusas solo en `.se-card`. Apariciones al scrollear (`.se-reveal`, `.se-stagger`, 0,8 s) y
-  bucles lentos (aurora, carrusel de redes, tarjetas que levitan), siempre solo `transform` y
-  `opacity`, pausados fuera de pantalla y quietos con `prefers-reduced-motion`.
-- Las apariciones solo ocultan contenido con `html.js`: sin JavaScript todo se ve.
-- Un solo botón `primary` por vista. Sin precios ni cifras de uso hasta tener datos reales.
+  titulares. La marca se escribe siempre "engineX". Sin precios ni cifras de uso hasta tener datos
+  reales.
 - Alcance del copy: el MVP (Instagram y Facebook; informe semanal, chat con métricas, 3 ideas por
   semana; prueba de 7 días). No prometer programación, bandeja, automatizaciones, otras redes ni
   planes hasta que existan.

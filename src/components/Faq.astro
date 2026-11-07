@@ -1,13 +1,11 @@
 ---
 import ChevronDown from "@lucide/astro/icons/chevron-down";
-import { faqs as defaultFaqs } from "../lib/content";
 
 interface Props {
-  /** Preguntas a mostrar; por defecto, las de la home. */
-  items?: { question: string; answer: string }[];
+  items: { question: string; answer: string }[];
 }
 
-const { items = defaultFaqs } = Astro.props;
+const { items } = Astro.props;
 ---
 
 <section id="preguntas" class="section border-t border-line" aria-labelledby="preguntas-title">

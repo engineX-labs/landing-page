@@ -2,9 +2,6 @@
 
 export const ASSISTANT_NAME = "Fidel";
 
-export const ASSISTANT_PAGES = ["enginex", "social-engine"] as const;
-export type AssistantPage = (typeof ASSISTANT_PAGES)[number];
-
 export const ASSISTANT_LIMITS = {
   /** Caracteres por mensaje de la persona. */
   userChars: 500,
@@ -24,7 +21,6 @@ export interface AssistantMessage {
 }
 
 export interface AssistantInput {
-  page: AssistantPage;
   messages: AssistantMessage[];
 }
 
@@ -52,8 +48,6 @@ export function validateAssistant(raw: unknown): AssistantValidation {
   const invalid = (error: string): AssistantValidation => ({ ok: false, error });
   if (!isRecord(raw)) return invalid("No pudimos leer el mensaje.");
 
-  const page = ASSISTANT_PAGES.find((p) => p === raw.page);
-  if (!page) return invalid("No pudimos leer el mensaje.");
   if (!Array.isArray(raw.messages)) return invalid("No pudimos leer el mensaje.");
 
   // Solo roles de conversación: las instrucciones salen del servidor, nunca del cliente.
@@ -82,25 +76,18 @@ export function validateAssistant(raw: unknown): AssistantValidation {
   }
 
   const honeypot = typeof raw.company === "string" && raw.company.trim() !== "";
-  return { ok: true, data: { page, messages: recent }, honeypot };
+  return { ok: true, data: { messages: recent }, honeypot };
 }
 
-/** Saludo y preguntas sugeridas del panel vacío, por página. */
-export const ASSISTANT_INTRO: Record<AssistantPage, { greeting: string; suggestions: string[] }> = {
-  enginex: {
-    greeting:
-      "Soy Fidel, el asistente de IA de engineX. Contame qué negocio tenés y te cuento si Social Engine te sirve.",
-    suggestions: ["¿Qué es Social Engine?", "¿Cuánto cuesta?", "¿Hacen sistemas a medida?"],
-  },
-  "social-engine": {
-    greeting:
-      "Soy Fidel, el asistente de IA de engineX. Contame qué negocio tenés y te cuento si Social Engine te sirve.",
-    suggestions: [
-      "¿Qué hace Social Engine?",
-      "¿Hay prueba gratuita?",
-      "¿Cómo me sumo a la lista de espera?",
-    ],
-  },
+/** Saludo y preguntas sugeridas del panel vacío. */
+export const ASSISTANT_INTRO: { greeting: string; suggestions: string[] } = {
+  greeting:
+    "Soy Fidel, el asistente de IA de engineX. Contame qué negocio tenés y te cuento si Social Engine te sirve.",
+  suggestions: [
+    "¿Qué hace Social Engine?",
+    "¿Hay prueba gratuita?",
+    "¿Cómo me sumo a la lista de espera?",
+  ],
 };
 
 /** Un tramo de la respuesta de Fidel: texto o un link a uno de los destinos permitidos. */

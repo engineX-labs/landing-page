@@ -1,0 +1,54 @@
+---
+import Moon from "@lucide/astro/icons/moon";
+import Sun from "@lucide/astro/icons/sun";
+---
+
+<!-- Sin JavaScript no hace nada: queda oculto (html:not(.js)). El estado lo pone el script. -->
+<button
+  type="button"
+  class="se-theme-toggle"
+  aria-label="Modo oscuro"
+  aria-pressed="false"
+  data-theme-toggle
+>
+  <Sun size={20} aria-hidden="true" class="se-theme-sun" />
+  <Moon size={20} aria-hidden="true" class="se-theme-moon" />
+</button>
+
+<style>
+  .se-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: transform var(--duration-press) var(--ease-out);
+  }
+  .se-theme-toggle:active {
+    transform: scale(0.95);
+  }
+  :global(html:not(.js)) .se-theme-toggle {
+    display: none;
+  }
+  /* Muestra el ícono del modo al que se pasa: la luna en claro, el sol en oscuro. */
+  .se-theme-sun {
+    display: none;
+  }
+  :global(html[data-theme="dark"]) .se-theme-sun {
+    display: block;
+  }
+  :global(html[data-theme="dark"]) .se-theme-moon {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .se-theme-toggle:active {
+      transform: none;
+    }
+  }
+</style>

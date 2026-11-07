@@ -1,5 +1,6 @@
 ---
 // Logo provisorio: el isotipo de engineX más "Social Engine". El definitivo lo diseña el equipo.
+// En el tema claro la flecha y la palabra "Social" llevan el degradé de los verbos del título.
 import Logo from "../Logo.astro";
 
 interface Props {
@@ -10,8 +11,8 @@ const { height = 28 } = Astro.props;
 ---
 
 <span class="se-logo">
-  <Logo variant="mark" height={height} decorative />
-  <span class="se-logo-word">Social Engine</span>
+  <Logo variant="mark" height={height} decorative gradientId={`se-logo-gradient-${height}`} />
+  <span class="se-logo-word"><span class="se-logo-social">Social</span> Engine</span>
 </span>
 
 <style>
@@ -25,5 +26,13 @@ const { height = 28 } = Astro.props;
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--ink);
+    white-space: nowrap;
+  }
+  /* Mismo degradé de texto que los verbos (paradas oscuras, ≥ 4,5:1 sobre Papel). */
+  :global(html[data-theme="light"]) .se-logo-social {
+    background: var(--se-gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 </style>

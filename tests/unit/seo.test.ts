@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { parseSiteUrl, resolveSiteUrl } from "../../site.config.mjs";
-import { faqs } from "../../src/lib/content";
 import {
   AI_CRAWLERS,
   buildLlmsTxt,
@@ -8,12 +7,8 @@ import {
   buildSitemapXml,
   sitePaths,
 } from "../../src/lib/seo";
-import { faqs as socialEngineFaqs } from "../../src/lib/social-engine-content";
-import {
-  buildSocialEngineData,
-  buildStructuredData,
-  serializeJsonLd,
-} from "../../src/lib/structured-data";
+import { faqs } from "../../src/lib/social-engine-content";
+import { buildStructuredData, serializeJsonLd } from "../../src/lib/structured-data";
 
 const SITE = "https://enginex.com.ar";
 
@@ -84,7 +79,7 @@ describe("sitemap.xml", () => {
 describe("JSON-LD", () => {
   it("describe a engineX con dominio y WhatsApp, sin datos inventados", () => {
     const data = buildStructuredData({ site: SITE, whatsappNumber: "5493548545450" });
-    const [org, website] = data["@graph"];
+    const [org, website, app] = data["@graph"];
     expect(org).toMatchObject({
       name: "engineX",
       url: `${SITE}/`,
@@ -95,15 +90,28 @@ describe("JSON-LD", () => {
     expect(org).not.toHaveProperty("sameAs");
     expect(org).not.toHaveProperty("aggregateRating");
     expect(website).toMatchObject({ "@type": "WebSite", url: `${SITE}/`, inLanguage: "es-AR" });
+    expect(app).toMatchObject({
+      "@type": "SoftwareApplication",
+      name: "Social Engine",
+      applicationCategory: "BusinessApplication",
+      url: `${SITE}/`,
+      publisher: { "@id": `${SITE}/#organization` },
+    });
+    expect(app).not.toHaveProperty("offers");
   });
 
   it("sin dominio no publica URLs del sitio", () => {
     const data = buildStructuredData({ whatsappNumber: "5493548545450" });
-    expect(data["@graph"].map((n) => n["@type"])).toEqual(["Organization", "FAQPage"]);
+    expect(data["@graph"].map((n) => n["@type"])).toEqual([
+      "Organization",
+      "SoftwareApplication",
+      "FAQPage",
+    ]);
     for (const node of data["@graph"]) {
       expect(node).not.toHaveProperty("url");
       expect(node).not.toHaveProperty("logo");
     }
+    expect(JSON.stringify(data)).not.toContain("undefined");
   });
 
   it("publica las preguntas frecuentes de la página como FAQPage", () => {
@@ -127,72 +135,34 @@ describe("llms.txt", () => {
       { display: "+54 9 3548 54-5450", url: "https://wa.me/5493548545450" },
       { display: "+54 9 3571 60-9047", url: "https://wa.me/5493571609047" },
     ],
-    projects: [
-      {
-        title: "Reservo",
-        client: "Alojamientos",
-        summary: "Manejan sus reservas.",
-        tags: ["React", "FastAPI"],
-        href: "https://www.mireservo.online",
-      },
-    ],
   };
 
-  it("resume servicios, proyectos y contacto con URLs absolutas", () => {
+  it("presenta Social Engine, sus preguntas y el contacto con URLs absolutas", () => {
     const txt = buildLlmsTxt({ ...base, site: SITE });
-    expect(txt.startsWith("# engineX\n")).toBe(true);
-    expect(txt).toContain("## Servicios");
+    expect(txt.startsWith("# Social Engine\n")).toBe(true);
     expect(txt).toContain("## Preguntas frecuentes");
     expect(txt).toContain(`### ${faqs[0].question}`);
-    expect(txt).toContain(`[Facturación electrónica ARCA](${SITE}/#servicios)`);
-    expect(txt).toContain("[Reservo](https://www.mireservo.online)");
-    expect(txt).toContain(`[Formulario de contacto](${SITE}/#contacto)`);
+    expect(txt).toContain(`[Lista de espera](${SITE}/#lista)`);
     expect(txt).toContain("[WhatsApp +54 9 3548 54-5450](https://wa.me/5493548545450)");
     expect(txt).toContain("[WhatsApp +54 9 3571 60-9047](https://wa.me/5493571609047)");
   });
 
   it("sin dominio usa rutas relativas", () => {
-    expect(buildLlmsTxt(base)).toContain("[Formulario de contacto](/#contacto)");
+    expect(buildLlmsTxt(base)).toContain("[Lista de espera](/#lista)");
+  });
+
+  it("no menciona servicios a medida, proyectos ni la demo", () => {
+    expect(buildLlmsTxt({ ...base, site: SITE })).not.toMatch(
+      /a medida|Servicios|Proyectos|Freggiaro|Reservo|formulario/i,
+    );
   });
 });
 
-describe("Social Engine", () => {
-  const WHATSAPP = "5493548545450";
-
-  it("el sitemap incluye la home y /social-engine", () => {
+describe("sitio de una sola página", () => {
+  it("el sitemap incluye solo la raíz", () => {
+    expect(sitePaths).toEqual(["/"]);
     const xml = buildSitemapXml(SITE, sitePaths, new Date("2026-11-01T12:00:00Z"));
     expect(xml).toContain(`<loc>${SITE}/</loc>`);
-    expect(xml).toContain(`<loc>${SITE}/social-engine</loc>`);
-  });
-
-  it("llms.txt presenta el producto con link absoluto, o relativo sin dominio", () => {
-    const base = { whatsapp: [{ display: "+1", url: "https://wa.me/1" }], projects: [] };
-    const conDominio = buildLlmsTxt({ ...base, site: SITE });
-    expect(conDominio).toContain("## Social Engine");
-    expect(conDominio).toContain(`[Social Engine](${SITE}/social-engine)`);
-    expect(buildLlmsTxt(base)).toContain("[Social Engine](/social-engine)");
-  });
-
-  it("el JSON-LD es una SoftwareApplication sin precios y con las preguntas de la página", () => {
-    const data = buildSocialEngineData({ site: SITE, whatsappNumber: WHATSAPP });
-    const graph = data["@graph"];
-    const app = graph.find((node) => node["@type"] === "SoftwareApplication");
-    expect(app).toMatchObject({
-      name: "Social Engine",
-      applicationCategory: "BusinessApplication",
-      url: `${SITE}/social-engine`,
-      publisher: { "@id": `${SITE}/#organization` },
-    });
-    expect(app).not.toHaveProperty("offers");
-    const faq = graph.find((node) => node["@type"] === "FAQPage");
-    expect(faq?.mainEntity).toHaveLength(socialEngineFaqs.length);
-    expect(graph.some((node) => node["@id"] === `${SITE}/#organization`)).toBe(true);
-  });
-
-  it("sin dominio no inventa URLs", () => {
-    const data = buildSocialEngineData({ whatsappNumber: WHATSAPP });
-    const app = data["@graph"].find((node) => node["@type"] === "SoftwareApplication");
-    expect(app).not.toHaveProperty("url");
-    expect(JSON.stringify(data)).not.toContain("undefined");
+    expect(xml).not.toContain("/social-engine");
   });
 });

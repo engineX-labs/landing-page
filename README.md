@@ -1,8 +1,8 @@
 # engineX · landing page
 
-Landing de **engineX**: creamos productos de software para negocios que quieren crecer. El producto principal es **Social Engine** (en desarrollo, con su propia landing en `/social-engine`); también tomamos proyectos a medida (gestión, facturación electrónica ARCA, reservas, pagos, webs).
+Landing de **Social Engine**, el producto de **engineX**: lee las métricas de tu Instagram y tu Facebook y te dice qué publicaciones funcionan y qué repetir. Es la única página del sitio (`/`).
 
-Es una sola página con hero, productos, clientes, servicios a medida, proyectos, cómo trabajamos, preguntas frecuentes y un formulario de contacto que guarda el mensaje y deriva la conversación a WhatsApp. Está hecha con **Astro 7** (todo prerenderizado salvo el endpoint del formulario; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño. La única animación de entrada, la del hero, es CSS: la home no carga JavaScript para animar.
+Es una sola página con hero, redes, módulos, cómo funciona, beneficios, prueba gratuita de 7 días, preguntas frecuentes y lista de espera, más Fidel, el asistente de IA. Tiene **modo claro y oscuro**. Está hecha con **Astro 7** (todo prerenderizado salvo los endpoints de la lista de espera y de Fidel; se deploya en **Vercel** y localmente corre con Node), **Tailwind CSS 4** sobre los tokens del sistema de diseño y un script chico sin librerías.
 
 ## Requisitos
 
@@ -17,7 +17,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Queda en <http://localhost:4321>. En desarrollo también se ven los proyectos marcados como borrador (`draft: true`).
+Queda en <http://localhost:4321>.
 
 Para probar el build de producción:
 
@@ -45,7 +45,7 @@ El dominio se configura en **un solo lugar**: [`site.config.mjs`](site.config.mj
 3. Comprobá el resultado con `npm run preview`:
    - <http://localhost:4321/sitemap.xml> lista `https://<tu-dominio>/`.
    - <http://localhost:4321/robots.txt> termina con `Sitemap: https://<tu-dominio>/sitemap.xml`.
-   - El HTML de la home tiene `canonical`, `og:url` y `og:image` con el dominio.
+   - El HTML de la página tiene `canonical`, `og:url` y `og:image` con el dominio.
 
 **Qué cambia con el dominio:** se genera `/sitemap.xml`, `robots.txt` publica la línea `Sitemap:`, y el canonical, `og:url`, `og:image`, el JSON-LD y los links de `/llms.txt` pasan a URLs absolutas.
 
@@ -58,8 +58,7 @@ Todas están en [`.env.example`](.env.example).
 | Variable | Cuándo se usa | Para qué | Por defecto |
 | --- | --- | --- | --- |
 | `SITE_URL` | Build | Dominio público (ver arriba). | vacío, o `DEFAULT_SITE_URL` |
-| `WHATSAPP_NUMBER` | Build **y** runtime | Número de engineX sin `+` ni espacios. En el build arma los links de la página; en runtime, la URL que devuelve `/api/contact`. Tiene que ser el mismo en los dos. | `5493548545450` |
-| `CONTACTS_DIR` | Runtime | Carpeta donde se guarda un `.json` por mensaje cuando no hay Redis. | `data/contacts` |
+| `WHATSAPP_NUMBER` | Build | Número de engineX sin `+` ni espacios. Arma los links de WhatsApp de la página y de Fidel. | `5493548545450` |
 | `GEMINI_API_KEY` | Runtime (solo servidor) | Key de Gemini para Fidel, el asistente de IA. Sin ella el widget no aparece. En Vercel además hace falta Redis: sin Redis el asistente se apaga. | — |
 | `GEMINI_MODEL` | Runtime | Modelo de Gemini que usa Fidel. | `gemini-2.5-flash-lite` |
 | `ASSISTANT_DAILY_LIMIT` | Runtime | Tope de mensajes por día en total (contador en Redis; en memoria si no hay Redis fuera de Vercel). Es el techo del gasto. | `300` |
@@ -69,8 +68,8 @@ Todas están en [`.env.example`](.env.example).
 | `ASSISTANT_MAX_OUTPUT_TOKENS` | Runtime | Tope de tokens de cada respuesta de Fidel (50 a 2000). Afecta el gasto. | `400` |
 | `ASSISTANT_RATE_LIMIT_MESSAGES` | Runtime | Mensajes por IP en la ventana (1 a 1000). Solo se aplica en Vercel con Redis. | `12` |
 | `ASSISTANT_RATE_LIMIT_WINDOW` | Runtime | Ventana del límite por IP: número y unidad (`ms`, `s`, `m`, `h`, `d`). | `10 m` |
-| `WAITLIST_DIR` | Runtime | Lo mismo para los emails de la lista de espera de Social Engine (con Redis van a la lista `waitlist`). | `data/waitlist` |
-| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
+| `WAITLIST_DIR` | Runtime | Carpeta donde se guarda un `.json` por email de la lista de espera cuando no hay Redis (con Redis van a la lista `waitlist`). Necesita disco persistente. | `data/waitlist` |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los emails de la lista de espera y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
 | `VERCEL` | Build y runtime | La define Vercel. Elige el adapter de Vercel y evita guardar en disco. No se configura a mano. | vacío |
 | `HOST`, `PORT` | Runtime | Dónde escucha el servidor Node. | `localhost`, `4321` |
 
@@ -89,35 +88,33 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 
 - **`npm run lint`**: Biome, lint y formato sin escribir. `npm run format` aplica los arreglos.
 - **`npm test`**: Vitest, en `tests/unit/`.
-  - `contact.test.ts`: validación del formulario (mensajes de error en voseo), honeypot, límite de tamaño (también sin `Content-Length`), guardado del `.json`, errores al guardar y codificación de la URL de WhatsApp.
-  - `contact-store.test.ts`: guardado en archivos y en Redis (con un Redis simulado), elección del almacenamiento según el entorno y el límite de envíos por IP (solo en Vercel).
+  - `contact.test.ts`: número de WhatsApp (normalización, formato y links).
+  - `contact-store.test.ts`: guardado en archivos y en Redis (con un Redis simulado) e IP del cliente.
+  - `waitlist.test.ts`: validación, endpoint, elección del almacenamiento y límite de envíos por IP (solo en Vercel).
   - `seo.test.ts`: validación de `SITE_URL`, `robots.txt` con y sin dominio, `sitemap.xml`, JSON-LD sin datos inventados y `llms.txt`.
+  - `theme.test.ts`: elección del tema y el script del `<head>`, corrido de verdad con un documento falso.
 - **`npm run build`**: chequeo de tipos (`astro check`) y build.
 - **`npm run test:e2e`**: Playwright en `tests/e2e/`. Compila y levanta el **build de producción** con un dominio y un número de prueba (ver `playwright.config.ts`) y comprueba:
-  - El envío completo del formulario (guarda el mensaje y arma el link de WhatsApp).
-  - Los errores conectados por `aria-describedby`.
-  - El foco visible con teclado.
-  - Un solo `h1` (como máximo un `display-xl`) y un solo botón primario en el hero.
-  - Que no salgan los borradores.
-  - El movimiento reducido.
-  - Móvil sin scroll horizontal y con el menú funcionando.
+  - La lista de espera (guarda el email con su origen, errores junto al campo, honeypot).
+  - Los dos temas: arranca con el del dispositivo, el botón alterna y recuerda la elección, sin parpadeo, y el texto con degradé pasa 4,5:1 en claro y en oscuro.
+  - El logo: en claro, flecha y "Social" con degradé.
+  - Un solo `h1` y un solo botón primario; el foco visible con teclado.
+  - El movimiento reducido y la página sin JavaScript.
+  - Móvil sin scroll horizontal.
   - `robots.txt`, `sitemap.xml`, `llms.txt`, las URLs absolutas y el JSON-LD.
+  - Que `/social-engine`, la demo y `/api/contact` ya no existan.
+  - Fidel (con el endpoint simulado).
 
 ## Cómo está pensada
 
-- **El sistema de diseño manda.** Todo sale de "engineX — Sistema de diseño, versión 2": el PDF está en [`docs/`](docs/engineX-sistema-de-diseno.pdf) y su fuente viva es el artifact del sistema. Los tokens, los logos oficiales, las fuentes y los componentes (`Logo`, `Button`, `Tag`, `ProjectCard`, `TextField`) están portados de ahí con los mismos valores y props.
-- **Oscuro, preciso, con una chispa.** Solo tema Carbón (el claro es para documentos). El naranja `ignite` aparece únicamente donde está la acción: botón primario, flecha, foco y hover de las tarjetas.
-- **Mostrar, no prometer.** El portfolio muestra proyectos reales con su resultado. Reservo linkea a su sitio. Freggiaro abre una demo interactiva en un modal.
-- **Demos que no pesan.** La demo de Freggiaro es una página propia (`/demo/freggiaro`, `noindex`, fuera del sitemap). La home la muestra en un `<dialog>` con un `<iframe>` que se carga recién al abrirlo, así que la landing no paga su peso. Replica la interfaz real del sistema (sus colores y su tipografía, acotados a la demo) con datos ficticios y facturación simulada: no hay backend ni conexión con ARCA. `/#demo-freggiaro` abre el modal y `/demo/freggiaro` sirve como link para compartir.
-- **Movimiento que confirma.** Solo `transform` y `opacity`, nada de UI por encima de 300 ms y nunca `ease-in`. Hay un único momento de entrada (el hero, con `@keyframes ex-rise` en CSS); `prefers-reduced-motion` quita escalas y desplazamientos. La barra de WhatsApp en móvil aparece al pasar el hero: es un control que cambia de estado, no contenido que se revela al scrollear.
-- **Productos primero.** El hero presenta a engineX ("Productos de software para negocios que quieren crecer") con Social Engine como producto principal y, como botón `primary`, el link a `/social-engine`; WhatsApp es el secundario. El mockup muestra proyectos que hicimos (Freggiaro) (todavía no hay capturas de Social Engine) y los chips de vidrio dicen lo que hará el producto. Los servicios y proyectos a medida quedan más abajo. Cada proyecto se muestra en compu y en celular (`DeviceShowcase`).
-- **Vidrio y brillo, con medida.** El vidrio va solo donde flota sobre algo con color y los brillos son de fondo; las animaciones de fondo son lentas, se pausan fuera de pantalla y respetan el movimiento reducido.
-- **WhatsApp a mano.** Es el canal que más usa una pyme: el botón secundario del hero, el del header, el de "Cómo trabajamos", la opción grande de Contacto y la barra fija en móvil abren el chat con un saludo ya escrito (`whatsapp.chatUrl`).
+- **El sistema de diseño manda.** Todo sale de "engineX — Sistema de diseño, versión 2": el PDF está en [`docs/`](docs/engineX-sistema-de-diseno.pdf) y su fuente viva es el artifact del sistema. Los tokens, los logos oficiales, las fuentes y los componentes (`Logo`, `Button`, `Arrow`) están portados de ahí con los mismos valores y props.
+- **Dos temas.** Oscuro es Carbón (los tokens de `tokens.css`) y claro es Papel (`html[data-theme="light"]` en `social-engine.css`). Un script inline en el `<head>` (`src/lib/theme.ts`) fija el tema antes de pintar, según lo guardado en `localStorage` o, si no hay elección, el del dispositivo; el botón de la barra lo alterna. Sin JavaScript queda oscuro y el botón se oculta. En claro hay sombras difusas solo en `.se-card` y el degradé de texto usa paradas oscuras; en oscuro las tarjetas se separan con borde y el degradé usa paradas claras (ambos ≥ 4,5:1). El logo lleva degradé en la flecha y en "Social" solo en claro.
+- **Movimiento que confirma.** Solo `transform` y `opacity`; todo se pausa fuera de pantalla y queda quieto con `prefers-reduced-motion`. Apariciones al scrollear, línea que se dibuja con el scroll, carrusel de redes y pestañas de módulos, con la estructura de la landing de Xubio. Todo es CSS más un script chico sin librerías (`src/scripts/social-engine.ts`); sin JavaScript el contenido se ve igual.
+- **Alcance del MVP.** Describe solo conexión con Instagram y Facebook, informe semanal, chat con las métricas y 3 ideas de posteo por semana (no programa ni publica). En lugar de planes tiene la prueba gratuita de 7 días. Los mockups son HTML y CSS con datos ficticios. No muestra precios: los emails de la lista de espera van a `POST /api/waitlist`.
+- **Fidel, el asistente de IA.** Un chat flotante (`src/components/Assistant.astro`) que llama a `POST /api/assistant`, que a su vez llama a Gemini. La key vive solo en el servidor y se verifica que no aparezca en `dist/`. El widget solo se muestra si `GET /api/assistant` dice que está habilitado (hay key y límites). Defensas, en este orden: forma y tamaño del pedido, honeypot, 12 mensajes cada 10 minutos por IP (solo en Vercel con Redis), tope global de 300 mensajes por día (Redis), 500 caracteres por mensaje, 6 turnos de historial y 400 tokens de salida. Si se agota algún límite o Gemini falla, el widget deriva a WhatsApp. El límite de gasto en Google se configura aparte, en la cuenta. Habla solo de Social Engine: ante pedidos a medida u otros temas deriva a WhatsApp. El prompt sale de `social-engine-content.ts` y `assistant-config.ts`.
+- **Estática con dos rutas server.** La página es HTML liviano generado en el build. Solo `POST /api/waitlist` y `/api/assistant` corren en el servidor (en Vercel, como función): validan, limitan por IP y guardan (Upstash Redis en Vercel, archivos en local).
+- **SEO y GEO.** `robots.txt` permite todo menos `/api/`, también a los crawlers de IA (búsqueda y entrenamiento). El sitemap (solo `/`), el canonical, Open Graph, el JSON-LD (`Organization`, `WebSite`, `SoftwareApplication` y `FAQPage`) y `llms.txt` salen del dominio configurado.
 - **Voz.** Voseo, primera persona del plural, sentence case, sin emojis ni signos de exclamación en titulares. La marca se escribe siempre "engineX".
-- **Social Engine.** `/social-engine` es la landing del producto, en el tema Papel (claro) y con la estructura y el movimiento de la landing de Xubio: verbo que rota en el título, aparición al scrollear, línea que se dibuja con el scroll, carrusel de redes y pestañas de módulos. Describe solo el alcance del MVP: conexión con Instagram y Facebook, informe semanal, chat con las métricas y 3 ideas de posteo por semana (no programa ni publica). En lugar de planes tiene la prueba gratuita de 7 días. Todo es CSS más un script chico sin librerías (`src/scripts/social-engine.ts`); sin JavaScript el contenido se ve igual. Los mockups son HTML y CSS con datos ficticios. No muestra precios: los emails de la lista de espera van a `POST /api/waitlist`. Las reglas distintas de la home (tema claro, degradé acotado, sombras, apariciones al scrollear) viven bajo `html.se`; ver `AGENTS.md`.
-- **Fidel, el asistente de IA.** Un chat flotante en las dos páginas (`src/components/Assistant.astro`) que llama a `POST /api/assistant`, que a su vez llama a Gemini. La key vive solo en el servidor y se verifica que no aparezca en `dist/`. El widget solo se muestra si `GET /api/assistant` dice que está habilitado (hay key y límites). Defensas, en este orden: forma y tamaño del pedido, honeypot, 12 mensajes cada 10 minutos por IP (solo en Vercel con Redis), tope global de 300 mensajes por día (Redis), 500 caracteres por mensaje, 6 turnos de historial y 400 tokens de salida. Si se agota algún límite o Gemini falla, el widget deriva a WhatsApp. El límite de gasto en Google se configura aparte, en la cuenta. El prompt sale de `content.ts`, `social-engine-content.ts` y los proyectos.
-- **Estática con una sola ruta server.** La página es HTML liviano generado en el build. Solo `POST /api/contact` y `POST /api/waitlist` corren en el servidor (en Vercel, como función): valida, limita los envíos por IP, guarda el mensaje (Upstash Redis en Vercel, archivos en local) y devuelve la URL de WhatsApp con el texto ya escrito. El usuario la abre desde un link en el estado de éxito, porque abrirla sola después del envío la bloquean Safari y otros navegadores.
-- **SEO y GEO.** `robots.txt` permite todo menos `/api/`, también a los crawlers de IA (búsqueda y entrenamiento). El sitemap, el canonical, Open Graph, el JSON-LD (`Organization` + `WebSite`) y `llms.txt` salen del dominio configurado.
 
 ## Estructura
 
@@ -129,43 +126,38 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 ├── plans/                   # planes aprobados de cada feature
 ├── public/
 │   ├── brand/               # los 11 logos oficiales (favicon, app icon, mono…)
-│   ├── clientes/            # logos PNG transparentes de la barra "Confían en nosotros"
 │   └── fonts/               # Plus Jakarta Sans y JetBrains Mono (woff2)
 ├── src/
-│   ├── assets/projects/     # capturas de proyectos (se optimizan a WebP en el build)
-│   ├── assets/freggiaro/    # emblema de Freggiaro para la demo
 │   ├── components/
-│   │   ├── Logo, Button, Tag, ProjectCard, TextField, Arrow   # componentes del sistema
-│   │   ├── Header, Hero, Products, Clients, Services, Projects, Process, Faq, ContactForm, Footer  # secciones
-│   │   ├── MobileWhatsappBar.astro # botón fijo de WhatsApp en móvil
-│   │   ├── DemoDialog.astro # modal que abre una demo en un iframe
-│   │   ├── FreggiaroDemo.astro # la demo de Freggiaro (réplica de su interfaz)
-│   │   └── logo-paths.ts    # paths oficiales del logo (no redibujar)
-│   ├── content/projects/    # un .md por proyecto del portfolio
-│   ├── content.config.ts    # esquema de la colección de proyectos
-│   ├── layouts/Base.astro   # <head>: meta, Open Graph, JSON-LD, fuentes
+│   │   ├── Logo, Button, Arrow          # componentes del sistema (Logo con degradé opcional)
+│   │   ├── Faq.astro, Assistant.astro   # preguntas frecuentes y Fidel
+│   │   ├── logo-paths.ts                # paths oficiales del logo (no redibujar)
+│   │   └── social-engine/               # secciones de la landing, ThemeToggle y mockups
+│   ├── layouts/Base.astro   # <head>: meta, Open Graph, JSON-LD, fuentes, script de tema
 │   ├── lib/
-│   │   ├── content.ts       # copy de productos, servicios, proceso y FAQ (página, llms.txt y Fidel)
-│   │   ├── contact.ts       # validación y URL de WhatsApp (cliente y servidor)
-│   │   ├── contact-server.ts# lectura del request, límite y respuesta
-│   │   ├── contact-store.ts # dónde se guardan los mensajes (archivos o Redis) y límite por IP
-│   │   ├── freggiaro-demo.ts# datos ficticios y reglas de la demo de Freggiaro
-│   │   ├── seo.ts           # robots.txt, sitemap.xml, llms.txt
-│   │   ├── structured-data.ts # JSON-LD
-│   │   └── site.ts          # número de WhatsApp y navegación
+│   │   ├── social-engine-content.ts # copy de la página (también alimenta llms.txt y JSON-LD)
+│   │   ├── social-engine-ui.ts      # cálculos de UI puros
+│   │   ├── theme.ts                 # tema claro/oscuro y script del <head>
+│   │   ├── assistant*.ts            # Fidel: validación, prompt, límites, ajustes y servidor
+│   │   ├── waitlist*.ts             # lista de espera: validación y endpoint
+│   │   ├── contact.ts               # número de WhatsApp: normalización y links
+│   │   ├── contact-server.ts        # lectura del request con límite, JSON y límite por IP
+│   │   ├── contact-store.ts         # dónde se guardan los emails (archivos o Redis) y límite por IP
+│   │   ├── seo.ts                   # robots.txt, sitemap.xml, llms.txt
+│   │   ├── structured-data.ts       # JSON-LD
+│   │   └── site.ts                  # número de WhatsApp
 │   ├── pages/
-│   │   ├── index.astro      # la landing
-│   │   ├── demo/freggiaro.astro # la demo sola; con ?embed, sin barra (para el modal)
-│   │   ├── social-engine.astro # landing de Social Engine (tema Papel)
-│   │   ├── api/contact.ts   # POST /api/contact
-│   │   ├── api/waitlist.ts  # POST /api/waitlist (lista de espera de Social Engine)
+│   │   ├── index.astro      # la landing de Social Engine
+│   │   ├── api/waitlist.ts  # POST /api/waitlist
 │   │   ├── api/assistant.ts # GET (¿habilitado?) y POST (chat) de Fidel
 │   │   ├── robots.txt.ts
 │   │   └── llms.txt.ts
 │   ├── routes/sitemap.xml.ts# se registra solo si hay dominio
+│   ├── scripts/social-engine.ts # interacciones: tema, apariciones, módulos, lista de espera
 │   └── styles/
-│       ├── tokens.css       # tokens del sistema (única fuente de valores)
-│       └── global.css       # escala tipográfica y clases ex-* del sistema
+│       ├── tokens.css       # tokens del sistema, tema oscuro (única fuente de valores)
+│       ├── global.css       # escala tipográfica y clases ex-* del sistema
+│       └── social-engine*.css # tema claro, layout, movimiento y mockups de la landing
 └── tests/
     ├── unit/                # Vitest
     └── e2e/                 # Playwright
@@ -173,33 +165,13 @@ Ese es el orden para validar antes de abrir un PR; los cuatro tienen que pasar.
 
 ## Editar contenido
 
-- **Agregar un proyecto:** creá `src/content/projects/<slug>.md` con este frontmatter:
-
-  ```yaml
-  ---
-  title: Reservo, gestión de reservas para alojamientos   # obligatorio
-  client: "Alojamientos turísticos: cabañas, departamentos y suites"
-  summary: Manejan todas sus reservas desde cualquier dispositivo.  # resultado para el cliente, no la tecnología
-  tags: [React, FastAPI, Python]       # hasta 5, con la grafía oficial
-  image: ../../assets/projects/<slug>-desktop.jpg   # opcional, 16:10 (1440×900); sin imagen, el isotipo
-  mobileImage: ../../assets/projects/<slug>-mobile.jpg   # opcional, 390×844 a 2x: con las dos, mockup de compu y celular
-  imageAlt: Descripción de la captura
-  href: https://...                    # opcional: la tarjeta entera linkea ahí
-  demo: /demo/<slug>                   # opcional, en lugar de href: la tarjeta abre esa página en el modal
-  cta: Ver el proyecto
-  order: 2                             # orden en la grilla
-  draft: false                         # true: solo se ve en desarrollo
-  ---
-  ```
-
-- **Agregar un cliente a la barra:** copiá su logo (PNG transparente) a `public/clientes/` y sumá una entrada a `clients` en `src/lib/content.ts` con `name`, `logo`, `width`, `height` y `tone`: `mono` pinta el logo en un solo tono del tema (para logos de línea) y `color` lo deja con sus colores (para placas y rellenos).
-- **Copy de servicios y del proceso:** `src/lib/content.ts`, que también alimenta `/llms.txt`.
-- **Resto del copy:** en cada sección de `src/components/`. Header y footer toman la navegación de `src/lib/site.ts`.
-- **Colores, espaciado, radios y movimiento:** solo en `src/styles/tokens.css`, con los valores del sistema de diseño.
+- **Copy de la página** (título, módulos, pasos, beneficios, prueba, preguntas): `src/lib/social-engine-content.ts`, que también alimenta `/llms.txt` y el JSON-LD. Mantenerlo dentro del alcance del MVP.
+- **Datos de Fidel** (horario, prueba, precio): `src/lib/assistant-config.ts`. Con el precio vacío, Fidel responde "no confirmado".
+- **Colores, espaciado, radios y movimiento:** `src/styles/tokens.css` (oscuro) y `html[data-theme="light"]` en `src/styles/social-engine.css` (claro).
 
 ## Deploy en Vercel
 
-El build elige solo el adapter: en Vercel (que define `VERCEL=1`) usa `@astrojs/vercel`; en cualquier otro lado, Node. La página, `robots.txt`, `sitemap.xml` y `llms.txt` se sirven como estáticos y `/api/contact` corre como función.
+El build elige solo el adapter: en Vercel (que define `VERCEL=1`) usa `@astrojs/vercel`; en cualquier otro lado, Node. La página, `robots.txt`, `sitemap.xml` y `llms.txt` se sirven como estáticos y `/api/waitlist` y `/api/assistant` corren como funciones.
 
 1. **Importar el repo** en Vercel (Add New → Project → `engineX-labs/landing-page`):
    - **Root Directory**: `./` (la raíz, **no** `src`).
@@ -208,12 +180,12 @@ El build elige solo el adapter: en Vercel (que define `VERCEL=1`) usa `@astrojs/
 3. **Variables de entorno** (Settings → Environment Variables), para Production y Preview:
    - `SITE_URL`: el dominio con `https://` y sin barra final. Mientras no haya dominio propio, la URL `https://<proyecto>.vercel.app`.
    - `WHATSAPP_NUMBER`: `5493548545450`.
-4. **Deploy**. Si en el log del build aparece `Build en Vercel sin Upstash Redis`, falta el paso 2: el sitio funciona, pero el formulario responde que no pudo guardar y ofrece WhatsApp directo.
-5. **Probar**: mandar un mensaje desde el formulario y verlo en la consola de Upstash (Data Browser → clave `contacts`, o `LRANGE contacts 0 -1`). El más nuevo queda primero.
+4. **Deploy**. Si en el log del build aparece `Build en Vercel sin Upstash Redis`, falta el paso 2: el sitio funciona, pero la lista de espera responde que no pudo guardar el email y Fidel queda apagado.
+5. **Probar**: anotar un email en la lista de espera y verlo en la consola de Upstash (Data Browser → clave `waitlist`, o `LRANGE waitlist 0 -1`). El más nuevo queda primero.
 6. **Dominio propio**: agregarlo en Settings → Domains, actualizar `SITE_URL` y volver a deployar.
 
-Los mensajes viven en la lista `contacts` de Redis, uno por elemento, como JSON con `name`, `email`, `message` y `receivedAt`.
+Los emails viven en la lista `waitlist` de Redis, uno por elemento, como JSON con `email`, `source` y `receivedAt`.
 
 ### Servidor propio (alternativa)
 
-También corre en cualquier servidor con **Node 22.12+**: `npm run build` y `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `SITE_URL` y `WHATSAPP_NUMBER`. Sin Redis guarda los mensajes en `CONTACTS_DIR`, que necesita **disco persistente**. Con las variables de Redis guarda en Redis, pero sin límite de envíos: fuera de Vercel la IP del cliente se puede falsificar.
+También corre en cualquier servidor con **Node 22.12+**: `npm run build` y `node dist/server/entry.mjs` (o `npm run preview`), con `HOST`, `PORT`, `SITE_URL` y `WHATSAPP_NUMBER`. Sin Redis guarda los emails en `WAITLIST_DIR`, que necesita **disco persistente**. Con las variables de Redis guarda en Redis, pero sin límite de envíos: fuera de Vercel la IP del cliente se puede falsificar.

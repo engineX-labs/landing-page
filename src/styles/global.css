@@ -326,195 +326,6 @@
     border: 1px solid transparent;
   }
 
-  /* ProjectCard: el ancho lo decide la grilla, no la tarjeta. */
-  .ex-card {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background: var(--surface-raised);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .ex-card-link {
-    transition: border-color var(--duration-fast) ease;
-  }
-  .ex-card-link:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-  .ex-card-media {
-    aspect-ratio: 16 / 10;
-    background: var(--stone);
-    color: var(--carbon);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  /* Captura dentro de un marco simple sobre stone. */
-  .ex-card-shot {
-    width: calc(100% - var(--space-12));
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    overflow: hidden;
-    align-self: flex-end;
-    border: 1px solid color-mix(in srgb, var(--carbon) 12%, transparent);
-    border-bottom: 0;
-    box-sizing: border-box;
-  }
-  /* Etiqueta sobre la captura: avisa qué pasa al tocar la tarjeta. */
-  .ex-card-media {
-    position: relative;
-  }
-  .ex-card-badge {
-    position: absolute;
-    top: var(--space-4);
-    left: var(--space-4);
-    z-index: 1;
-  }
-  .ex-card-shot {
-    transition: transform var(--duration-base) var(--ease-out);
-  }
-  /* Tarjeta con mockup de compu y celular, sobre un brillo de la marca. */
-  .ex-card-media-device {
-    aspect-ratio: auto;
-    align-items: flex-end;
-    padding: var(--space-16) var(--space-6) var(--space-6);
-    background:
-      radial-gradient(120% 90% at 85% 0%, var(--glow-ignite-soft), transparent 60%),
-      var(--surface-inset);
-    border-bottom: 1px solid var(--line);
-  }
-  .ex-card-shot img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .ex-card-body {
-    padding: var(--space-6);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
-    flex: 1;
-  }
-  .ex-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-1) var(--space-3);
-    color: var(--ink-muted);
-  }
-  .ex-card-title {
-    margin: 0;
-    overflow-wrap: break-word;
-    text-wrap: balance;
-  }
-  .ex-card-summary {
-    margin: 0;
-    color: var(--ink-muted);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .ex-card-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .ex-card-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--accent-ink);
-    margin-top: auto;
-    padding-top: var(--space-1);
-  }
-
-  /* TextField */
-  .ex-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    min-width: 0;
-  }
-  .ex-field-label {
-    font-size: 14px;
-    line-height: 20px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  .ex-field-optional {
-    font-weight: 400;
-    color: var(--ink-muted);
-  }
-  .ex-field-control {
-    font: inherit;
-    font-size: 16px;
-    line-height: 24px;
-    color: var(--ink);
-    background: var(--surface-raised);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
-    padding: var(--space-3) var(--space-4);
-    min-height: 48px;
-    box-sizing: border-box;
-    width: 100%;
-    transition: border-color var(--duration-fast) ease;
-  }
-  .ex-field-control::placeholder {
-    color: var(--ink-muted);
-    opacity: 1;
-  }
-  textarea.ex-field-control {
-    min-height: 120px;
-    resize: vertical;
-  }
-  .ex-field-control:focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-    border-color: var(--ink);
-  }
-  .ex-field-control[aria-invalid="true"] {
-    border-color: var(--danger);
-  }
-  .ex-field-hint {
-    margin: 0;
-    font-size: 14px;
-    line-height: 20px;
-    color: var(--ink-muted);
-  }
-  .ex-field-error {
-    margin: 0;
-    display: flex;
-    gap: var(--space-1);
-    align-items: flex-start;
-    font-size: 14px;
-    line-height: 20px;
-    color: var(--danger);
-  }
-  .ex-field-error[hidden] {
-    display: none;
-  }
-  .ex-field-error svg {
-    flex: none;
-    margin-top: 2px;
-  }
-
-  /* Mensajes que aparecen (formulario, menú): duration-base desde scale(0.95). */
-  .ex-pop {
-    animation: ex-pop var(--duration-base) var(--ease-out);
-    transform-origin: top left;
-  }
-
   /* Hover solo con mouse: en touch el tap dispara :hover y queda pegado. */
   @media (hover: hover) and (pointer: fine) {
     .ex-btn-primary:hover {
@@ -526,26 +337,8 @@
     .ex-btn-ghost:hover {
       background: var(--accent-soft);
     }
-    .ex-btn:hover .ex-btn-arrow,
-    .ex-card-link:hover .ex-btn-arrow {
+    .ex-btn:hover .ex-btn-arrow {
       transform: translate(2px, -2px);
-    }
-    .ex-card-link:hover {
-      border-color: var(--accent);
-    }
-    /* La captura sube: confirma que la tarjeta entera se puede tocar. */
-    .ex-card-link:hover .ex-card-shot {
-      transform: translateY(-4px);
-    }
-    /* Con mockup, el celular sube más que la compu: se separan y se nota la profundidad. */
-    .ex-card-link:hover .device-browser {
-      transform: translateY(-4px);
-    }
-    .ex-card-link:hover .device-phone {
-      transform: translateY(-10px);
-    }
-    .ex-field-control:hover:not(:focus) {
-      border-color: var(--ink-muted);
     }
   }
 
@@ -560,18 +353,11 @@
     .ex-btn:active {
       transform: none;
     }
-    .ex-btn:hover .ex-btn-arrow,
-    .ex-card-link:hover .ex-btn-arrow,
-    .ex-card-link:hover .ex-card-shot,
-    .ex-card-link:hover .device-browser,
-    .ex-card-link:hover .device-phone {
+    .ex-btn:hover .ex-btn-arrow {
       transform: none;
     }
     .ex-btn-spinner {
       animation-duration: 1.6s;
-    }
-    .ex-pop {
-      animation-name: ex-fade;
     }
   }
 }
@@ -579,12 +365,6 @@
 @keyframes ex-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-@keyframes ex-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
   }
 }
 /* Vidrio: fondo translúcido + desenfoque. Sin soporte, queda el fondo casi opaco. */
@@ -602,13 +382,6 @@
   }
 }
 
-/* Entrada del hero: sube 8px mientras aparece. */
-@keyframes ex-rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
 @keyframes ex-fade {
   from {
     opacity: 0;

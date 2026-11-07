@@ -1,17 +1,9 @@
 // robots.txt, sitemap.xml y llms.txt, como funciones puras para poder testearlas.
-import {
-  description,
-  evaluatingProducts,
-  faqs,
-  mainProduct,
-  services,
-  steps,
-  supportHours,
-} from "./content";
-import { pageDescription, productName } from "./social-engine-content";
+import { supportHours } from "./assistant-config";
+import { companyDescription, faqs, pageDescription, productName } from "./social-engine-content";
 
 /** Páginas indexables, para el sitemap. */
-export const sitePaths = ["/", "/social-engine"];
+export const sitePaths = ["/"];
 
 /** Crawlers de motores con IA, permitidos todos (búsqueda y entrenamiento). */
 export const AI_CRAWLERS = [
@@ -61,61 +53,26 @@ export function buildSitemapXml(site: string, paths: string[], lastmod: Date): s
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-export interface LlmsProject {
-  title: string;
-  client: string;
-  summary: string;
-  tags: string[];
-  href?: string;
-}
-
 export function buildLlmsTxt({
   site,
   whatsapp,
-  projects,
 }: {
   site?: string;
   whatsapp: { display: string; url: string }[];
-  projects: LlmsProject[];
 }): string {
-  const link = (anchor: string) => (site ? `${site}/#${anchor}` : `/#${anchor}`);
   const out: string[] = [
-    "# engineX",
+    `# ${productName}`,
     "",
-    `> Empresa de software de Argentina. ${description}`,
+    `> ${pageDescription}`,
     "",
-    `engineX crea productos de software listos para usar para negocios que quieren crecer, con suscripción y prueba gratuita de 7 días. Además toma proyectos a medida. Trabaja en español y atiende ${supportHours}, hora de Argentina.`,
-    "",
-    "## Productos",
-    "",
-    `- [${mainProduct.name}](${site ? `${site}${mainProduct.href}` : mainProduct.href}) (${mainProduct.status.toLowerCase()}): ${mainProduct.text}`,
-    `- En evaluación, sin fecha, precio ni funciones confirmadas: ${evaluatingProducts.join(", ")}.`,
-    "",
-    "## Servicios a medida",
-    "",
-    ...services.map((s) => `- [${s.title}](${link("servicios")}): ${s.text}`),
-    "",
-    "## Proyectos",
-    "",
-    ...projects.map((p) => {
-      const title = p.href ? `[${p.title}](${p.href})` : p.title;
-      return `- ${title} (${p.client}): ${p.summary} Stack: ${p.tags.join(", ")}.`;
-    }),
-    "",
-    `## ${productName}`,
-    "",
-    `- [${productName}](${site ? `${site}/social-engine` : "/social-engine"}): ${pageDescription}`,
-    "",
-    "## Cómo trabajamos",
-    "",
-    ...steps.map((s, i) => `${i + 1}. ${s.title}: ${s.text}`),
+    `${productName} es un producto de engineX, empresa de software de Argentina. ${companyDescription} Trabaja en español y atiende por WhatsApp ${supportHours}, hora de Argentina.`,
     "",
     "## Preguntas frecuentes",
     "",
     ...faqs.flatMap((f) => [`### ${f.question}`, "", f.answer, ""]),
     "## Contacto",
     "",
-    `- [Formulario de contacto](${link("contacto")})`,
+    `- [Lista de espera](${site ? `${site}/#lista` : "/#lista"})`,
     ...whatsapp.map((w) => `- [WhatsApp ${w.display}](${w.url})`),
   ];
   return `${out.join("\n")}\n`;

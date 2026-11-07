@@ -9,6 +9,11 @@ interface Props {
   title?: string;
   class?: string;
   decorative?: boolean;
+  /**
+   * Id del degradé de la flecha (ignite → magenta → violeta). Si se pasa, el degradé se ve solo
+   * en el tema claro; en oscuro la flecha sigue siendo ignite. Tiene que ser único en la página.
+   */
+  gradientId?: string;
 }
 
 const {
@@ -18,6 +23,7 @@ const {
   title = "engineX",
   class: className,
   decorative = false,
+  gradientId,
 } = Astro.props;
 
 // A 24px o menos el trazo de 28 se empasta: el isotipo usa un trazo óptico más grueso.
@@ -33,10 +39,22 @@ const a11y = decorative
 <svg
   class:list={["ex-logo", `ex-logo-${tone}`, className]}
   viewBox={viewBox}
+  style={gradientId ? `--ex-logo-gradient: url(#${gradientId})` : undefined}
   height={height}
   width={Math.round(height * ratio)}
   {...a11y}
 >
+  {
+    gradientId && (
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#ff5b2e" />
+          <stop offset="0.55" stop-color="#e0307a" />
+          <stop offset="1" stop-color="#7c5cff" />
+        </linearGradient>
+      </defs>
+    )
+  }
   {variant === "full" && <path class="ex-logo-ink-f" fill-rule="evenodd" d={WORD} />}
   <g
     fill="none"
@@ -45,6 +63,13 @@ const a11y = decorative
     stroke-linejoin="round"
   >
     <path class="ex-logo-ink-s" d={MARK_INK} />
-    <path class="ex-logo-accent-s" d={MARK_ACCENT} />
+    <path class:list={["ex-logo-accent-s", gradientId && "ex-logo-accent-gradient"]} d={MARK_ACCENT} />
   </g>
 </svg>
+
+<style>
+  /* El degradé solo en el tema claro. Sin capa, le gana al `stroke` de `.ex-logo` de global.css. */
+  :global(html[data-theme="light"]) .ex-logo-accent-gradient {
+    stroke: var(--ex-logo-gradient);
+  }
+</style>

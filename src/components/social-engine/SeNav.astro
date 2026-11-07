@@ -1,6 +1,7 @@
 ---
 import Button from "../Button.astro";
 import SocialEngineLogo from "./SocialEngineLogo.astro";
+import ThemeToggle from "./ThemeToggle.astro";
 
 const links = [
   { href: "#producto", label: "Producto" },
@@ -25,11 +26,11 @@ const links = [
             </li>
           ))
         }
-        <li>
-          <a href="/" class="se-nav-link">engineX</a>
-        </li>
       </ul>
     </nav>
-    <Button variant="secondary" href="#lista">Sumarme</Button>
+    <div class="se-nav-actions">
+      <ThemeToggle />
+      <Button variant="secondary" href="#lista">Sumarme</Button>
+    </div>
   </div>
 </div>

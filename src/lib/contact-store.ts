@@ -1,28 +1,23 @@
-// Dónde se guardan los mensajes del formulario y cuántos se aceptan por IP.
+// Dónde se guardan los emails de la lista de espera y cuántos se aceptan por IP.
 // En Vercel el disco se borra: ahí se usa Upstash Redis. En local y en un servidor propio, archivos.
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { type Duration, Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import type { ContactInput } from "./contact";
 import type { WaitlistInput } from "./waitlist";
-
-export interface StoredContact extends ContactInput {
-  receivedAt: string;
-}
 
 export interface StoredWaitlist extends WaitlistInput {
   receivedAt: string;
 }
 
-/** Dónde se guarda un registro (mensaje de contacto o email de la lista de espera). */
-export interface ContactStore<T = StoredContact> {
+/** Dónde se guarda un registro (un email de la lista de espera). */
+export interface ContactStore<T = unknown> {
   save(record: T): Promise<void>;
 }
 
 /** Un .json por mensaje en una carpeta. Para desarrollo, tests y servidores con disco persistente. */
-export class FileContactStore<T extends { receivedAt: string } = StoredContact>
+export class FileContactStore<T extends { receivedAt: string } = { receivedAt: string }>
   implements ContactStore<T>
 {
   constructor(readonly dir: string) {}
@@ -40,15 +35,13 @@ export interface RedisList {
   lpush(key: string, ...values: string[]): Promise<number>;
 }
 
-export const REDIS_CONTACTS_KEY = "contacts";
-
 export const REDIS_WAITLIST_KEY = "waitlist";
 
-/** Cada registro va como JSON al principio de una lista (`contacts` por defecto), el más nuevo primero. */
+/** Cada registro va como JSON al principio de una lista (`waitlist` por defecto), el más nuevo primero. */
 export class RedisContactStore<T = unknown> implements ContactStore<T> {
   constructor(
     private readonly redis: RedisList,
-    private readonly key = REDIS_CONTACTS_KEY,
+    private readonly key = REDIS_WAITLIST_KEY,
   ) {}
 
   async save(record: T): Promise<void> {
@@ -56,11 +49,11 @@ export class RedisContactStore<T = unknown> implements ContactStore<T> {
   }
 }
 
-/** En Vercel sin Redis: falla a propósito para que el mensaje no se pierda en silencio. */
+/** En Vercel sin Redis: falla a propósito para que el email no se pierda en silencio. */
 export class UnavailableContactStore implements ContactStore<never> {
   async save(): Promise<void> {
     throw new Error(
-      "No hay almacenamiento para los mensajes: conectá Upstash Redis (KV_REST_API_URL y KV_REST_API_TOKEN).",
+      "No hay almacenamiento para los emails: conectá Upstash Redis (KV_REST_API_URL y KV_REST_API_TOKEN).",
     );
   }
 }
@@ -87,13 +80,6 @@ interface StoreTarget {
   limitPrefix: string;
 }
 
-const CONTACTS_TARGET: StoreTarget = {
-  redisKey: REDIS_CONTACTS_KEY,
-  dirVar: "CONTACTS_DIR",
-  defaultDir: "data/contacts",
-  limitPrefix: "enginex:contact",
-};
-
 const WAITLIST_TARGET: StoreTarget = {
   redisKey: REDIS_WAITLIST_KEY,
   dirVar: "WAITLIST_DIR",
@@ -111,10 +97,6 @@ function storeFromEnv<T extends { receivedAt: string }>(
   return new FileContactStore<T>(path.resolve(env[target.dirVar] || target.defaultDir));
 }
 
-export function contactStoreFromEnv(env: Env, redis?: RedisList): ContactStore {
-  return storeFromEnv<StoredContact>(env, CONTACTS_TARGET, redis);
-}
-
 export interface ContactRateLimiter {
   /** true si la IP todavía puede mandar un mensaje. */
   allow(ip: string): Promise<boolean>;
@@ -124,7 +106,7 @@ export const RATE_LIMIT = { messages: 5, window: "10 m" } as const;
 
 export function upstashRateLimiter(
   redis: Redis,
-  prefix = CONTACTS_TARGET.limitPrefix,
+  prefix = WAITLIST_TARGET.limitPrefix,
   { messages, window } = RATE_LIMIT as { messages: number; window: Duration },
 ): ContactRateLimiter {
   const ratelimit = new Ratelimit({
@@ -165,10 +147,6 @@ function backendFromEnv<T extends { receivedAt: string }>(
   return env.VERCEL
     ? { store, rateLimiter: upstashRateLimiter(redis, target.limitPrefix) }
     : { store };
-}
-
-export function contactBackendFromEnv(env: Env) {
-  return backendFromEnv<StoredContact>(env, CONTACTS_TARGET);
 }
 
 export function waitlistBackendFromEnv(env: Env) {

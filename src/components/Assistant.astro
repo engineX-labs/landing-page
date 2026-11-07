@@ -2,24 +2,14 @@
 import MessageCircle from "@lucide/astro/icons/message-circle";
 import Send from "@lucide/astro/icons/send";
 import X from "@lucide/astro/icons/x";
-import {
-  ASSISTANT_INTRO,
-  ASSISTANT_LIMITS,
-  ASSISTANT_NAME,
-  type AssistantPage,
-} from "../lib/assistant";
+import { ASSISTANT_INTRO, ASSISTANT_LIMITS, ASSISTANT_NAME } from "../lib/assistant";
 import { WAITLIST_HREF } from "../lib/assistant-config";
 import { buildWhatsappUrl } from "../lib/contact";
 import { whatsapp } from "../lib/site";
 
-interface Props {
-  page: AssistantPage;
-}
-
-const { page } = Astro.props;
-const intro = ASSISTANT_INTRO[page];
+const intro = ASSISTANT_INTRO;
 const whatsappUrl = buildWhatsappUrl(whatsapp.number, "Hola, vengo de la web de engineX.");
-const titleId = `assistant-title-${page}`;
+const titleId = "assistant-title";
 ---
 
 <!--
@@ -27,10 +17,9 @@ const titleId = `assistant-title-${page}`;
   (hay key y límites) y recién entonces lo muestra. Sin JavaScript no se ve.
 -->
 <div
-  class:list={["assistant", page === "enginex" && "assistant-home"]}
+  class="assistant"
   hidden
   data-assistant
-  data-page={page}
   data-whatsapp={whatsappUrl}
   data-lista={WAITLIST_HREF}
   data-greeting={intro.greeting}
@@ -38,7 +27,7 @@ const titleId = `assistant-title-${page}`;
   data-max={ASSISTANT_LIMITS.userChars}
 >
   <div
-    class:list={["assistant-panel", page === "social-engine" && "se-card"]}
+    class="assistant-panel se-card"
     role="dialog"
     aria-labelledby={titleId}
     data-assistant-panel
@@ -74,10 +63,10 @@ const titleId = `assistant-title-${page}`;
     <div class="assistant-suggestions" data-assistant-suggestions></div>
 
     <form class="assistant-form" data-assistant-form novalidate>
-      <label class="sr-only" for={`assistant-input-${page}`}>Tu pregunta para {ASSISTANT_NAME}</label>
+      <label class="sr-only" for={"assistant-input"}>Tu pregunta para {ASSISTANT_NAME}</label>
       <div class="assistant-field">
         <textarea
-          id={`assistant-input-${page}`}
+          id={"assistant-input"}
           class="assistant-input"
           rows="1"
           maxlength={ASSISTANT_LIMITS.userChars}
@@ -91,7 +80,7 @@ const titleId = `assistant-title-${page}`;
       </div>
       <p class="assistant-counter small m-0" data-assistant-counter hidden></p>
       <p class="assistant-note small m-0 text-ink-muted">
-        {ASSISTANT_NAME} es un asistente de IA y puede equivocarse. Para presupuestos, escribinos por WhatsApp.
+        {ASSISTANT_NAME} es un asistente de IA y puede equivocarse. Para consultas del equipo, escribinos por WhatsApp.
       </p>
     </form>
   </div>
@@ -121,18 +110,9 @@ const titleId = `assistant-title-${page}`;
   .assistant[hidden] {
     display: none;
   }
-  /* La barra de WhatsApp (solo móvil, home) ocupa el borde de abajo: el botón queda arriba. */
-  @media (max-width: 767px) {
-    .assistant-home {
-      bottom: calc(72px + var(--space-3) + env(safe-area-inset-bottom));
-    }
-  }
-
   .assistant-toggle {
     background: var(--surface-raised);
     border-color: var(--line-strong);
-  }
-  :global(html.se) .assistant-toggle {
     border-radius: var(--radius-pill);
   }
 
@@ -277,7 +257,7 @@ const titleId = `assistant-title-${page}`;
     background: var(--surface-inset);
     color: var(--ink);
     border: 1px solid var(--line);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     font: inherit;
     /* 16px: en iOS menos de eso hace zoom al enfocar. */
     font-size: 16px;
@@ -297,16 +277,12 @@ const titleId = `assistant-title-${page}`;
     background: transparent;
     color: var(--accent-ink);
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-pill);
     cursor: pointer;
   }
   .assistant-send:disabled {
     cursor: not-allowed;
     opacity: 0.5;
-  }
-  :global(html.se) .assistant-send,
-  :global(html.se) .assistant-input {
-    border-radius: var(--radius-pill);
   }
   .assistant-counter {
     color: var(--ink-muted);
@@ -379,8 +355,7 @@ const titleId = `assistant-title-${page}`;
     }
     root.hidden = false;
 
-    const page = root.dataset.page ?? "enginex";
-    const storageKey = `fidel:${page}`;
+    const storageKey = "fidel";
     const whatsapp = root.dataset.whatsapp ?? "";
     const waitlist = root.dataset.lista ?? "";
     const greeting = root.dataset.greeting ?? "";
@@ -538,7 +513,7 @@ const titleId = `assistant-title-${page}`;
         const response = await fetch("/api/assistant", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ page, messages, company: "" }),
+          body: JSON.stringify({ messages, company: "" }),
         });
         const body = (await response.json()) as AssistantResponseBody;
         typing?.remove();
