@@ -39,7 +39,12 @@ Ver `.env.example`. Se leen con `process.env` (en Astro 7 `import.meta.env` qued
   devuelve `/api/contact`). Tiene que estar definido igual en los dos.
 - `GEMINI_API_KEY`: key de Gemini para Fidel (solo servidor, nunca `PUBLIC_`). Sin ella el widget no
   aparece; en Vercel además hace falta Redis. `GEMINI_MODEL` (por defecto `gemini-2.5-flash-lite`) y
-  `ASSISTANT_DAILY_LIMIT` (por defecto 300 mensajes por día en total) son opcionales.
+  `ASSISTANT_DAILY_LIMIT` (por defecto 300 mensajes por día en total) son opcionales, igual que los
+  ajustes finos: `GEMINI_API_BASE`, `GEMINI_TIMEOUT_MS`, `GEMINI_TEMPERATURE`,
+  `ASSISTANT_MAX_OUTPUT_TOKENS`, `ASSISTANT_RATE_LIMIT_MESSAGES` y `ASSISTANT_RATE_LIMIT_WINDOW`
+  (defaults y validación en `src/lib/assistant-settings.ts` y `env-values.ts`; un valor inválido
+  vuelve al default). Toda variable nueva que lea el código tiene que figurar en `.env.example` y en
+  la tabla del README: `tests/unit/env-docs.test.ts` lo verifica.
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` (o `UPSTASH_REDIS_REST_*`): Upstash Redis. Con ellas los
   mensajes van a la lista `contacts`; en Vercel, además, hay límite de 5 envíos por IP cada 10 minutos.
 - `WAITLIST_DIR`: lo mismo que `CONTACTS_DIR` para la lista de espera de Social Engine (por defecto

@@ -63,6 +63,12 @@ Todas están en [`.env.example`](.env.example).
 | `GEMINI_API_KEY` | Runtime (solo servidor) | Key de Gemini para Fidel, el asistente de IA. Sin ella el widget no aparece. En Vercel además hace falta Redis: sin Redis el asistente se apaga. | — |
 | `GEMINI_MODEL` | Runtime | Modelo de Gemini que usa Fidel. | `gemini-2.5-flash-lite` |
 | `ASSISTANT_DAILY_LIMIT` | Runtime | Tope de mensajes por día en total (contador en Redis; en memoria si no hay Redis fuera de Vercel). Es el techo del gasto. | `300` |
+| `GEMINI_API_BASE` | Runtime | URL base de la API de Gemini. Solo `https` (o `http` hacia localhost, para tests); si no, se ignora. | `https://generativelanguage.googleapis.com/v1beta` |
+| `GEMINI_TIMEOUT_MS` | Runtime | Espera máxima de la respuesta de Gemini, en ms (1000 a 60000). | `15000` |
+| `GEMINI_TEMPERATURE` | Runtime | Temperatura de las respuestas (0 a 2). | `0.4` |
+| `ASSISTANT_MAX_OUTPUT_TOKENS` | Runtime | Tope de tokens de cada respuesta de Fidel (50 a 2000). Afecta el gasto. | `400` |
+| `ASSISTANT_RATE_LIMIT_MESSAGES` | Runtime | Mensajes por IP en la ventana (1 a 1000). Solo se aplica en Vercel con Redis. | `12` |
+| `ASSISTANT_RATE_LIMIT_WINDOW` | Runtime | Ventana del límite por IP: número y unidad (`ms`, `s`, `m`, `h`, `d`). | `10 m` |
 | `WAITLIST_DIR` | Runtime | Lo mismo para los emails de la lista de espera de Social Engine (con Redis van a la lista `waitlist`). | `data/waitlist` |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Runtime (y aviso en build) | Upstash Redis: guarda los mensajes y, en Vercel, limita los envíos a 5 por IP cada 10 minutos. En Vercel los carga la integración. También se aceptan `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN`. | vacío |
 | `VERCEL` | Build y runtime | La define Vercel. Elige el adapter de Vercel y evita guardar en disco. No se configura a mano. | vacío |
